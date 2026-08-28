@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.jobhelper.mapper.UserEducationMapper">
+    <resultMap id="BaseResultMap" type="com.gk.jobhelper.entity.UserEducation">
+        <id property="id" column="id"/><result property="profileId" column="profile_id"/>
+        <result property="educationLevel" column="education_level"/><result property="degree" column="degree"/>
+        <result property="schoolName" column="school_name"/><result property="majorName" column="major_name"/>
+        <result property="majorCode" column="major_code"/><result property="graduationDate" column="graduation_date"/>
+        <result property="highest" column="is_highest"/><result property="enabled" column="enabled"/>
+        <result property="createdAt" column="created_at"/><result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <sql id="cols">id, profile_id, education_level, degree, school_name, major_name, major_code, graduation_date, is_highest, enabled, created_at, updated_at</sql>
+    <select id="selectByProfileId" resultMap="BaseResultMap">SELECT <include refid="cols"/> FROM user_education WHERE profile_id=#{profileId} ORDER BY is_highest DESC, id ASC</select>
+    <select id="selectEnabledByProfileId" resultMap="BaseResultMap">SELECT <include refid="cols"/> FROM user_education WHERE profile_id=#{profileId} AND enabled=1 ORDER BY is_highest DESC, id ASC</select>
+    <select id="selectById" resultMap="BaseResultMap">SELECT <include refid="cols"/> FROM user_education WHERE id=#{id}</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">INSERT INTO user_education (profile_id,education_level,degree,school_name,major_name,major_code,graduation_date,is_highest,enabled,created_at,updated_at) VALUES (#{profileId},#{educationLevel},#{degree},#{schoolName},#{majorName},#{majorCode},#{graduationDate},#{highest},#{enabled},#{createdAt},#{updatedAt})</insert>
+    <update id="update">UPDATE user_education SET education_level=#{educationLevel},degree=#{degree},school_name=#{schoolName},major_name=#{majorName},major_code=#{majorCode},graduation_date=#{graduationDate},is_highest=#{highest},enabled=#{enabled},updated_at=#{updatedAt} WHERE id=#{id}</update>
+    <update id="clearHighest">UPDATE user_education SET is_highest=0,updated_at=CURRENT_TIMESTAMP WHERE profile_id=#{profileId}</update>
+    <delete id="deleteById">DELETE FROM user_education WHERE id=#{id}</delete>
+</mapper>

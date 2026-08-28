@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.jobhelper.mapper.MajorCatalogItemMapper">
+
+    <sql id="Base_Column_List">
+        id, catalog_id, parent_id, major_code, major_name, normalized_name, item_level,
+        degree_category, sort_no, raw_data, created_at, updated_at
+    </sql>
+
+    <resultMap id="BaseResultMap" type="com.gk.jobhelper.entity.MajorCatalogItem">
+        <id property="id" column="id"/>
+        <result property="catalogId" column="catalog_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="majorCode" column="major_code"/>
+        <result property="majorName" column="major_name"/>
+        <result property="normalizedName" column="normalized_name"/>
+        <result property="itemLevel" column="item_level"/>
+        <result property="degreeCategory" column="degree_category"/>
+        <result property="sortNo" column="sort_no"/>
+        <result property="rawData" column="raw_data"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM major_catalog_item
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByCatalogAndCode" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM major_catalog_item
+        WHERE catalog_id = #{catalogId}
+          AND major_code = #{majorCode}
+    </select>
+
+    <select id="selectByCatalogAndNames" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM major_catalog_item
+        WHERE catalog_id = #{catalogId}
+          AND normalized_name IN
+          <foreach collection="names" item="name" open="(" separator="," close=")">
+              #{name}
+          </foreach>
+        ORDER BY id ASC
+    </select>
+
+    <select id="selectByCatalogAndAliasNames" resultMap="BaseResultMap">
+        SELECT i.*
+        FROM major_catalog_item i
+                 INNER JOIN major_alias a ON a.major_catalog_item_id = i.id
+        WHERE a.catalog_id = #{catalogId}
+          AND a.normalized_alias IN
+          <foreach collection="names" item="name" open="(" separator="," close=")">
+              #{name}
+          </foreach>
+        ORDER BY i.id ASC
+    </select>
+
+    <select id="selectChildren" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM major_catalog_item
+        WHERE catalog_id = #{catalogId}
+          AND parent_id = #{parentId}
+        ORDER BY sort_no ASC, id ASC
+    </select>
+
+    <sql id="Item_Query_Condition">
+        WHERE i.catalog_id = #{catalogId}
+        <if test="keyword != null and keyword != ''">
+            AND (i.major_name LIKE CONCAT('%', #{keyword}, '%') OR i.major_code = #{keyword})
+        </if>
+        <if test="majorCode != null and majorCode != ''">
+            AND i.major_code = #{majorCode}
+        </if>
+        <if test="majorName != null and majorName != ''">
+            AND i.major_name LIKE CONCAT('%', #{majorName}, '%')
+        </if>
+    </sql>
+
+    <select id="selectItemsByCatalogId" resultType="com.gk.jobhelper.dto.MajorCatalogItemVO">
+        SELECT i.id            AS id,
+               i.catalog_id    AS catalogId,
+               i.parent_id     AS parentId,
+               p.major_name    AS parentName,
+               i.major_code    AS majorCode,
+               i.major_name    AS majorName,
+               i.item_level    AS itemLevel,
+               i.degree_category AS degreeCategory,
+               i.sort_no       AS sortNo
+        FROM major_catalog_item i
+                 LEFT JOIN major_catalog_item p ON i.parent_id = p.id
+        <include refid="Item_Query_Condition"/>
+        ORDER BY i.sort_no ASC, i.id ASC
+            LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countItemsByCatalogId" resultType="long">
+        SELECT COUNT(*)
+        FROM major_catalog_item i
+        <include refid="Item_Query_Condition"/>
+    </select>
+
+    <select id="searchItems" resultType="com.gk.jobhelper.dto.MajorSearchItemVO">
+        SELECT i.id              AS itemId,
+               c.id              AS catalogId,
+               c.catalog_code    AS catalogCode,
+               c.catalog_name    AS catalogName,
+               c.catalog_type    AS catalogType,
+               c.education_level AS educationLevel,
+               i.major_code      AS majorCode,
+               i.major_name      AS majorName,
+               i.item_level      AS itemLevel,
+               i.degree_category AS degreeCategory,
+               p.major_code      AS parentCode,
+               p.major_name      AS parentName
+        FROM major_catalog_item i
+                 INNER JOIN major_catalog c ON i.catalog_id = c.id
+                 LEFT JOIN major_catalog_item p ON i.parent_id = p.id
+        WHERE c.enabled = 1
+          AND (
+              i.major_code = #{keyword}
+              OR i.major_name LIKE CONCAT('%', #{keyword}, '%')
+              OR i.normalized_name = #{normalizedKeyword}
+              OR EXISTS (
+                  SELECT 1 FROM major_alias a
+                  WHERE a.major_catalog_item_id = i.id
+                    AND a.normalized_alias IN (#{keyword}, #{normalizedKeyword})
+              )
+          )
+        ORDER BY c.priority ASC, i.major_code ASC
+            LIMIT #{limit}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO major_catalog_item (catalog_id, parent_id, major_code, major_name, normalized_name,
+                                        item_level, degree_category, sort_no, raw_data, created_at, updated_at)
+        VALUES (#{catalogId}, #{parentId}, #{majorCode}, #{majorName}, #{normalizedName},
+                #{itemLevel}, #{degreeCategory}, #{sortNo}, #{rawData}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <select id="countByCatalogId" resultType="long">
+        SELECT COUNT(*) FROM major_catalog_item WHERE catalog_id = #{catalogId}
+    </select>
+
+    <delete id="deleteByCatalogId">
+        DELETE FROM major_catalog_item WHERE catalog_id = #{catalogId}
+    </delete>
+
+    <delete id="deleteAll">
+        DELETE FROM major_catalog_item
+    </delete>
+</mapper>

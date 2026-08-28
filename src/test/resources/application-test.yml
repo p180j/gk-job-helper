@@ -1,0 +1,20 @@
+# 单元测试配置: 使用 H2 内存数据库(MySQL 兼容模式)，无需本地 MySQL
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    # 说明: 不同测试类组合(@AutoConfigureMockMvc 与否)会缓存多个 Spring 上下文;
+    # 若共享同一 H2 库名, 第二个上下文重复执行 schema.sql 会触发 CREATE INDEX 冲突。
+    # 因此每个上下文使用随机库名的独立 H2 实例, 各自执行 schema + 初始化数据。
+    url: jdbc:h2:mem:gk_job_helper_test_${random.uuid};MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+      schema-locations: classpath:db/schema.sql
+      data-locations: classpath:db/data_major_catalog.sql
+
+upload:
+  # 测试上传目录，避免污染正式 uploads 目录
+  dir: ./target/test-uploads

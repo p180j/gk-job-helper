@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.jobhelper.mapper.MajorAliasMapper">
+
+    <sql id="Base_Column_List">
+        id, catalog_id, major_catalog_item_id, alias_name, normalized_alias, alias_type, created_at
+    </sql>
+
+    <resultMap id="BaseResultMap" type="com.gk.jobhelper.entity.MajorAlias">
+        <id property="id" column="id"/>
+        <result property="catalogId" column="catalog_id"/>
+        <result property="majorCatalogItemId" column="major_catalog_item_id"/>
+        <result property="aliasName" column="alias_name"/>
+        <result property="normalizedAlias" column="normalized_alias"/>
+        <result property="aliasType" column="alias_type"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="selectByCatalogAndNames" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM major_alias
+        WHERE catalog_id = #{catalogId}
+          AND normalized_alias IN
+          <foreach collection="names" item="name" open="(" separator="," close=")">
+              #{name}
+          </foreach>
+        ORDER BY id ASC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO major_alias (catalog_id, major_catalog_item_id, alias_name, normalized_alias,
+                                 alias_type, created_at)
+        VALUES (#{catalogId}, #{majorCatalogItemId}, #{aliasName}, #{normalizedAlias},
+                #{aliasType}, #{createdAt})
+    </insert>
+
+    <delete id="deleteByCatalogId">
+        DELETE FROM major_alias WHERE catalog_id = #{catalogId}
+    </delete>
+
+    <delete id="deleteAll">
+        DELETE FROM major_alias
+    </delete>
+</mapper>
