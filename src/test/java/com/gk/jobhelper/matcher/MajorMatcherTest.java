@@ -274,6 +274,13 @@ class MajorMatcherTest {
     }
 
     @Test
+    void leveledRequirementWithProfessionalSuffixShouldSelectUserLevelSegment() {
+        MatchItemResult result = match("软件工程", "080902", "本科",
+                "研究生专业：计算机类；本科专业：法学类", null);
+        assertResult(result, MatchResult.NOT_MATCH);
+    }
+
+    @Test
     void leveledRequirementWithoutMatchingLevelShouldBeUncertain() {
         // 用户专科，要求仅分本科/研究生段 -> 无法选择适用段 -> UNCERTAIN
         MatchItemResult result = match("软件工程", "080902", "大专", "本科：计算机类；研究生：法学", null);

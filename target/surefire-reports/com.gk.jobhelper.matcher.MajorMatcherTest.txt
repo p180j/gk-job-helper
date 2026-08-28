@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.gk.jobhelper.matcher.MajorMatcherTest
 -------------------------------------------------------------------------------
-Tests run: 35, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.011 s - in com.gk.jobhelper.matcher.MajorMatcherTest
+Tests run: 36, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.893 s - in com.gk.jobhelper.matcher.MajorMatcherTest

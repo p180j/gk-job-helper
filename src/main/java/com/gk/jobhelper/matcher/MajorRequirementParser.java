@@ -41,10 +41,11 @@ public final class MajorRequirementParser {
     };
 
     /** 分学历层次前缀 */
-    private static final Pattern LEVEL_PREFIX = Pattern.compile("^([^:]{1,8}):(.+)$");
+    private static final Pattern LEVEL_PREFIX = Pattern.compile("^([^:：]{1,8})[:：](.+)$");
 
     private static final String[] LEVEL_KEYWORDS = {
-            "硕士研究生", "博士研究生", "研究生", "本科", "大专", "专科", "硕士", "博士"
+            "硕士研究生", "博士研究生", "研究生", "研究生专业", "本科", "本科专业",
+            "大专", "大专专业", "专科", "专科专业", "硕士", "硕士专业", "博士", "博士专业"
     };
 
     private MajorRequirementParser() {
@@ -169,13 +170,16 @@ public final class MajorRequirementParser {
     /** 分段前缀是否对应用户学历层次 */
     private static boolean matchesUserLevel(String userLevel, String segmentPrefix) {
         if ("本科".equals(userLevel)) {
-            return "本科".equals(segmentPrefix);
+            return "本科".equals(segmentPrefix) || "本科专业".equals(segmentPrefix);
         }
         if ("专科".equals(userLevel)) {
-            return "专科".equals(segmentPrefix) || "大专".equals(segmentPrefix);
+            return "专科".equals(segmentPrefix) || "专科专业".equals(segmentPrefix)
+                    || "大专".equals(segmentPrefix) || "大专专业".equals(segmentPrefix);
         }
         // 研究生
-        return "研究生".equals(segmentPrefix) || "硕士".equals(segmentPrefix) || "博士".equals(segmentPrefix)
+        return "研究生".equals(segmentPrefix) || "研究生专业".equals(segmentPrefix)
+                || "硕士".equals(segmentPrefix) || "硕士专业".equals(segmentPrefix)
+                || "博士".equals(segmentPrefix) || "博士专业".equals(segmentPrefix)
                 || "硕士研究生".equals(segmentPrefix) || "博士研究生".equals(segmentPrefix);
     }
 
