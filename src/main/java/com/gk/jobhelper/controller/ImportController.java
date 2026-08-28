@@ -10,6 +10,7 @@ import com.gk.jobhelper.dto.PageVO;
 import com.gk.jobhelper.service.DashboardService;
 import com.gk.jobhelper.service.ExcelImportService;
 import com.gk.jobhelper.service.JobImportService;
+import com.gk.jobhelper.service.ImportProgressStore;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,12 +36,14 @@ public class ImportController {
     private final ExcelImportService excelImportService;
     private final JobImportService jobImportService;
     private final DashboardService dashboardService;
+    private final ImportProgressStore importProgressStore;
 
     public ImportController(ExcelImportService excelImportService, JobImportService jobImportService,
-                            DashboardService dashboardService) {
+                            DashboardService dashboardService, ImportProgressStore importProgressStore) {
         this.excelImportService = excelImportService;
         this.jobImportService = jobImportService;
         this.dashboardService = dashboardService;
+        this.importProgressStore = importProgressStore;
     }
 
     /** 首页"最近分析"卡片：最近一次导入记录 + 当前档案匹配统计；无记录时 data 为 null */
@@ -54,6 +57,13 @@ public class ImportController {
     public ApiResponse<PageVO<RecentImportVO>> page(@RequestParam(value = "page", defaultValue = "1") int page,
                                                      @RequestParam(value = "size", defaultValue = "10") int size) {
         return ApiResponse.ok(dashboardService.pageImports(page, size));
+    }
+
+    /** 后台导入任务进度（IMPORTING / IMPORTED / IMPORT_FAILED） */
+    @GetMapping("/{id}/progress")
+    public ApiResponse<com.gk.jobhelper.entity.ImportFile> progress(@PathVariable("id") Long id) {
+        com.gk.jobhelper.entity.ImportFile progress = importProgressStore.get(id);
+        return ApiResponse.ok(progress == null ? excelImportService.getImportFile(id) : progress);
     }
 
     /** 删除指定职位表及其导入岗位、匹配结果 */

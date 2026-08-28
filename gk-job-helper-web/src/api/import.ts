@@ -4,6 +4,7 @@ import type {
   FieldMappingPreview,
   ImportResult,
   MappingItem,
+  ImportProgress,
   RecentImport,
   PageVO
 } from '@/types/model'
@@ -23,6 +24,10 @@ export function fetchMapping(importId: number): Promise<FieldMappingPreview> {
 /** 按确认的映射正式导入岗位 */
 export function confirmImport(importId: number, mappings: MappingItem[]): Promise<ImportResult> {
   return post<ImportResult>(`/api/import/${importId}/confirm`, { mappings })
+}
+
+export function fetchImportProgress(importId: number): Promise<ImportProgress> {
+  return get<ImportProgress>(`/api/import/${importId}/progress`)
 }
 
 /** 首页最近分析卡片：最近一次导入 + 匹配统计；无记录返回 null */

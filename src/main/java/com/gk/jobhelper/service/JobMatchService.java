@@ -34,6 +34,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * 报考资格匹配引擎 V1 编排服务：
@@ -94,6 +95,11 @@ public class JobMatchService {
      * 单个岗位异常不中断批次，记录失败岗位与原因。
      */
     public MatchSummaryVO batchExecute(MatchExecuteRequest request) {
+        return batchExecute(request, summary -> { });
+    }
+
+    /** 批量匹配并在每处理一个岗位后报告当前汇总，供后台任务展示进度。 */
+    public MatchSummaryVO batchExecute(MatchExecuteRequest request, Consumer<MatchSummaryVO> progressReporter) {
         UserProfile profile = requireProfile(request.getProfileId());
         requireImportFile(request.getImportId());
 
@@ -123,6 +129,7 @@ public class JobMatchService {
                                 position.getId(), "匹配执行异常: " + e.getMessage()));
                     }
                 }
+                progressReporter.accept(summary);
             }
             if (positions.size() < batchSize) {
                 break;

@@ -74,6 +74,16 @@ export interface ImportResult {
   failedItems: ImportFailedItem[]
 }
 
+export interface ImportProgress {
+  id: number
+  totalRows: number
+  status: 'PREVIEWED' | 'IMPORTING' | 'IMPORTED' | 'IMPORT_FAILED'
+  processedRows: number
+  successRows: number
+  failedRows: number
+  errorMessage: string | null
+}
+
 /** 匹配结果三态 */
 export type MatchResultValue = 'MATCH' | 'UNCERTAIN' | 'NOT_MATCH'
 

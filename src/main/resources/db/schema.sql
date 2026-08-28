@@ -78,6 +78,10 @@ CREATE TABLE IF NOT EXISTS import_file (
     headers          VARCHAR(1000) DEFAULT NULL,            -- 表头字段(逗号分隔)，供字段映射使用
     total_rows       INT           DEFAULT NULL,            -- 数据总行数(不含表头)
     status           VARCHAR(16)   NOT NULL DEFAULT 'PREVIEWED', -- PREVIEWED-已预览 / IMPORTED-已导入
+    processed_rows   INT           DEFAULT 0,
+    success_rows     INT           DEFAULT 0,
+    failed_rows      INT           DEFAULT 0,
+    error_message    VARCHAR(1000) DEFAULT NULL,
     created_at       DATETIME      DEFAULT NULL,
     PRIMARY KEY (id)
 );

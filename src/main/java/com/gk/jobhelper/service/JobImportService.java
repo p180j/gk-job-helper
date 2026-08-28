@@ -35,17 +35,22 @@ public class JobImportService {
     private final ExcelRowReader excelRowReader;
     private final JobPositionConverter jobPositionConverter;
     private final FieldMappingService fieldMappingService;
+    private final JobImportAsyncService jobImportAsyncService;
+    private final ImportProgressStore progressStore;
 
     public JobImportService(ImportFileMapper importFileMapper,
                             JobPositionMapper jobPositionMapper,
                             ExcelRowReader excelRowReader,
                             JobPositionConverter jobPositionConverter,
-                            FieldMappingService fieldMappingService) {
+                            FieldMappingService fieldMappingService, JobImportAsyncService jobImportAsyncService,
+                            ImportProgressStore progressStore) {
         this.importFileMapper = importFileMapper;
         this.jobPositionMapper = jobPositionMapper;
         this.excelRowReader = excelRowReader;
         this.jobPositionConverter = jobPositionConverter;
         this.fieldMappingService = fieldMappingService;
+        this.jobImportAsyncService = jobImportAsyncService;
+        this.progressStore = progressStore;
     }
 
     /**
@@ -79,26 +84,15 @@ public class JobImportService {
         // 校验用户映射：sourceField 必须存在于表头，targetField 必须为合法标准字段或空
         validateMappings(sheet, request.getMappings());
 
-        // 按确认映射逐行转换为标准岗位
-        ConversionResult conversion = jobPositionConverter.convert(sheet, request.getMappings(), importId);
-
-        // 删旧插新（同一文件重复导入幂等）
-        jobPositionMapper.deleteByImportFileId(importId);
-        List<JobPosition> positions = conversion.getPositions();
-        for (int start = 0; start < positions.size(); start += BATCH_SIZE) {
-            int end = Math.min(start + BATCH_SIZE, positions.size());
-            jobPositionMapper.insertBatch(positions.subList(start, end));
-        }
-
-        // 更新导入记录状态
-        importFileMapper.updateStatus(importId, "IMPORTED");
+        // 创建后台任务并立即返回，前端通过 progress 接口展示实时进度。
+        progressStore.start(importId, record.getTotalRows() == null ? 0 : record.getTotalRows());
+        jobImportAsyncService.execute(importId, request);
 
         ImportResultVO vo = new ImportResultVO();
         vo.setImportId(importId);
-        vo.setTotalRows(positions.size() + conversion.getFailures().size());
-        vo.setSuccessRows(positions.size());
-        vo.setFailedRows(conversion.getFailures().size());
-        vo.setFailedItems(conversion.getFailures());
+        vo.setTotalRows(record.getTotalRows() == null ? 0 : record.getTotalRows());
+        vo.setSuccessRows(0);
+        vo.setFailedRows(0);
         return vo;
     }
 

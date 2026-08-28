@@ -36,11 +36,13 @@ com\gk\jobhelper\service\QualificationEducationResolver$Candidate.class
 com\gk\jobhelper\matcher\RequirementToken.class
 com\gk\jobhelper\entity\ImportFile.class
 com\gk\jobhelper\dto\ConversionResult.class
+com\gk\jobhelper\config\ImportAsyncConfig.class
 com\gk\jobhelper\dto\ProfileRequest.class
 com\gk\jobhelper\matcher\JobConditionMatcher.class
 com\gk\jobhelper\dto\ImportResultVO.class
 com\gk\jobhelper\dto\MatchPositionResultVO.class
 com\gk\jobhelper\config\UploadProperties.class
+com\gk\jobhelper\dto\MatchProgressVO.class
 com\gk\jobhelper\mapper\MajorCatalogMapper.class
 com\gk\jobhelper\entity\MajorCatalog.class
 com\gk\jobhelper\matcher\MajorMatcher$TokenVerdict.class
@@ -52,8 +54,10 @@ com\gk\jobhelper\dto\HeaderSuggestion.class
 com\gk\jobhelper\matcher\AgeMatcher.class
 com\gk\jobhelper\controller\ProfileController.class
 com\gk\jobhelper\mapper\MajorAliasMapper.class
+com\gk\jobhelper\service\MatchProgressStore.class
 com\gk\jobhelper\mapper\JobPositionMapper.class
 com\gk\jobhelper\constant\FieldConfidence.class
+com\gk\jobhelper\service\JobMatchAsyncService.class
 com\gk\jobhelper\common\ApiResponse.class
 com\gk\jobhelper\service\JobPositionConverter.class
 com\gk\jobhelper\mapper\UserProfileMapper.class
@@ -81,6 +85,7 @@ com\gk\jobhelper\matcher\EducationMatcher.class
 com\gk\jobhelper\service\ExcelHeaderDetector.class
 com\gk\jobhelper\service\QualificationEducationResolver$1.class
 com\gk\jobhelper\mapper\UserEducationMapper.class
+com\gk\jobhelper\service\JobImportAsyncService.class
 com\gk\jobhelper\mapper\ExamMajorCatalogMapper.class
 com\gk\jobhelper\config\MatchProperties.class
 com\gk\jobhelper\entity\UserProfile.class
@@ -94,6 +99,7 @@ com\gk\jobhelper\dto\ExcelPreviewResult.class
 com\gk\jobhelper\dto\MatchSummaryVO.class
 com\gk\jobhelper\constant\MatchResult.class
 com\gk\jobhelper\entity\MajorCatalogItem.class
+com\gk\jobhelper\service\ImportProgressStore.class
 com\gk\jobhelper\dto\ExcelRawRow.class
 com\gk\jobhelper\service\UserProfileService.class
 com\gk\jobhelper\controller\JobController.class

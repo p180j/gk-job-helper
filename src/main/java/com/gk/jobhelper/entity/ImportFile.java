@@ -17,6 +17,10 @@ public class ImportFile {
     private String headers;
     private Integer totalRows;
     private String status;
+    private Integer processedRows;
+    private Integer successRows;
+    private Integer failedRows;
+    private String errorMessage;
     private LocalDateTime createdAt;
 
     public Long getId() {
@@ -98,6 +102,14 @@ public class ImportFile {
     public void setStatus(String status) {
         this.status = status;
     }
+    public Integer getProcessedRows() { return processedRows; }
+    public void setProcessedRows(Integer processedRows) { this.processedRows = processedRows; }
+    public Integer getSuccessRows() { return successRows; }
+    public void setSuccessRows(Integer successRows) { this.successRows = successRows; }
+    public Integer getFailedRows() { return failedRows; }
+    public void setFailedRows(Integer failedRows) { this.failedRows = failedRows; }
+    public String getErrorMessage() { return errorMessage; }
+    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

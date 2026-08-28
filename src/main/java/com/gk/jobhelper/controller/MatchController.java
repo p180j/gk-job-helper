@@ -5,8 +5,11 @@ import com.gk.jobhelper.dto.MatchExecuteRequest;
 import com.gk.jobhelper.dto.MatchPositionResultVO;
 import com.gk.jobhelper.dto.MatchResultVO;
 import com.gk.jobhelper.dto.MatchSummaryVO;
+import com.gk.jobhelper.dto.MatchProgressVO;
 import com.gk.jobhelper.dto.PageVO;
 import com.gk.jobhelper.service.JobMatchService;
+import com.gk.jobhelper.service.JobMatchAsyncService;
+import com.gk.jobhelper.service.MatchProgressStore;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,14 +29,32 @@ import javax.validation.Valid;
 public class MatchController {
 
     private final JobMatchService jobMatchService;
+    private final JobMatchAsyncService jobMatchAsyncService;
+    private final MatchProgressStore matchProgressStore;
 
-    public MatchController(JobMatchService jobMatchService) {
+    public MatchController(JobMatchService jobMatchService, JobMatchAsyncService jobMatchAsyncService,
+                           MatchProgressStore matchProgressStore) {
         this.jobMatchService = jobMatchService;
+        this.jobMatchAsyncService = jobMatchAsyncService;
+        this.matchProgressStore = matchProgressStore;
     }
 
     @PostMapping("/execute")
     public ApiResponse<MatchSummaryVO> execute(@Valid @RequestBody MatchExecuteRequest request) {
         return ApiResponse.ok(jobMatchService.batchExecute(request));
+    }
+
+    @PostMapping("/execute-async")
+    public ApiResponse<MatchProgressVO> executeAsync(@Valid @RequestBody MatchExecuteRequest request) {
+        MatchProgressVO progress = matchProgressStore.start(request.getProfileId(), request.getImportId());
+        jobMatchAsyncService.execute(request);
+        return ApiResponse.ok(progress);
+    }
+
+    @GetMapping("/progress")
+    public ApiResponse<MatchProgressVO> progress(@RequestParam("profileId") Long profileId,
+                                                  @RequestParam("importId") Long importId) {
+        return ApiResponse.ok(matchProgressStore.get(profileId, importId));
     }
 
     @GetMapping("/result")

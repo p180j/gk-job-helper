@@ -1,24 +1,30 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { fetchProfile, isProfileNotFound } from '@/api/profile'
 import { deleteImport, fetchImports } from '@/api/import'
 import { showError } from '@/api/http'
+import { fetchMatchProgress, type MatchProgress } from '@/api/match'
 import type { RecentImport, UserProfile } from '@/types/model'
 
 const router = useRouter()
+const route = useRoute()
 const profile = ref<UserProfile | null>(null)
 const records = ref<RecentImport[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = 10
 const loading = ref(true)
+const matchProgress = ref<MatchProgress | null>(null)
+let progressTimer: number | undefined
 const profileSummary = computed(() => profile.value ? `${profile.value.education ?? '学历未填'} · ${profile.value.major ?? '专业未填'} · ${profile.value.birthDate ? `${new Date().getFullYear() - new Date(profile.value.birthDate).getFullYear()}岁` : '年龄未填'}` : '')
 
 onMounted(async () => {
   try { profile.value = await fetchProfile() } catch (error) { if (!isProfileNotFound(error)) showError(error, '读取个人档案失败。') }
   await loadRecords()
+  const importId = Number(route.query.matching)
+  if (importId && profile.value) startProgressPolling(importId, profile.value.id)
   loading.value = false
 })
 
@@ -40,6 +46,24 @@ function changePage(value: number) {
   page.value = value
   loadRecords()
 }
+
+function startProgressPolling(importId: number, profileId: number) {
+  const refresh = async () => {
+    try {
+      matchProgress.value = await fetchMatchProgress(profileId, importId)
+      if (!matchProgress.value || matchProgress.value.status === 'MATCHING') return
+      window.clearInterval(progressTimer)
+      await loadRecords()
+    } catch (error) { showError(error, '读取匹配进度失败。'); window.clearInterval(progressTimer) }
+  }
+  refresh()
+  progressTimer = window.setInterval(refresh, 800)
+}
+
+function openProgressResult() {
+  const importId = Number(route.query.matching)
+  if (importId) router.push(`/results/${importId}`)
+}
 </script>
 
 <template>
@@ -49,7 +73,7 @@ function changePage(value: number) {
       <el-button type="primary" size="large" :icon="UploadFilled" @click="router.push('/import')">上传职位表</el-button>
     </div>
     <div class="page-card profile-card"><h2 class="page-title">我的报考档案</h2><template v-if="profile"><p class="profile-main">{{ profileSummary }}</p><p class="muted">{{ profile.politicalStatus ?? '政治面貌未填' }} · {{ profile.workYears ?? 0 }}年基层工作经历</p><el-button @click="router.push('/profile')">编辑档案</el-button></template><el-empty v-else description="请先完善报考档案" :image-size="72"><el-button type="primary" @click="router.push('/profile')">立即创建</el-button></el-empty></div>
-    <div class="page-card recent-card"><h2 class="page-title">我的匹配记录</h2><p class="page-subtitle">可查看、继续导入或删除指定职位表记录。</p><template v-if="records.length"><el-table :data="records" border><el-table-column prop="fileName" label="职位表" min-width="330" show-overflow-tooltip /><el-table-column prop="jobCount" label="岗位数量" width="100" /><el-table-column label="上传时间" width="180"><template #default="{ row }">{{ row.createdAt?.replace('T', ' ') || '-' }}</template></el-table-column><el-table-column label="匹配统计" min-width="220"><template #default="{ row }"><span class="match-count success">可以报 {{ row.matchStats.match }}</span><span class="match-count warning">待确认 {{ row.matchStats.uncertain }}</span><span class="match-count danger">不符合 {{ row.matchStats.notMatch }}</span></template></el-table-column><el-table-column label="状态" width="120"><template #default="{ row }"><el-tag :type="row.status === 'IMPORTED' ? 'success' : 'warning'">{{ row.status === 'IMPORTED' ? '已导入' : '待确认映射' }}</el-tag></template></el-table-column><el-table-column label="操作" width="190" fixed="right"><template #default="{ row }"><el-button type="primary" link @click="openRecord(row)">{{ row.status !== 'IMPORTED' ? '继续导入' : row.matchStats.total ? '查看结果' : '开始匹配' }}</el-button><el-button type="danger" link @click="removeRecord(row)">删除</el-button></template></el-table-column></el-table><div class="pager" v-if="total > pageSize"><el-pagination background layout="total, prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="changePage" /></div></template><el-empty v-else description="暂无职位表分析记录" /></div>
+    <div class="page-card recent-card"><h2 class="page-title">我的匹配记录</h2><p class="page-subtitle">可查看、继续导入或删除指定职位表记录。</p><div v-if="matchProgress" class="progress-panel"><template v-if="matchProgress.status === 'MATCHING'"><strong>正在智能匹配</strong><span>{{ matchProgress.processed }} / {{ matchProgress.total || '...' }} 个岗位</span><el-progress :percentage="matchProgress.total ? Math.floor(matchProgress.processed * 100 / matchProgress.total) : 0" :indeterminate="!matchProgress.total" /></template><template v-else-if="matchProgress.status === 'COMPLETED'"><strong>智能匹配完成</strong><span>已处理 {{ matchProgress.processed }} 个岗位</span><el-button type="primary" link @click="openProgressResult">查看结果</el-button></template><template v-else><strong>匹配任务失败</strong><span>{{ matchProgress.errorMessage || '请稍后重试。' }}</span></template></div><template v-if="records.length"><el-table :data="records" border><el-table-column prop="fileName" label="职位表" min-width="330" show-overflow-tooltip /><el-table-column prop="jobCount" label="岗位数量" width="100" /><el-table-column label="上传时间" width="180"><template #default="{ row }">{{ row.createdAt?.replace('T', ' ') || '-' }}</template></el-table-column><el-table-column label="匹配统计" min-width="220"><template #default="{ row }"><span class="match-count success">可以报 {{ row.matchStats.match }}</span><span class="match-count warning">待确认 {{ row.matchStats.uncertain }}</span><span class="match-count danger">不符合 {{ row.matchStats.notMatch }}</span></template></el-table-column><el-table-column label="状态" width="120"><template #default="{ row }"><el-tag :type="row.status === 'IMPORTED' ? 'success' : 'warning'">{{ row.status === 'IMPORTED' ? '已导入' : '待确认映射' }}</el-tag></template></el-table-column><el-table-column label="操作" width="190" fixed="right"><template #default="{ row }"><el-button type="primary" link @click="openRecord(row)">{{ row.status !== 'IMPORTED' ? '继续导入' : row.matchStats.total ? '查看结果' : '开始匹配' }}</el-button><el-button type="danger" link @click="removeRecord(row)">删除</el-button></template></el-table-column></el-table><div class="pager" v-if="total > pageSize"><el-pagination background layout="total, prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="changePage" /></div></template><el-empty v-else description="暂无职位表分析记录" /></div>
   </section>
 </template>
 

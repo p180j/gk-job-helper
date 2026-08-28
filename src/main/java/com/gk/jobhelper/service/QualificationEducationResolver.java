@@ -10,6 +10,7 @@ import com.gk.jobhelper.matcher.MajorMatcher;
 import com.gk.jobhelper.matcher.MatchContext;
 import com.gk.jobhelper.matcher.MatchItemResult;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataAccessException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +24,8 @@ public class QualificationEducationResolver {
     private final UserEducationMapper userEducationMapper;
     private final EducationMatcher educationMatcher;
     private final MajorMatcher majorMatcher;
+    /** 旧数据库尚未执行教育经历迁移时，自动退回到原档案字段。 */
+    private volatile boolean educationTableAvailable = true;
 
     public QualificationEducationResolver(UserEducationMapper userEducationMapper, EducationMatcher educationMatcher,
                                           MajorMatcher majorMatcher) {
@@ -32,7 +35,16 @@ public class QualificationEducationResolver {
     }
 
     public List<MatchItemResult> resolve(UserProfile profile, JobPosition position, MatchContext context) {
-        List<UserEducation> candidates = userEducationMapper.selectEnabledByProfileId(profile.getId());
+        if (!educationTableAvailable) {
+            return evaluate(profile, position, context, null);
+        }
+        List<UserEducation> candidates;
+        try {
+            candidates = userEducationMapper.selectEnabledByProfileId(profile.getId());
+        } catch (DataAccessException e) {
+            educationTableAvailable = false;
+            return evaluate(profile, position, context, null);
+        }
         if (candidates == null || candidates.isEmpty()) {
             return evaluate(profile, position, context, null);
         }

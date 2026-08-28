@@ -10,6 +10,10 @@ UPDATE exam SET exam_name = name WHERE exam_name IS NULL;
 CREATE UNIQUE INDEX uk_exam_code ON exam (exam_code);
 
 ALTER TABLE import_file ADD COLUMN exam_id BIGINT DEFAULT NULL;
+ALTER TABLE import_file ADD COLUMN processed_rows INT DEFAULT 0;
+ALTER TABLE import_file ADD COLUMN success_rows INT DEFAULT 0;
+ALTER TABLE import_file ADD COLUMN failed_rows INT DEFAULT 0;
+ALTER TABLE import_file ADD COLUMN error_message VARCHAR(1000) DEFAULT NULL;
 CREATE INDEX idx_import_file_exam ON import_file (exam_id);
 
 CREATE TABLE IF NOT EXISTS user_education (

@@ -116,6 +116,14 @@ public class ExcelImportService {
         deleteQuietly(Paths.get(record.getStoredPath()));
     }
 
+    public ImportFile getImportFile(Long importId) {
+        ImportFile record = importFileMapper.selectById(importId);
+        if (record == null) {
+            throw new BusinessException(ApiResponse.CODE_IMPORT_NOT_FOUND, "导入记录不存在: id=" + importId);
+        }
+        return record;
+    }
+
     private Path saveFile(MultipartFile file, String extension) {
         try {
             Path uploadDir = Paths.get(uploadProperties.getDir()).toAbsolutePath().normalize();
