@@ -80,3 +80,7 @@ atlassian-ide-plugin.xml
 
 /.codex/
 /.github/
+/.idea/
+/target/
+/gk-job-helper-web/node_modules/
+/uploads/
