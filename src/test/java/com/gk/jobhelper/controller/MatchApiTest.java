@@ -69,7 +69,7 @@ class MatchApiTest {
     private Long importId;
     private Long matchJobId;      // 全条件满足 -> MATCH
     private Long notMatchJobId;   // 学历不满足 -> NOT_MATCH
-    private Long uncertainJobId;  // 年龄要求为空 -> UNCERTAIN
+    private Long uncertainJobId;  // 备注存在无法自动判断的限制 -> UNCERTAIN
 
     @BeforeEach
     void prepareData() {
@@ -97,9 +97,9 @@ class MatchApiTest {
         assertEquals("MATCH", data.get("result").asText());
         assertEquals(REFERENCE_DATE, data.get("referenceDate").asText());
 
-        // 5 个条件明细，全部 MATCH（Iteration 4 起新增 MAJOR）
+        // 6 个条件明细，全部 MATCH（包含专业和备注条件）
         JsonNode items = data.get("items");
-        assertEquals(5, items.size());
+        assertEquals(6, items.size());
         assertEquals("EDUCATION", items.get(0).get("conditionType").asText());
         assertEquals("MATCH", items.get(0).get("result").asText());
         assertEquals("本科", items.get(0).get("userValue").asText());
@@ -128,6 +128,9 @@ class MatchApiTest {
         assertEquals("080902", evidence.get("majorCode").asText());
         assertEquals("0809", evidence.get("parentCode").asText());
 
+        assertEquals("REMARK", items.get(5).get("conditionType").asText());
+        assertEquals("MATCH", items.get(5).get("result").asText());
+
         // 匹配结果落库校验
         JobMatch match = jobMatchMapper.selectByProfileAndPosition(profileId, matchJobId);
         assertNotNull(match);
@@ -135,7 +138,7 @@ class MatchApiTest {
         assertEquals(LocalDate.of(2026, 8, 27), match.getReferenceDate());
         assertEquals(importId, match.getImportFileId());
         List<JobMatchItem> persistedItems = jobMatchMapper.selectItemsByMatchId(match.getId());
-        assertEquals(5, persistedItems.size());
+        assertEquals(6, persistedItems.size());
         // MAJOR 明细证据以 JSON 落库
         JobMatchItem majorItem = persistedItems.get(4);
         assertEquals("MAJOR", majorItem.getConditionType());
@@ -166,8 +169,8 @@ class MatchApiTest {
         assertNotNull(match);
         assertEquals(LocalDate.of(2026, 8, 28), match.getReferenceDate());
         assertEquals("MATCH", match.getMatchResult());
-        // items 删旧插新，仍为 5 条
-        assertEquals(5, jobMatchMapper.selectItemsByMatchId(match.getId()).size());
+        // items 删旧插新，仍为 6 条
+        assertEquals(6, jobMatchMapper.selectItemsByMatchId(match.getId()).size());
     }
 
     @Test
@@ -176,7 +179,7 @@ class MatchApiTest {
 
         JsonNode data = getJson("/api/jobs/" + matchJobId + "/match?profileId=" + profileId);
         assertEquals("MATCH", data.get("result").asText());
-        assertEquals(5, data.get("items").size());
+        assertEquals(6, data.get("items").size());
         assertEquals(REFERENCE_DATE, data.get("referenceDate").asText());
         // 详情接口反序列化返回 MAJOR 证据
         JsonNode majorItem = data.get("items").get(4);
@@ -189,14 +192,18 @@ class MatchApiTest {
         postJson("/api/jobs/" + uncertainJobId + "/match", matchBody(REFERENCE_DATE));
         JsonNode uncertain = getJson("/api/jobs/" + uncertainJobId + "/match?profileId=" + profileId);
         assertEquals("UNCERTAIN", uncertain.get("result").asText());
-        assertEquals(5, uncertain.get("items").size());
+        assertEquals(6, uncertain.get("items").size());
         JsonNode ageItem = uncertain.get("items").get(1);
-        assertEquals("UNCERTAIN", ageItem.get("result").asText());
-        assertTrue(ageItem.get("reason").asText().contains("为空"));
+        assertEquals("MATCH", ageItem.get("result").asText());
+        assertTrue(ageItem.get("reason").asText().contains("未设置"));
         JsonNode uncertainMajorItem = uncertain.get("items").get(4);
         assertEquals("MAJOR", uncertainMajorItem.get("conditionType").asText());
-        assertEquals("UNCERTAIN", uncertainMajorItem.get("result").asText());
-        assertTrue(uncertainMajorItem.get("reason").asText().contains("为空"));
+        assertEquals("MATCH", uncertainMajorItem.get("result").asText());
+        assertTrue(uncertainMajorItem.get("reason").asText().contains("未设置"));
+        JsonNode remarkItem = uncertain.get("items").get(5);
+        assertEquals("REMARK", remarkItem.get("conditionType").asText());
+        assertEquals("UNCERTAIN", remarkItem.get("result").asText());
+        assertTrue(remarkItem.get("reason").asText().contains("人工核验"));
     }
 
     @Test
@@ -410,9 +417,11 @@ class MatchApiTest {
         // P2: 学历不满足 -> NOT_MATCH（MAJOR 满足但综合聚合以 NOT_MATCH 为准）
         positions.add(buildPosition("3001002", "数据分析师", "硕士及以上", "中共党员",
                 "2年以上", "35周岁以下", "计算机类", importId));
-        // P3: 年龄/专业要求为空 -> AGE、MAJOR 均 UNCERTAIN -> 综合 UNCERTAIN
-        positions.add(buildPosition("3001003", "网络管理员", "本科及以上", "中共党员",
-                "2年以上", null, null, importId));
+        // P3: 年龄/专业为空表示无要求；备注有无法自动判断的限制 -> 综合 UNCERTAIN
+        JobPosition uncertainPosition = buildPosition("3001003", "网络管理员", "本科及以上", "中共党员",
+                "2年以上", null, null, importId);
+        uncertainPosition.setRemark("限本县事业单位工作5年以上人员报考");
+        positions.add(uncertainPosition);
         jobPositionMapper.insertBatch(positions);
         List<Long> ids = new ArrayList<>();
         for (JobPosition position : positions) {

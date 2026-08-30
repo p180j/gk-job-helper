@@ -9,6 +9,13 @@ public class MatchResultQuery {
     private Long importFileId;
     /** MATCH / UNCERTAIN / NOT_MATCH，null 表示不过滤 */
     private String matchResult;
+    private String region;
+    private String organizationKeyword;
+    private String positionKeyword;
+    private Integer recruitCountMin;
+    private Integer recruitCountMax;
+    private String educationKeyword;
+    private String majorKeyword;
     private int offset;
     private int size;
 
@@ -35,6 +42,21 @@ public class MatchResultQuery {
     public void setMatchResult(String matchResult) {
         this.matchResult = matchResult;
     }
+
+    public String getRegion() { return region; }
+    public void setRegion(String region) { this.region = region; }
+    public String getOrganizationKeyword() { return organizationKeyword; }
+    public void setOrganizationKeyword(String organizationKeyword) { this.organizationKeyword = organizationKeyword; }
+    public String getPositionKeyword() { return positionKeyword; }
+    public void setPositionKeyword(String positionKeyword) { this.positionKeyword = positionKeyword; }
+    public Integer getRecruitCountMin() { return recruitCountMin; }
+    public void setRecruitCountMin(Integer recruitCountMin) { this.recruitCountMin = recruitCountMin; }
+    public Integer getRecruitCountMax() { return recruitCountMax; }
+    public void setRecruitCountMax(Integer recruitCountMax) { this.recruitCountMax = recruitCountMax; }
+    public String getEducationKeyword() { return educationKeyword; }
+    public void setEducationKeyword(String educationKeyword) { this.educationKeyword = educationKeyword; }
+    public String getMajorKeyword() { return majorKeyword; }
+    public void setMajorKeyword(String majorKeyword) { this.majorKeyword = majorKeyword; }
 
     public int getOffset() {
         return offset;

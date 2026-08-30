@@ -4,11 +4,20 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.gk.jobhelper.common.BusinessException;
+import com.gk.jobhelper.constant.PositionStandardField;
 import com.gk.jobhelper.dto.ExcelRawRow;
 import com.gk.jobhelper.dto.ExcelRawSheet;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -27,20 +36,83 @@ public class ExcelRowReader {
         if (file == null || !file.exists() || !file.isFile()) {
             throw new BusinessException("Excel 文件不存在: " + (file == null ? "null" : file.getPath()));
         }
-        RawRowListener listener = new RawRowListener();
         String targetSheet = sheetName == null ? null : sheetName.trim();
-        int headerRowIndex = ExcelHeaderDetector.detect(file, targetSheet);
         try {
+            RawRowListener listener = new RawRowListener();
+            int headerRowIndex = ExcelHeaderDetector.detect(file, targetSheet);
             if (targetSheet == null || targetSheet.isEmpty()) {
                 EasyExcel.read(file, null, listener).headRowNumber(headerRowIndex + 1).sheet(0).doRead();
             } else {
                 EasyExcel.read(file, null, listener).headRowNumber(headerRowIndex + 1).sheet(targetSheet).doRead();
             }
+            return listener.toSheet();
         } catch (Exception e) {
-            throw new BusinessException("读取 Excel 失败，请确认文件有效且 Sheet 名称["
-                    + (targetSheet == null || targetSheet.isEmpty() ? "首个" : targetSheet) + "]存在");
+            return readWithPoi(file, targetSheet);
         }
-        return listener.toSheet();
+    }
+
+    private ExcelRawSheet readWithPoi(File file, String sheetName) {
+        try (FileInputStream input = new FileInputStream(file); Workbook workbook = WorkbookFactory.create(input)) {
+            Sheet sheet = sheetName == null || sheetName.isEmpty() ? workbook.getSheetAt(0) : workbook.getSheet(sheetName);
+            if (sheet == null) throw new IllegalArgumentException("Sheet 不存在: " + sheetName);
+            DataFormatter formatter = new DataFormatter();
+            FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+            int headerIndex = detectHeaderRow(sheet, formatter, evaluator);
+            Row headerRow = sheet.getRow(headerIndex);
+            int columnCount = headerRow == null ? 0 : Math.max(0, headerRow.getLastCellNum());
+            if (columnCount == 0) throw new IllegalArgumentException("未找到有效表头");
+            ExcelRawSheet result = new ExcelRawSheet();
+            result.setSheetName(sheet.getSheetName());
+            List<String> headers = new ArrayList<>();
+            for (int column = 0; column < columnCount; column++) headers.add(text(headerRow.getCell(column), formatter, evaluator));
+            result.setHeaders(headers);
+            List<ExcelRawRow> rows = new ArrayList<>();
+            for (int rowIndex = headerIndex + 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+                Row row = sheet.getRow(rowIndex);
+                if (row == null) continue;
+                Map<Integer, String> cells = new LinkedHashMap<>();
+                boolean nonBlank = false;
+                for (int column = 0; column < columnCount; column++) {
+                    String value = text(row.getCell(column), formatter, evaluator);
+                    cells.put(column, value);
+                    if (!value.isEmpty()) nonBlank = true;
+                }
+                if (nonBlank) rows.add(new ExcelRawRow(rowIndex + 1, cells));
+            }
+            result.setRows(rows);
+            return result;
+        } catch (Exception e) {
+            String detail = e.getMessage();
+            if (detail == null || detail.trim().isEmpty()) detail = e.getClass().getSimpleName();
+            throw new BusinessException("读取 Excel 失败，请确认文件是有效的 .xls/.xlsx 文件（" + detail + "）");
+        }
+    }
+
+    private int detectHeaderRow(Sheet sheet, DataFormatter formatter, FormulaEvaluator evaluator) {
+        int bestIndex = 0, bestScore = 0;
+        for (int rowIndex = 0; rowIndex <= Math.min(sheet.getLastRowNum(), 29); rowIndex++) {
+            Row row = sheet.getRow(rowIndex);
+            if (row == null) continue;
+            int nonBlank = 0, score = 0;
+            for (Cell cell : row) {
+                String normalized = PositionStandardField.normalize(text(cell, formatter, evaluator));
+                if (normalized.isEmpty()) continue;
+                nonBlank++;
+                boolean recognized = false;
+                for (PositionStandardField field : PositionStandardField.values()) {
+                    if (field.matchesExact(normalized) || field.matchesAlias(normalized)) { recognized = true; break; }
+                }
+                if (recognized || InterviewScoreHeaderPolicy.isScore(normalized)) score++;
+            }
+            if (nonBlank >= 3 && score >= 2 && score > bestScore) { bestIndex = rowIndex; bestScore = score; }
+        }
+        return bestIndex;
+    }
+
+    private String text(Cell cell, DataFormatter formatter, FormulaEvaluator evaluator) {
+        if (cell == null) return "";
+        try { return formatter.formatCellValue(cell, evaluator).trim(); }
+        catch (Exception ignored) { return formatter.formatCellValue(cell).trim(); }
     }
 
     private static class RawRowListener extends AnalysisEventListener<Map<Integer, String>> {

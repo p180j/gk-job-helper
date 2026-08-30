@@ -1,0 +1,1 @@
+import{g as e,d as o,p as i}from"./http-DWK_zMrH.js";function p(a,r){return i(`/api/favorites/${a}`,void 0,{params:{profileId:r}})}function f(a,r){return o(`/api/favorites/${a}`,{params:{profileId:r}})}function n(a,r,t){return e("/api/favorites",{params:{profileId:a,page:r,size:t}})}export{p as a,n as f,f as r};

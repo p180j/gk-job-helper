@@ -151,6 +151,7 @@ export interface JobPosition {
   remark: string | null
   sourceSheet: string | null
   sourceRow: number | null
+  rawData: string | null
 }
 
 /** 匹配结果列表行 */
@@ -162,11 +163,126 @@ export interface MatchPositionResult {
   organizationName: string | null
   province: string | null
   city: string | null
+  district: string | null
+  region: string | null
   recruitCount: number | null
   educationRequirement: string | null
   majorRequirement: string | null
-  matchResult: MatchResultValue
+  matchResult: MatchResultValue | null
   referenceDate: string | null
+  favorite: boolean
+  examSubjectCount: number | null
+  examSubjectsJson: string | null
+  examSubjectGroup: string | null
+  minInterviewScore: number | null
+}
+
+export interface JobFeature {
+  positionId: number
+  examSubjectCount: number | null
+  examSubjects: string[]
+  examSubjectGroup: string | null
+  examSubjectStatus: string
+  rawExamSubjectText: string | null
+  majorRestrictionType: string
+  majorDomains: string[]
+  majorScopeCount: number | null
+  majorAnalysisStatus: string
+  organizationLevel: string | null
+}
+
+export interface HistoricalAnalysis {
+  examYear: number | null
+  minInterviewScore: number | null
+  sampleMinScore: number | null
+  sampleMaxScore: number | null
+  sampleMedianScore: number | null
+  sampleAverageScore: number | null
+  comparisonLevel: string | null
+  sampleCount: number
+  percentile: number | null
+  relativeLevel: string | null
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH'
+  comparisonDescription: string
+  available: boolean
+  reliable: boolean
+}
+
+export interface JobPreference {
+  preferredRegions: string[]
+  acceptedOrgLevels: string[]
+  excludedOrgLevels: string[]
+  preferredSubjectGroups: string[]
+  acceptExtraSubjects: boolean
+  preferMoreRecruits: boolean
+}
+
+export interface RecommendationItem {
+  positionId: number
+  positionCode: string | null
+  positionName: string | null
+  departmentName: string | null
+  organizationName: string | null
+  region: string | null
+  recruitCount: number | null
+  educationRequirement: string | null
+  majorRequirement: string | null
+  examSubjectCount: number | null
+  examSubjects: string[]
+  examSubjectGroup: string | null
+  majorRestrictionType: string | null
+  minInterviewScore: number | null
+  historicalAnalysis: HistoricalAnalysis
+  priorityLevel: 'PRIORITY' | 'NORMAL' | 'OTHER'
+  recommendReasons: string[]
+  favorite: boolean
+}
+
+export interface InterviewScoreImportResult {
+  importId: number
+  examYear: number
+  rawRowCount: number
+  aggregatedPositionCount: number
+  insertedCount: number
+  updatedCount: number
+  linkedPositionCount: number
+  unlinkedPositionCount: number
+  invalidRowCount: number
+  invalidRows: string[]
+}
+
+export interface MatchResultFilters {
+  profileId: number
+  importId: number
+  status?: MatchResultValue
+  region?: string
+  organizationKeyword?: string
+  positionKeyword?: string
+  recruitCountMin?: number
+  recruitCountMax?: number
+  educationKeyword?: string
+  majorKeyword?: string
+  page: number
+  size: number
+}
+
+export interface JobCompareItem {
+  jobId: number
+  region: string | null
+  departmentName: string | null
+  organizationName: string | null
+  positionName: string | null
+  positionCode: string | null
+  recruitCount: number | null
+  educationRequirement: string | null
+  majorRequirement: string | null
+  ageRequirement: string | null
+  politicalRequirement: string | null
+  workYearRequirement: string | null
+  freshGraduateRequirement: string | null
+  otherRestrictions: string | null
+  overallStatus: MatchResultValue
+  matchItems: MatchItem[]
 }
 
 /** 通用分页 */
@@ -183,6 +299,7 @@ export interface RecentImport {
   fileName: string
   sheetName: string | null
   totalRows: number
+  examYear: number | null
   status: 'PREVIEWED' | 'IMPORTED'
   createdAt: string | null
   jobCount: number

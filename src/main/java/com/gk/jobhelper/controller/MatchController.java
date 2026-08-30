@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * 匹配接口
@@ -61,11 +62,28 @@ public class MatchController {
     public ApiResponse<PageVO<MatchPositionResultVO>> result(
             @RequestParam("profileId") Long profileId,
             @RequestParam(value = "importId", required = false) Long importId,
-            @RequestParam(value = "result", required = false) String result,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "result", required = false) String legacyResult,
+            @RequestParam(value = "region", required = false) String region,
+            @RequestParam(value = "organizationKeyword", required = false) String organizationKeyword,
+            @RequestParam(value = "positionKeyword", required = false) String positionKeyword,
+            @RequestParam(value = "recruitCountMin", required = false) Integer recruitCountMin,
+            @RequestParam(value = "recruitCountMax", required = false) Integer recruitCountMax,
+            @RequestParam(value = "educationKeyword", required = false) String educationKeyword,
+            @RequestParam(value = "majorKeyword", required = false) String majorKeyword,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
         int safePage = Math.max(1, page);
         int safeSize = Math.min(Math.max(1, size), 100);
-        return ApiResponse.ok(jobMatchService.queryResults(profileId, importId, result, safePage, safeSize));
+        String effectiveStatus = status == null || status.trim().isEmpty() ? legacyResult : status;
+        return ApiResponse.ok(jobMatchService.queryResults(profileId, importId, effectiveStatus,
+                region, organizationKeyword, positionKeyword, recruitCountMin, recruitCountMax,
+                educationKeyword, majorKeyword, safePage, safeSize));
+    }
+
+    @GetMapping("/regions")
+    public ApiResponse<List<String>> regions(@RequestParam("profileId") Long profileId,
+                                              @RequestParam("importId") Long importId) {
+        return ApiResponse.ok(jobMatchService.queryResultRegions(profileId, importId));
     }
 }

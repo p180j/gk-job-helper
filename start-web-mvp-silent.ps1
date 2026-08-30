@@ -53,11 +53,45 @@ function Test-HttpEndpoint([string]$Uri) {
     }
 }
 
+function Get-ListeningProcess([int]$Port) {
+    $connection = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    if (-not $connection) {
+        return $null
+    }
+    return Get-CimInstance Win32_Process -Filter "ProcessId = $($connection.OwningProcess)" -ErrorAction SilentlyContinue
+}
+
+function Restart-ProjectBackend([string]$ProjectDir) {
+    $backendProcess = Get-ListeningProcess 8080
+    if (-not $backendProcess) {
+        return
+    }
+
+    # Only stop the listener when its command line clearly belongs to this project.
+    # Never terminate an unrelated application that happens to use port 8080.
+    $commandLine = [string]$backendProcess.CommandLine
+    if ($commandLine.IndexOf($ProjectDir, [System.StringComparison]::OrdinalIgnoreCase) -lt 0) {
+        return
+    }
+
+    Stop-Process -Id $backendProcess.ProcessId -Force
+    for ($attempt = 0; $attempt -lt 40 -and (Test-LocalPort 8080); $attempt++) {
+        Start-Sleep -Milliseconds 250
+    }
+    Start-Sleep -Milliseconds 500
+}
+
 if (-not (Test-Path (Join-Path $webDir 'package.json'))) {
     throw "Frontend directory was not found: $webDir"
 }
 
 New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+
+# The desktop BAT is a full application launcher: every click restarts this
+# project's backend so newly edited matching rules always take effect.
+# A listener that does not belong to this project is never terminated.
+Restart-ProjectBackend $projectDir
 
 if (-not (Test-LocalPort 8080)) {
     Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', 'mvn spring-boot:run' -WorkingDirectory $projectDir -WindowStyle Hidden -RedirectStandardOutput (Join-Path $logDir 'backend.log') -RedirectStandardError (Join-Path $logDir 'backend-error.log')

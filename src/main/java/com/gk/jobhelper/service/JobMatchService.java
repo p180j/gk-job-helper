@@ -141,23 +141,49 @@ public class JobMatchService {
     /**
      * 匹配结果分页查询（可按 profileId + importId + result 过滤）
      */
-    public PageVO<MatchPositionResultVO> queryResults(Long profileId, Long importId, String result,
-                                                      int page, int size) {
+    public PageVO<MatchPositionResultVO> queryResults(Long profileId, Long importId, String status,
+                                                      String region, String organizationKeyword,
+                                                      String positionKeyword, Integer recruitCountMin,
+                                                      Integer recruitCountMax, String educationKeyword,
+                                                      String majorKeyword, int page, int size) {
         if (profileId == null) {
             throw new BusinessException(ApiResponse.CODE_BAD_REQUEST, "profileId 不能为空");
         }
-        MatchResult resultFilter = parseResultFilter(result);
+        MatchResult resultFilter = parseResultFilter(status);
+        if (recruitCountMin != null && recruitCountMin < 0) {
+            throw new BusinessException(ApiResponse.CODE_BAD_REQUEST, "recruitCountMin 不能小于 0");
+        }
+        if (recruitCountMax != null && recruitCountMax < 0) {
+            throw new BusinessException(ApiResponse.CODE_BAD_REQUEST, "recruitCountMax 不能小于 0");
+        }
+        if (recruitCountMin != null && recruitCountMax != null && recruitCountMin > recruitCountMax) {
+            throw new BusinessException(ApiResponse.CODE_BAD_REQUEST, "recruitCountMin 不能大于 recruitCountMax");
+        }
 
         MatchResultQuery query = new MatchResultQuery();
         query.setProfileId(profileId);
         query.setImportFileId(importId);
         query.setMatchResult(resultFilter == null ? null : resultFilter.name());
+        query.setRegion(trimToNull(region));
+        query.setOrganizationKeyword(likeValue(organizationKeyword));
+        query.setPositionKeyword(likeValue(positionKeyword));
+        query.setRecruitCountMin(recruitCountMin);
+        query.setRecruitCountMax(recruitCountMax);
+        query.setEducationKeyword(likeValue(educationKeyword));
+        query.setMajorKeyword(likeValue(majorKeyword));
 
         long total = jobMatchMapper.countResultPage(query);
         query.setOffset((page - 1) * size);
         query.setSize(size);
         List<MatchPositionResultVO> items = jobMatchMapper.selectResultPage(query);
         return new PageVO<>(total, page, size, items);
+    }
+
+    public List<String> queryResultRegions(Long profileId, Long importId) {
+        if (profileId == null || importId == null) {
+            throw new BusinessException(ApiResponse.CODE_BAD_REQUEST, "profileId 和 importId 不能为空");
+        }
+        return jobMatchMapper.selectResultRegions(profileId, importId);
     }
 
     /**
@@ -215,14 +241,15 @@ public class JobMatchService {
         MatchContext context = MatchContext.of(referenceDate);
         List<MatchItemResult> items = new ArrayList<>(matchers.size());
         List<MatchItemResult> qualificationItems = qualificationEducationResolver.resolve(profile, position, context);
-        items.add(qualificationItems.get(0));
         for (JobConditionMatcher matcher : matchers) {
-            if (matcher.support() == ConditionType.EDUCATION || matcher.support() == ConditionType.MAJOR) {
-                continue;
+            if (matcher.support() == ConditionType.EDUCATION) {
+                items.add(qualificationItems.get(0));
+            } else if (matcher.support() == ConditionType.MAJOR) {
+                items.add(qualificationItems.get(1));
+            } else {
+                items.add(matcher.match(profile, position, context));
             }
-            items.add(matcher.match(profile, position, context));
         }
-        items.add(qualificationItems.get(1));
         MatchResult overall = aggregate(items);
         matchPersistenceService.persist(profile, position, overall, context.getReferenceDate(), items);
 
@@ -257,6 +284,15 @@ public class JobMatchService {
         }
         throw new BusinessException(ApiResponse.CODE_BAD_REQUEST,
                 "非法的 result 过滤值: " + trimmed + "，必须为 MATCH / UNCERTAIN / NOT_MATCH");
+    }
+
+    private String trimToNull(String value) {
+        return value == null || value.trim().isEmpty() ? null : value.trim();
+    }
+
+    private String likeValue(String value) {
+        String trimmed = trimToNull(value);
+        return trimmed == null ? null : "%" + trimmed + "%";
     }
 
     /** 反序列化匹配证据 JSON；解析失败时返回 null（reason 仍可读） */

@@ -95,12 +95,11 @@ class EducationMatcherTest {
     }
 
     @Test
-    void emptyRequirementShouldBeUncertain() {
-        // 岗位要求为空不武断判 MATCH
+    void emptyRequirementShouldMeanNoRestriction() {
         MatchItemResult r = match("本科", null);
-        assertEquals(MatchResult.UNCERTAIN, r.getResult());
-        assertEquals(MatchResult.UNCERTAIN, match("本科", "  ").getResult());
-        assertTrue(r.getReason().contains("为空"));
+        assertEquals(MatchResult.MATCH, r.getResult());
+        assertEquals(MatchResult.MATCH, match("本科", "  ").getResult());
+        assertTrue(r.getReason().contains("无学历限制"));
     }
 
     @Test

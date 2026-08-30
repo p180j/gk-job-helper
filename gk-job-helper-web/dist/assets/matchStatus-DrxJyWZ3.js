@@ -1,0 +1,1 @@
+const e={MATCH:{label:"可以报",detailLabel:"符合",type:"success",icon:"✓"},UNCERTAIN:{label:"待确认",detailLabel:"需要确认",type:"warning",icon:"!"},NOT_MATCH:{label:"不符合",detailLabel:"不能报",type:"danger",icon:"×"}};function t(a){return e[a]??e.UNCERTAIN}const l={EDUCATION:"学历",AGE:"年龄",POLITICAL:"政治面貌",WORK_EXPERIENCE:"基层工作经历",MAJOR:"专业",REMARK:"备注条件"};export{l as C,t as m};

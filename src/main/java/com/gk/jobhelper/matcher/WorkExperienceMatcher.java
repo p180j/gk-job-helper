@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * 基层工作年限匹配器。
  *
  * 规则:
- * - "不限"/"无要求"/"无"/"0年"        -> 无年限要求，MATCH
+ * - 空值/"不限"/"无要求"/"无"/"0年"  -> 无年限要求，MATCH
  * - "2年以上"/"2年及以上"/"满2年"/"至少2年"/"两年以上" -> workYears >= 2
  * - "具有2年以上相关工作经历"等含"相关"限定 -> UNCERTAIN（相关经历本轮无法判断）
  * - 具体岗位/行业经历（无年限数字）     -> UNCERTAIN
@@ -36,8 +36,8 @@ public class WorkExperienceMatcher implements JobConditionMatcher {
         String requirement = TextNormalizer.normalize(requirementRaw);
 
         if (requirement.isEmpty()) {
-            return build(MatchResult.UNCERTAIN, displayWorkYears(profile), requirementRaw,
-                    "岗位基层工作年限要求为空，无法可靠判断。");
+            return build(MatchResult.MATCH, displayWorkYears(profile), requirementRaw,
+                    "岗位未设置基层工作年限要求，按无基层工作年限限制处理。");
         }
         if (TextNormalizer.isUnlimited(requirement)) {
             return build(MatchResult.MATCH, displayWorkYears(profile), requirementRaw,

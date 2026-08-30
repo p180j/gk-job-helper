@@ -16,23 +16,51 @@ import AppHeader from '@/components/AppHeader.vue'
 
 <style scoped>
 .app-shell {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.app-shell::before,
+.app-shell::after {
+  position: fixed;
+  z-index: -1;
+  content: '';
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(2px);
+}
+
+.app-shell::before {
+  top: 62px;
+  left: -190px;
+  width: 620px;
+  height: 620px;
+  background: radial-gradient(circle, rgba(64, 158, 255, 0.17), transparent 68%);
+}
+
+.app-shell::after {
+  right: -210px;
+  bottom: -80px;
+  width: 650px;
+  height: 650px;
+  background: radial-gradient(circle, rgba(83, 168, 255, 0.14), transparent 70%);
 }
 
 .app-main {
   flex: 1;
   width: 1200px;
   max-width: calc(100% - 48px);
-  margin: 24px auto 0;
+  margin: 28px auto 0;
 }
 
 .app-footer {
   text-align: center;
-  color: #909399;
+  color: #8a97a8;
   font-size: 12px;
-  padding: 24px 0;
+  padding: 30px 20px 26px;
 }
 
 @media (max-width: 1366px) {

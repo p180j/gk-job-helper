@@ -84,3 +84,5 @@ atlassian-ide-plugin.xml
 /target/
 /gk-job-helper-web/node_modules/
 /uploads/
+/data/*.xls
+/data/*.xlsx

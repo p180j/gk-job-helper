@@ -7,7 +7,12 @@ body,
 }
 
 body {
-  background-color: #f5f7fa;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at 10% 3%, rgba(64, 158, 255, 0.26), transparent 32rem),
+    radial-gradient(circle at 92% 22%, rgba(121, 187, 255, 0.2), transparent 29rem),
+    linear-gradient(145deg, #e7f2ff 0, #f0f6fd 38%, #e9f0f8 100%);
+  background-attachment: fixed;
   font-family:
     'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
@@ -16,10 +21,14 @@ body {
 }
 
 .page-card {
-  background: #fff;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(205, 221, 238, 0.96);
+  border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 2px 5px rgba(31, 95, 174, 0.06),
+    0 14px 36px rgba(47, 92, 142, 0.11);
+  backdrop-filter: blur(8px);
 }
 
 .page-title {

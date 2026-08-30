@@ -4,7 +4,7 @@
 
     <sql id="Base_Column_List">
         id, original_name, stored_name, stored_path, file_size, file_type, sheet_name,
-        headers, total_rows, status, created_at
+        headers, total_rows, exam_year, status, created_at
     </sql>
 
     <resultMap id="BaseResultMap" type="com.gk.jobhelper.entity.ImportFile">
@@ -17,6 +17,7 @@
         <result property="sheetName" column="sheet_name"/>
         <result property="headers" column="headers"/>
         <result property="totalRows" column="total_rows"/>
+        <result property="examYear" column="exam_year"/>
         <result property="status" column="status"/>
         <result property="createdAt" column="created_at"/>
     </resultMap>
@@ -47,9 +48,9 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO import_file (original_name, stored_name, stored_path, file_size, file_type,
-                                 sheet_name, headers, total_rows, status, created_at)
+                                 sheet_name, headers, total_rows, exam_year, status, created_at)
         VALUES (#{originalName}, #{storedName}, #{storedPath}, #{fileSize}, #{fileType},
-                #{sheetName}, #{headers}, #{totalRows}, #{status}, #{createdAt})
+                #{sheetName}, #{headers}, #{totalRows}, #{examYear}, #{status}, #{createdAt})
     </insert>
 
     <update id="updateStatus">

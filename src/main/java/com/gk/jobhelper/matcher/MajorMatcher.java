@@ -57,9 +57,9 @@ public class MajorMatcher implements JobConditionMatcher {
         String majorCodeRaw = profile.getMajorCode();
         String userValue = buildUserValue(majorRaw, majorCodeRaw);
 
-        // 1. 空值：不武断判定
+        // 1. 岗位要求为空：业务约定为未设置专业限制
         if (TextNormalizer.isBlank(requirementRaw)) {
-            return build(MatchResult.UNCERTAIN, userValue, requirementRaw, "岗位专业要求为空，无法可靠判断。");
+            return build(MatchResult.MATCH, userValue, requirementRaw, "岗位未设置专业要求，按不限专业处理。");
         }
         if (TextNormalizer.isBlank(majorRaw) && TextNormalizer.isBlank(majorCodeRaw)) {
             return build(MatchResult.UNCERTAIN, userValue, requirementRaw, "用户档案专业为空，无法判断专业要求。");

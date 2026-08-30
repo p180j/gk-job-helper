@@ -61,6 +61,9 @@ final class ExcelHeaderDetector {
                         break;
                     }
                 }
+                if (InterviewScoreHeaderPolicy.isScore(normalized)) {
+                    score++;
+                }
             }
             if (nonBlank >= 3 && score >= MIN_RECOGNIZED_HEADERS && score > bestScore) {
                 headerRowIndex = rowIndex;
@@ -76,5 +79,6 @@ final class ExcelHeaderDetector {
         int getHeaderRowIndex() {
             return headerRowIndex;
         }
+
     }
 }

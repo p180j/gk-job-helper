@@ -9,14 +9,19 @@ import org.springframework.stereotype.Service;
 public class JobMatchAsyncService {
     private final JobMatchService jobMatchService;
     private final MatchProgressStore progressStore;
+    private final JobFeatureService jobFeatureService;
 
-    public JobMatchAsyncService(JobMatchService jobMatchService, MatchProgressStore progressStore) {
+    public JobMatchAsyncService(JobMatchService jobMatchService, MatchProgressStore progressStore,
+                                JobFeatureService jobFeatureService) {
         this.jobMatchService = jobMatchService; this.progressStore = progressStore;
+        this.jobFeatureService = jobFeatureService;
     }
 
     @Async("matchExecutor")
     public void execute(MatchExecuteRequest request) {
         try {
+            jobFeatureService.rebuild(request.getImportId());
+            progressStore.update(request.getProfileId(), request.getImportId(), new MatchSummaryVO(), "MATCHING", null);
             MatchSummaryVO summary = jobMatchService.batchExecute(request,
                     current -> progressStore.update(request.getProfileId(), request.getImportId(), current, "MATCHING", null));
             progressStore.update(request.getProfileId(), request.getImportId(), summary, "COMPLETED", null);

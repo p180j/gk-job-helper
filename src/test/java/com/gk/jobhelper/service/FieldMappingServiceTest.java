@@ -50,6 +50,10 @@ class FieldMappingServiceTest {
         assertSuggest("人数", "recruitCount", FieldConfidence.ALIAS);
         assertSuggest("学历要求", "educationRequirement", FieldConfidence.ALIAS);
         assertSuggest("工作地点", "city", FieldConfidence.ALIAS);
+        assertSuggest("设区市", "city", FieldConfidence.ALIAS);
+        assertSuggest("招录地区", "district", FieldConfidence.ALIAS);
+        assertSuggest("岗位所在地", "district", FieldConfidence.ALIAS);
+        assertSuggest("所在省份", "province", FieldConfidence.ALIAS);
     }
 
     @Test

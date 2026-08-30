@@ -250,10 +250,10 @@ class MajorMatcherTest {
     }
 
     @Test
-    void emptyRequirementShouldBeUncertain() {
+    void emptyRequirementShouldMeanNoRestriction() {
         MatchItemResult result = match("软件工程", "080902", "本科", null, null);
-        assertResult(result, MatchResult.UNCERTAIN);
-        assertTrue(result.getReason().contains("为空"));
+        assertResult(result, MatchResult.MATCH);
+        assertTrue(result.getReason().contains("不限专业"));
     }
 
     @Test

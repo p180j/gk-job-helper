@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.jobhelper.mapper.JobFavoriteMapper">
+
+    <insert id="insertIgnore" useGeneratedKeys="true" keyProperty="id">
+        INSERT IGNORE INTO job_favorite (profile_id, position_id, created_at)
+        VALUES (#{profileId}, #{positionId}, #{createdAt})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM job_favorite WHERE profile_id = #{profileId} AND position_id = #{positionId}
+    </delete>
+
+    <select id="exists" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) &gt; 0 THEN TRUE ELSE FALSE END
+        FROM job_favorite WHERE profile_id = #{profileId} AND position_id = #{positionId}
+    </select>
+    <select id="selectPositionIds" resultType="long">
+        SELECT position_id FROM job_favorite WHERE profile_id=#{profileId} AND position_id IN
+        <foreach collection="positionIds" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*) FROM job_favorite WHERE profile_id = #{profileId}
+    </select>
+
+    <select id="selectPage" resultType="com.gk.jobhelper.dto.MatchPositionResultVO">
+        SELECT p.id AS jobId,
+               p.position_name AS positionName,
+               p.position_code AS positionCode,
+               p.department_name AS departmentName,
+               p.organization_name AS organizationName,
+               p.province AS province,
+               p.city AS city,
+               p.district AS district,
+               TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) AS region,
+               p.recruit_count AS recruitCount,
+               p.education_requirement AS educationRequirement,
+               p.major_requirement AS majorRequirement,
+               m.match_result AS matchResult,
+               m.reference_date AS referenceDate,
+               1 AS favorite
+        FROM job_favorite f
+        JOIN job_position p ON p.id = f.position_id
+        LEFT JOIN job_match m ON m.profile_id = f.profile_id AND m.job_position_id = f.position_id
+        WHERE f.profile_id = #{profileId}
+        ORDER BY f.created_at DESC, f.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <delete id="deleteAll">DELETE FROM job_favorite</delete>
+</mapper>

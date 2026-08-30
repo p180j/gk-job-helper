@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.jobhelper.mapper.RecommendationMapper">
+ <select id="selectMatchCandidates" resultType="com.gk.jobhelper.dto.RecommendationCandidateRow">
+  SELECT p.id AS positionId,p.import_file_id AS importFileId,p.position_code AS positionCode,p.position_name AS positionName,
+   p.department_name AS departmentName,p.organization_name AS organizationName,p.province,p.city,p.district,p.recruit_count AS recruitCount,
+   p.education_requirement AS educationRequirement,p.major_requirement AS majorRequirement,p.raw_data AS rawData
+  FROM job_match m JOIN job_position p ON p.id=m.job_position_id
+  WHERE m.profile_id=#{profileId} AND m.match_result='MATCH' AND m.import_file_id=#{importId}
+  ORDER BY p.id
+ </select>
+</mapper>

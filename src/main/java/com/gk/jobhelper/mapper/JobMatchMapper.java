@@ -45,6 +45,10 @@ public interface JobMatchMapper {
     /** 分页查询匹配结果（关联岗位基本信息） */
     List<MatchPositionResultVO> selectResultPage(MatchResultQuery query);
 
+    /** 指定档案和导入批次中可用于筛选的地区值。 */
+    List<String> selectResultRegions(@Param("profileId") Long profileId,
+                                     @Param("importFileId") Long importFileId);
+
     /** 清库（测试用） */
     void deleteAllItems();
 

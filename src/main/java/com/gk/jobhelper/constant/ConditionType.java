@@ -18,5 +18,8 @@ public enum ConditionType {
     WORK_EXPERIENCE,
 
     /** 专业要求（Iteration 4） */
-    MAJOR
+    MAJOR,
+
+    /** 备注中的补充报考条件 */
+    REMARK
 }

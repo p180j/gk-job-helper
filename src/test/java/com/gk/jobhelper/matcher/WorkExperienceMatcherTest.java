@@ -63,10 +63,10 @@ class WorkExperienceMatcherTest {
     }
 
     @Test
-    void emptyRequirementShouldBeUncertain() {
+    void emptyRequirementShouldMeanNoRestriction() {
         MatchItemResult r = match(5, null);
-        assertEquals(MatchResult.UNCERTAIN, r.getResult());
-        assertTrue(r.getReason().contains("为空"));
+        assertEquals(MatchResult.MATCH, r.getResult());
+        assertTrue(r.getReason().contains("无基层工作年限限制"));
     }
 
     @Test

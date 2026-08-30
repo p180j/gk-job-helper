@@ -31,7 +31,7 @@ const CODE_MESSAGES: Record<number, string> = {
 
 function httpErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
-    return CODE_MESSAGES[error.code] ?? error.message
+    return error.message || CODE_MESSAGES[error.code] || '请求失败，请稍后重试。'
   }
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError
@@ -83,7 +83,7 @@ async function request<T>(
     const response = await http.request<ApiResponse<T>>(merged)
     const payload = response.data
     if (payload.code !== 0) {
-      const message = CODE_MESSAGES[payload.code] ?? payload.message ?? '请求失败。'
+      const message = payload.message || CODE_MESSAGES[payload.code] || '请求失败。'
       throw new ApiError(payload.code, message)
     }
     return payload.data as T
@@ -93,7 +93,7 @@ async function request<T>(
       // 后端通过 HTTP 200 + code 返回业务错误；此处兜底非 200 且带响应体的情况
       const payload = axiosError.response?.data
       if (payload && typeof payload.code === 'number' && payload.code !== 0) {
-        const message = CODE_MESSAGES[payload.code] ?? payload.message ?? '请求失败。'
+        const message = payload.message || CODE_MESSAGES[payload.code] || '请求失败。'
         throw new ApiError(payload.code, message)
       }
     }

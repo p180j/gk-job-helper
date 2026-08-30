@@ -20,7 +20,7 @@ import java.util.List;
  * - "仅限本科"    -> 仅限本科（==）
  * - "本科或硕士"  -> 允许集合 {本科, 硕士}
  * - "研究生"      -> 按硕士或博士（及以上时按 >= 硕士）
- * - "不限"        -> MATCH；要求为空 -> UNCERTAIN（不武断判 MATCH）
+ * - "不限"或要求为空 -> MATCH（岗位未设置该项限制）
  * - 无法识别      -> UNCERTAIN，不做猜测
  */
 @Component
@@ -44,9 +44,9 @@ public class EducationMatcher implements JobConditionMatcher {
         String requirement = prepare(TextNormalizer.normalize(requirementRaw));
         String user = prepare(TextNormalizer.normalize(userRaw));
 
-        // 岗位要求为空：不武断认为满足
+        // 岗位要求为空：业务约定为未设置学历限制
         if (requirement.isEmpty()) {
-            return build(MatchResult.UNCERTAIN, userRaw, requirementRaw, "岗位学历要求为空，无法可靠判断。");
+            return build(MatchResult.MATCH, userRaw, requirementRaw, "岗位未设置学历要求，按无学历限制处理。");
         }
         if (TextNormalizer.isUnlimited(requirement)) {
             return build(MatchResult.MATCH, userRaw, requirementRaw, "岗位学历要求为“不限”，无学历限制。");

@@ -16,6 +16,7 @@ public class ImportFile {
     private String sheetName;
     private String headers;
     private Integer totalRows;
+    private Integer examYear;
     private String status;
     private Integer processedRows;
     private Integer successRows;
@@ -93,6 +94,14 @@ public class ImportFile {
 
     public void setTotalRows(Integer totalRows) {
         this.totalRows = totalRows;
+    }
+
+    public Integer getExamYear() {
+        return examYear;
+    }
+
+    public void setExamYear(Integer examYear) {
+        this.examYear = examYear;
     }
 
     public String getStatus() {

@@ -60,6 +60,24 @@
         WHERE id = #{id}
     </select>
 
+    <select id="selectByIds" resultMap="BaseResultMap">
+        SELECT <include refid="List_Column_List"/> FROM job_position WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </select>
+
+    <select id="selectByPositionCodes" resultMap="BaseResultMap">
+        SELECT <include refid="List_Column_List"/> FROM job_position WHERE position_code IN
+        <foreach collection="codes" item="code" open="(" separator="," close=")">#{code}</foreach>
+        ORDER BY id DESC
+    </select>
+
+    <select id="selectByImportFileIdAndPositionCodes" resultMap="BaseResultMap">
+        SELECT <include refid="List_Column_List"/> FROM job_position
+        WHERE import_file_id = #{importFileId} AND position_code IN
+        <foreach collection="codes" item="code" open="(" separator="," close=")">#{code}</foreach>
+        ORDER BY id DESC
+    </select>
+
     <select id="selectByImportFileId" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>

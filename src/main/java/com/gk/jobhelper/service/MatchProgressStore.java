@@ -13,7 +13,7 @@ public class MatchProgressStore {
 
     public MatchProgressVO start(Long profileId, Long importId) {
         MatchProgressVO progress = new MatchProgressVO();
-        progress.setStatus("MATCHING");
+        progress.setStatus("FEATURE_BUILDING");
         tasks.put(key(profileId, importId), progress);
         return progress;
     }

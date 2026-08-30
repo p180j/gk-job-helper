@@ -96,11 +96,11 @@ class PoliticalMatcherTest {
     }
 
     @Test
-    void emptyValuesShouldBeUncertain() {
-        // 岗位要求为空
+    void emptyRequirementShouldMeanNoRestrictionAndEmptyUserShouldRemainUncertain() {
+        // 岗位要求为空表示没有政治面貌限制
         MatchItemResult emptyRequirement = match("中共党员", null);
-        assertEquals(MatchResult.UNCERTAIN, emptyRequirement.getResult());
-        assertTrue(emptyRequirement.getReason().contains("为空"));
+        assertEquals(MatchResult.MATCH, emptyRequirement.getResult());
+        assertTrue(emptyRequirement.getReason().contains("无政治面貌限制"));
         // 用户政治面貌为空
         MatchItemResult emptyUser = match(null, "中共党员");
         assertEquals(MatchResult.UNCERTAIN, emptyUser.getResult());

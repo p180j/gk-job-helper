@@ -102,11 +102,33 @@
         <if test="matchResult != null and matchResult != ''">
             AND m.match_result = #{matchResult}
         </if>
+        <if test="region != null and region != ''">
+            AND TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) = #{region}
+        </if>
+        <if test="organizationKeyword != null and organizationKeyword != ''">
+            AND (p.department_name LIKE #{organizationKeyword} OR p.organization_name LIKE #{organizationKeyword})
+        </if>
+        <if test="positionKeyword != null and positionKeyword != ''">
+            AND p.position_name LIKE #{positionKeyword}
+        </if>
+        <if test="recruitCountMin != null">
+            AND p.recruit_count &gt;= #{recruitCountMin}
+        </if>
+        <if test="recruitCountMax != null">
+            AND p.recruit_count &lt;= #{recruitCountMax}
+        </if>
+        <if test="educationKeyword != null and educationKeyword != ''">
+            AND p.education_requirement LIKE #{educationKeyword}
+        </if>
+        <if test="majorKeyword != null and majorKeyword != ''">
+            AND p.major_requirement LIKE #{majorKeyword}
+        </if>
     </sql>
 
     <select id="countResultPage" resultType="long">
         SELECT COUNT(*)
         FROM job_match m
+        JOIN job_position p ON m.job_position_id = p.id
         <include refid="Result_Query_Condition"/>
     </select>
 
@@ -118,16 +140,38 @@
                p.organization_name AS organizationName,
                p.province        AS province,
                p.city            AS city,
+               p.district        AS district,
+               TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) AS region,
                p.recruit_count   AS recruitCount,
                p.education_requirement AS educationRequirement,
                p.major_requirement AS majorRequirement,
                m.match_result    AS matchResult,
-               m.reference_date  AS referenceDate
+               m.reference_date  AS referenceDate,
+               f.exam_subject_count AS examSubjectCount,
+               f.exam_subjects AS examSubjectsJson,
+               f.exam_subject_group AS examSubjectGroup,
+               s.min_interview_score AS minInterviewScore,
+               CASE WHEN EXISTS (
+                   SELECT 1 FROM job_favorite f
+                   WHERE f.profile_id = #{profileId} AND f.position_id = p.id
+               ) THEN 1 ELSE 0 END AS favorite
         FROM job_match m
                  JOIN job_position p ON m.job_position_id = p.id
+                 LEFT JOIN job_position_feature f ON f.position_id = p.id
+                 LEFT JOIN job_interview_score s ON s.position_code = p.position_code AND s.exam_year = 2026
         <include refid="Result_Query_Condition"/>
         ORDER BY m.job_position_id ASC
             LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="selectResultRegions" resultType="string">
+        SELECT DISTINCT TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) AS region
+        FROM job_match m
+        JOIN job_position p ON m.job_position_id = p.id
+        WHERE m.profile_id = #{profileId}
+          AND m.import_file_id = #{importFileId}
+          AND TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) &lt;&gt; ''
+        ORDER BY region
     </select>
 
     <select id="selectResultStats" resultType="com.gk.jobhelper.dto.MatchResultStatRow">

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.jobhelper.mapper.JobInterviewScoreMapper">
+  <resultMap id="map" type="com.gk.jobhelper.entity.JobInterviewScore">
+    <id column="id" property="id"/><result column="exam_year" property="examYear"/>
+    <result column="position_code" property="positionCode"/><result column="department_name" property="departmentName"/>
+    <result column="position_name" property="positionName"/><result column="min_interview_score" property="minInterviewScore"/>
+    <result column="interview_candidate_count" property="interviewCandidateCount"/><result column="source_file_name" property="sourceFileName"/>
+    <result column="created_at" property="createdAt"/><result column="updated_at" property="updatedAt"/>
+  </resultMap>
+  <sql id="cols">id,exam_year,position_code,department_name,position_name,min_interview_score,interview_candidate_count,source_file_name,created_at,updated_at</sql>
+  <insert id="upsert" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO job_interview_score(exam_year,position_code,department_name,position_name,min_interview_score,interview_candidate_count,source_file_name,created_at,updated_at)
+    VALUES(#{examYear},#{positionCode},#{departmentName},#{positionName},#{minInterviewScore},#{interviewCandidateCount},#{sourceFileName},#{createdAt},#{updatedAt})
+    ON DUPLICATE KEY UPDATE department_name=VALUES(department_name),position_name=VALUES(position_name),min_interview_score=VALUES(min_interview_score),interview_candidate_count=VALUES(interview_candidate_count),source_file_name=VALUES(source_file_name),updated_at=VALUES(updated_at)
+  </insert>
+  <select id="selectByYearAndCode" resultMap="map">SELECT <include refid="cols"/> FROM job_interview_score WHERE exam_year=#{examYear} AND position_code=#{positionCode}</select>
+  <select id="selectByYearAndCodes" resultMap="map">
+    SELECT <include refid="cols"/> FROM job_interview_score WHERE exam_year=#{examYear} AND position_code IN
+    <foreach collection="codes" item="code" open="(" separator="," close=")">#{code}</foreach>
+  </select>
+  <select id="selectByYear" resultMap="map">SELECT <include refid="cols"/> FROM job_interview_score WHERE exam_year=#{examYear} ORDER BY position_code</select>
+  <select id="selectAnalysisSamples" resultType="com.gk.jobhelper.dto.HistoricalSampleRow">
+    SELECT p.id AS positionId,s.exam_year AS examYear,p.position_code AS positionCode,p.recruit_count AS recruitCount,
+           s.min_interview_score AS minInterviewScore,f.exam_subject_group AS examSubjectGroup,
+           f.major_restriction_type AS majorRestrictionType,f.major_domains AS majorDomains
+    FROM job_interview_score s
+    JOIN import_file i ON i.exam_year=s.exam_year AND i.status='IMPORTED'
+    JOIN job_position p ON p.import_file_id=i.id AND p.position_code=s.position_code
+    JOIN job_position_feature f ON f.position_id=p.id
+    WHERE f.exam_subject_status='RECOGNIZED'
+    ORDER BY p.id DESC
+  </select>
+  <select id="countLinkedCodes" resultType="long">SELECT COUNT(*) FROM job_interview_score s WHERE s.exam_year=#{examYear} AND EXISTS(SELECT 1 FROM job_position p WHERE p.position_code=s.position_code)</select>
+  <delete id="deleteAll">DELETE FROM job_interview_score</delete>
+</mapper>

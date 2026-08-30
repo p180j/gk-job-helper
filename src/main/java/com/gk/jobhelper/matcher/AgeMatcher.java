@@ -53,8 +53,8 @@ public class AgeMatcher implements JobConditionMatcher {
         String dateText = referenceDate.format(DATE_FORMAT);
 
         if (requirement.isEmpty()) {
-            return build(MatchResult.UNCERTAIN, null, requirementRaw,
-                    "岗位年龄要求为空，无法可靠判断（年龄基准日期为" + dateText + "）。");
+            return build(MatchResult.MATCH, null, requirementRaw,
+                    "岗位未设置年龄要求，按无年龄限制处理。");
         }
         if (TextNormalizer.isUnlimited(requirement)) {
             return build(MatchResult.MATCH, null, requirementRaw,

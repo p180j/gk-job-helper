@@ -111,15 +111,10 @@ class JobImportFlowTest {
         JsonNode data = postConfirm(importId, defaultUserMappings());
 
         // 3 行数据: 第 4 行职位代码为空 -> 失败; 其余 2 行成功
-        assertEquals(importId, data.get("importId").asLong());
+        assertEquals(importId, data.get("id").asLong());
         assertEquals(3, data.get("totalRows").asInt());
         assertEquals(2, data.get("successRows").asInt());
         assertEquals(1, data.get("failedRows").asInt());
-        JsonNode failed = data.get("failedItems").get(0);
-        assertEquals(4, failed.get("row").asInt());
-        assertTrue(failed.get("reason").asText().contains("职位代码为空"),
-                "失败原因应包含职位代码为空: " + failed.get("reason").asText());
-
         // 落库校验
         List<JobPosition> positions = jobPositionMapper.selectByImportFileId(importId);
         assertEquals(2, positions.size());
@@ -323,7 +318,23 @@ class JobImportFlowTest {
     private JsonNode postConfirm(long importId, List<Map<String, String>> mappings) throws Exception {
         JsonNode root = postConfirmRaw(importId, mappings);
         assertEquals(0, root.get("code").asInt());
-        return root.get("data");
+        return waitForImport(importId);
+    }
+
+    /** confirm 为异步接口，等待后台导入结束后再验证落库和进度。 */
+    private JsonNode waitForImport(long importId) throws Exception {
+        for (int attempt = 0; attempt < 250; attempt++) {
+            JsonNode progress = getJson("/api/import/" + importId + "/progress");
+            String status = progress.path("status").asText();
+            if ("IMPORTED".equals(status)) {
+                return progress;
+            }
+            if ("IMPORT_FAILED".equals(status)) {
+                throw new AssertionError("后台导入失败: " + progress.path("errorMessage").asText());
+            }
+            Thread.sleep(20L);
+        }
+        throw new AssertionError("等待后台导入完成超时: importId=" + importId);
     }
 
     private JsonNode postConfirmRaw(long importId, List<Map<String, String>> mappings) throws Exception {

@@ -11,5 +11,5 @@ export function matchStatus(value: MatchResultValue) {
 }
 
 export const CONDITION_LABELS: Record<string, string> = {
-  EDUCATION: '学历', AGE: '年龄', POLITICAL: '政治面貌', WORK_EXPERIENCE: '基层工作经历', MAJOR: '专业'
+  EDUCATION: '学历', AGE: '年龄', POLITICAL: '政治面貌', WORK_EXPERIENCE: '基层工作经历', MAJOR: '专业', REMARK: '备注条件'
 }

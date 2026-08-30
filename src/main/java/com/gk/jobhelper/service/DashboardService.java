@@ -64,6 +64,7 @@ public class DashboardService {
         vo.setFileName(latest.getOriginalName());
         vo.setSheetName(latest.getSheetName());
         vo.setTotalRows(latest.getTotalRows());
+        vo.setExamYear(ImportExamYearResolver.resolve(latest));
         vo.setStatus(latest.getStatus());
         vo.setCreatedAt(latest.getCreatedAt());
         vo.setJobCount(jobPositionMapper.countByImportFileId(latest.getId()));

@@ -13,6 +13,7 @@ public class RecentImportVO {
     private String sheetName;
     /** Excel 数据总行数（不含表头） */
     private Integer totalRows;
+    private Integer examYear;
     /** PREVIEWED / IMPORTED */
     private String status;
     private LocalDateTime createdAt;
@@ -52,6 +53,10 @@ public class RecentImportVO {
     public void setTotalRows(Integer totalRows) {
         this.totalRows = totalRows;
     }
+
+    public Integer getExamYear() { return examYear; }
+
+    public void setExamYear(Integer examYear) { this.examYear = examYear; }
 
     public String getStatus() {
         return status;

@@ -1,12 +1,12 @@
 import { get, post } from './http'
-import type { MatchPositionResult, MatchResult, MatchResultValue, MatchSummary, PageVO } from '@/types/model'
+import type { MatchPositionResult, MatchResult, MatchResultFilters, MatchSummary, PageVO } from '@/types/model'
 
 export function executeMatch(profileId: number, importId: number, referenceDate: string) {
   return post<MatchSummary>('/api/match/execute', { profileId, importId, referenceDate })
 }
 
 export interface MatchProgress extends MatchSummary {
-  status: 'MATCHING' | 'COMPLETED' | 'FAILED'
+  status: 'FEATURE_BUILDING' | 'MATCHING' | 'COMPLETED' | 'FAILED'
   processed: number
   errorMessage?: string
 }
@@ -19,8 +19,12 @@ export function fetchMatchProgress(profileId: number, importId: number) {
   return get<MatchProgress | null>('/api/match/progress', { params: { profileId, importId } })
 }
 
-export function fetchMatchResults(params: { profileId: number; importId: number; result?: MatchResultValue; page: number; size: number }) {
+export function fetchMatchResults(params: MatchResultFilters) {
   return get<PageVO<MatchPositionResult>>('/api/match/result', { params })
+}
+
+export function fetchMatchRegions(profileId: number, importId: number) {
+  return get<string[]>('/api/match/regions', { params: { profileId, importId } })
 }
 
 export function fetchJobMatch(jobId: number, profileId: number) {

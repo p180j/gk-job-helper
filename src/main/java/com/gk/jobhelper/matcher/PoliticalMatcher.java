@@ -47,7 +47,7 @@ public class PoliticalMatcher implements JobConditionMatcher {
         String requirement = TextNormalizer.normalize(requirementRaw);
 
         if (requirement.isEmpty()) {
-            return build(MatchResult.UNCERTAIN, userRaw, requirementRaw, "岗位政治面貌要求为空，无法可靠判断。");
+            return build(MatchResult.MATCH, userRaw, requirementRaw, "岗位未设置政治面貌要求，按无政治面貌限制处理。");
         }
         if (TextNormalizer.isUnlimited(requirement)) {
             return build(MatchResult.MATCH, userRaw, requirementRaw, "岗位政治面貌要求为“不限”，无政治面貌限制。");

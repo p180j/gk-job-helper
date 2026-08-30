@@ -93,10 +93,10 @@ class AgeMatcherTest {
     }
 
     @Test
-    void emptyRequirementShouldBeUncertain() {
+    void emptyRequirementShouldMeanNoRestriction() {
         MatchItemResult r = match(LocalDate.of(1994, 6, 15), null);
-        assertEquals(MatchResult.UNCERTAIN, r.getResult());
-        assertTrue(r.getReason().contains("为空"));
+        assertEquals(MatchResult.MATCH, r.getResult());
+        assertTrue(r.getReason().contains("无年龄限制"));
     }
 
     @Test

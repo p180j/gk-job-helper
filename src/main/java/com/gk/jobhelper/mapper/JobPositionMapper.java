@@ -19,6 +19,13 @@ public interface JobPositionMapper {
     /** 按主键查询（含 raw_data） */
     JobPosition selectById(Long id);
 
+    List<JobPosition> selectByIds(@Param("ids") List<Long> ids);
+
+    List<JobPosition> selectByPositionCodes(@Param("codes") List<String> codes);
+
+    List<JobPosition> selectByImportFileIdAndPositionCodes(@Param("importFileId") Long importFileId,
+                                                           @Param("codes") List<String> codes);
+
     /** 按导入文件查询（按来源行号排序，含 raw_data） */
     List<JobPosition> selectByImportFileId(Long importFileId);
 

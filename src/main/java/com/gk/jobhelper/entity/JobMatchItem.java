@@ -3,7 +3,7 @@ package com.gk.jobhelper.entity;
 import java.time.LocalDateTime;
 
 /**
- * 岗位匹配条件明细：每个条件类型（EDUCATION/AGE/POLITICAL/WORK_EXPERIENCE/MAJOR）一条记录
+ * 岗位匹配条件明细：每个条件类型（EDUCATION/AGE/POLITICAL/WORK_EXPERIENCE/MAJOR/REMARK）一条记录
  */
 public class JobMatchItem {
 

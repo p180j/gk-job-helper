@@ -29,15 +29,16 @@ public enum PositionStandardField {
 
     PROVINCE("province",
             new String[]{"省份"},
-            new String[]{"省", "省级", "工作地点省份"}),
+            new String[]{"省", "省级", "工作地点省份", "工作省份", "所在省份"}),
 
     CITY("city",
             new String[]{"城市"},
-            new String[]{"市", "工作地点"}),
+            new String[]{"市", "设区市", "地市", "工作地点", "工作城市", "所在城市"}),
 
     DISTRICT("district",
             new String[]{"区县"},
-            new String[]{"县区", "地区", "行政区划"}),
+            new String[]{"县区", "县市区", "地区", "招录地区", "招考地区", "岗位地区",
+                    "工作地区", "所在地区", "岗位所在地", "单位所在地", "行政区划"}),
 
     RECRUIT_COUNT("recruitCount",
             new String[]{"招考人数"},

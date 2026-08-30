@@ -37,6 +37,22 @@ const router = createRouter({
       path: '/jobs/:id',
       name: 'jobDetail',
       component: () => import('@/views/JobDetailView.vue')
+    },
+    {
+      path: '/favorites',
+      name: 'favorites',
+      component: () => import('@/views/FavoritesView.vue')
+    },
+    {
+      path: '/compare',
+      name: 'compare',
+      component: () => import('@/views/CompareView.vue')
+    },
+    {
+      path: '/recommend', name: 'recommend', component: () => import('@/views/RecommendView.vue')
+    },
+    {
+      path: '/interview-scores/import', name: 'interviewScoreImport', component: () => import('@/views/InterviewScoreImportView.vue')
     }
   ]
 })

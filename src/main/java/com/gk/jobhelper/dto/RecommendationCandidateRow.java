@@ -1,0 +1,9 @@
+package com.gk.jobhelper.dto;
+public class RecommendationCandidateRow {
+ private Long positionId;private Long importFileId;private String positionCode,positionName,departmentName,organizationName,province,city,district,educationRequirement,majorRequirement,rawData;private Integer recruitCount;
+ public Long getPositionId(){return positionId;}public void setPositionId(Long v){positionId=v;}public Long getImportFileId(){return importFileId;}public void setImportFileId(Long v){importFileId=v;}
+ public String getPositionCode(){return positionCode;}public void setPositionCode(String v){positionCode=v;}public String getPositionName(){return positionName;}public void setPositionName(String v){positionName=v;}public String getDepartmentName(){return departmentName;}public void setDepartmentName(String v){departmentName=v;}public String getOrganizationName(){return organizationName;}public void setOrganizationName(String v){organizationName=v;}
+ public String getProvince(){return province;}public void setProvince(String v){province=v;}public String getCity(){return city;}public void setCity(String v){city=v;}public String getDistrict(){return district;}public void setDistrict(String v){district=v;}public Integer getRecruitCount(){return recruitCount;}public void setRecruitCount(Integer v){recruitCount=v;}public String getEducationRequirement(){return educationRequirement;}public void setEducationRequirement(String v){educationRequirement=v;}public String getMajorRequirement(){return majorRequirement;}public void setMajorRequirement(String v){majorRequirement=v;}
+ public String getRawData(){return rawData;}public void setRawData(String v){rawData=v;}
+ public String getRegion(){StringBuilder b=new StringBuilder();for(String s:new String[]{province,city,district})if(s!=null&&!s.trim().isEmpty()){if(b.length()>0)b.append(' ');b.append(s.trim());}return b.toString();}
+}

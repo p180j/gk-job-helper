@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.jobhelper.mapper.JobPositionFeatureMapper">
+  <resultMap id="map" type="com.gk.jobhelper.entity.JobPositionFeature">
+    <id column="position_id" property="positionId"/><result column="exam_subject_count" property="examSubjectCount"/>
+    <result column="exam_subjects" property="examSubjects"/><result column="exam_subject_group" property="examSubjectGroup"/>
+    <result column="exam_subject_status" property="examSubjectStatus"/><result column="raw_exam_subject_text" property="rawExamSubjectText"/>
+    <result column="major_restriction_type" property="majorRestrictionType"/><result column="major_domains" property="majorDomains"/>
+    <result column="major_scope_count" property="majorScopeCount"/><result column="major_analysis_status" property="majorAnalysisStatus"/>
+    <result column="organization_level" property="organizationLevel"/><result column="organization_level_status" property="organizationLevelStatus"/>
+    <result column="created_at" property="createdAt"/><result column="updated_at" property="updatedAt"/>
+  </resultMap>
+  <sql id="cols">position_id,exam_subject_count,exam_subjects,exam_subject_group,exam_subject_status,raw_exam_subject_text,major_restriction_type,major_domains,major_scope_count,major_analysis_status,organization_level,organization_level_status,created_at,updated_at</sql>
+  <insert id="upsert">
+    INSERT INTO job_position_feature(<include refid="cols"/>) VALUES(#{positionId},#{examSubjectCount},#{examSubjects},#{examSubjectGroup},#{examSubjectStatus},#{rawExamSubjectText},#{majorRestrictionType},#{majorDomains},#{majorScopeCount},#{majorAnalysisStatus},#{organizationLevel},#{organizationLevelStatus},#{createdAt},#{updatedAt})
+    ON DUPLICATE KEY UPDATE exam_subject_count=VALUES(exam_subject_count),exam_subjects=VALUES(exam_subjects),exam_subject_group=VALUES(exam_subject_group),exam_subject_status=VALUES(exam_subject_status),raw_exam_subject_text=VALUES(raw_exam_subject_text),major_restriction_type=VALUES(major_restriction_type),major_domains=VALUES(major_domains),major_scope_count=VALUES(major_scope_count),major_analysis_status=VALUES(major_analysis_status),organization_level=VALUES(organization_level),organization_level_status=VALUES(organization_level_status),updated_at=VALUES(updated_at)
+  </insert>
+  <select id="selectByPositionId" resultMap="map">SELECT <include refid="cols"/> FROM job_position_feature WHERE position_id=#{positionId}</select>
+  <select id="selectByPositionIds" resultMap="map">SELECT <include refid="cols"/> FROM job_position_feature WHERE position_id IN <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach></select>
+  <select id="selectBySubjectGroup" resultMap="map">SELECT <include refid="cols"/> FROM job_position_feature WHERE exam_subject_group=#{group}</select>
+  <delete id="deleteAll">DELETE FROM job_position_feature</delete>
+</mapper>

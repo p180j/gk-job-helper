@@ -95,6 +95,7 @@ public class ExcelImportService {
         record.setSheetName(result.getSheetName());
         record.setHeaders(String.join(",", result.getHeaders()));
         record.setTotalRows(result.getTotalRows());
+        record.setExamYear(ImportExamYearResolver.resolve(fileNameOnly(originalName)));
         record.setStatus("PREVIEWED");
         record.setCreatedAt(LocalDateTime.now());
         importFileMapper.insert(record);
