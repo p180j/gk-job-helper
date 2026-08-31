@@ -53,6 +53,8 @@ const router = createRouter({
     },
     {
       path: '/interview-scores/import', name: 'interviewScoreImport', component: () => import('@/views/InterviewScoreImportView.vue')
+    },
+    { path: '/recruitment', name: 'recruitment', component: () => import('@/views/RecruitmentDiscoveryView.vue')
     }
   ]
 })

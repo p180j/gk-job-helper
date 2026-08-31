@@ -293,6 +293,7 @@ CREATE TABLE IF NOT EXISTS job_position_feature (
     raw_exam_subject_text VARCHAR(1000) DEFAULT NULL,
     major_restriction_type VARCHAR(32) NOT NULL DEFAULT 'UNCERTAIN',
     major_domains TEXT,
+    major_similarity_keys TEXT,
     major_scope_count INT DEFAULT NULL,
     major_analysis_status VARCHAR(16) NOT NULL DEFAULT 'UNKNOWN',
     organization_level VARCHAR(32) DEFAULT NULL,
@@ -320,3 +321,6 @@ CREATE TABLE IF NOT EXISTS job_preference (
     CONSTRAINT fk_job_preference_profile FOREIGN KEY (profile_id) REFERENCES user_profile (id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX uk_job_preference_profile ON job_preference (profile_id);
+
+CREATE TABLE IF NOT EXISTS recruitment_source (id BIGINT NOT NULL AUTO_INCREMENT,source_code VARCHAR(64) NOT NULL,source_name VARCHAR(255) NOT NULL,source_type VARCHAR(32) NOT NULL,list_url VARCHAR(1000) NOT NULL,enabled TINYINT NOT NULL DEFAULT 1,last_fetch_time DATETIME DEFAULT NULL,last_fetch_status VARCHAR(255) DEFAULT NULL,created_at DATETIME DEFAULT NULL,updated_at DATETIME DEFAULT NULL,PRIMARY KEY(id),UNIQUE KEY uk_recruitment_source_code(source_code));
+CREATE TABLE IF NOT EXISTS recruitment_notice (id BIGINT NOT NULL AUTO_INCREMENT,source_id BIGINT NOT NULL,title VARCHAR(1000) NOT NULL,notice_url VARCHAR(512) NOT NULL,publish_date DATETIME DEFAULT NULL,notice_type VARCHAR(32) NOT NULL,parent_notice_id BIGINT DEFAULT NULL,user_status VARCHAR(32) NOT NULL,viewed_at DATETIME DEFAULT NULL,discovered_at DATETIME NOT NULL,created_at DATETIME DEFAULT NULL,updated_at DATETIME DEFAULT NULL,PRIMARY KEY(id),UNIQUE KEY uk_recruitment_notice_source_url(source_id,notice_url),KEY idx_recruitment_notice_status(user_status),CONSTRAINT fk_recruitment_notice_source FOREIGN KEY(source_id) REFERENCES recruitment_source(id));

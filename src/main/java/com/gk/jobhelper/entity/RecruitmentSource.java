@@ -1,0 +1,6 @@
+package com.gk.jobhelper.entity;
+import java.time.LocalDateTime;
+public class RecruitmentSource {
+ private Long id;private String sourceCode,sourceName,sourceType,listUrl,lastFetchStatus;private Boolean enabled;private LocalDateTime lastFetchTime,createdAt,updatedAt;
+ public Long getId(){return id;}public void setId(Long v){id=v;}public String getSourceCode(){return sourceCode;}public void setSourceCode(String v){sourceCode=v;}public String getSourceName(){return sourceName;}public void setSourceName(String v){sourceName=v;}public String getSourceType(){return sourceType;}public void setSourceType(String v){sourceType=v;}public String getListUrl(){return listUrl;}public void setListUrl(String v){listUrl=v;}public Boolean getEnabled(){return enabled;}public void setEnabled(Boolean v){enabled=v;}public LocalDateTime getLastFetchTime(){return lastFetchTime;}public void setLastFetchTime(LocalDateTime v){lastFetchTime=v;}public String getLastFetchStatus(){return lastFetchStatus;}public void setLastFetchStatus(String v){lastFetchStatus=v;}public LocalDateTime getCreatedAt(){return createdAt;}public void setCreatedAt(LocalDateTime v){createdAt=v;}public LocalDateTime getUpdatedAt(){return updatedAt;}public void setUpdatedAt(LocalDateTime v){updatedAt=v;}
+}

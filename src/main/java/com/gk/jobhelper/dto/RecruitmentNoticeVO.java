@@ -1,0 +1,6 @@
+package com.gk.jobhelper.dto;
+import java.time.LocalDateTime;
+public class RecruitmentNoticeVO {
+ private Long id;private String title,noticeUrl,noticeType,userStatus,sourceCode,sourceName;private LocalDateTime publishDate,viewedAt,discoveredAt;
+ public Long getId(){return id;}public void setId(Long v){id=v;}public String getTitle(){return title;}public void setTitle(String v){title=v;}public String getNoticeUrl(){return noticeUrl;}public void setNoticeUrl(String v){noticeUrl=v;}public String getNoticeType(){return noticeType;}public void setNoticeType(String v){noticeType=v;}public String getUserStatus(){return userStatus;}public void setUserStatus(String v){userStatus=v;}public String getSourceCode(){return sourceCode;}public void setSourceCode(String v){sourceCode=v;}public String getSourceName(){return sourceName;}public void setSourceName(String v){sourceName=v;}public LocalDateTime getPublishDate(){return publishDate;}public void setPublishDate(LocalDateTime v){publishDate=v;}public LocalDateTime getViewedAt(){return viewedAt;}public void setViewedAt(LocalDateTime v){viewedAt=v;}public LocalDateTime getDiscoveredAt(){return discoveredAt;}public void setDiscoveredAt(LocalDateTime v){discoveredAt=v;}
+}

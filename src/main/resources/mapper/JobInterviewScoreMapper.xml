@@ -23,7 +23,8 @@
   <select id="selectAnalysisSamples" resultType="com.gk.jobhelper.dto.HistoricalSampleRow">
     SELECT p.id AS positionId,s.exam_year AS examYear,p.position_code AS positionCode,p.recruit_count AS recruitCount,
            s.min_interview_score AS minInterviewScore,f.exam_subject_group AS examSubjectGroup,
-           f.major_restriction_type AS majorRestrictionType,f.major_domains AS majorDomains
+           f.major_restriction_type AS majorRestrictionType,f.major_domains AS majorDomains,
+           f.major_similarity_keys AS majorSimilarityKeys
     FROM job_interview_score s
     JOIN import_file i ON i.exam_year=s.exam_year AND i.status='IMPORTED'
     JOIN job_position p ON p.import_file_id=i.id AND p.position_code=s.position_code

@@ -1,8 +1,8 @@
 [INFO] Scanning for projects...
 [INFO] 
-[INFO] ------------------------< com.gk:gk-job-helper >------------------------
+[INFO] ------------------------------------------------------------------------
 [INFO] Building gk-job-helper 0.0.1-SNAPSHOT
-[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] ------------------------------------------------------------------------
 [INFO] 
 [INFO] >>> spring-boot-maven-plugin:2.7.18:run (default-cli) > test-compile @ gk-job-helper >>>
 [INFO] 
@@ -10,7 +10,7 @@
 [INFO] Using 'UTF-8' encoding to copy filtered resources.
 [INFO] Using 'UTF-8' encoding to copy filtered properties files.
 [INFO] Copying 1 resource
-[INFO] Copying 22 resources
+[INFO] Copying 26 resources
 [INFO] 
 [INFO] --- maven-compiler-plugin:3.10.1:compile (default-compile) @ gk-job-helper ---
 [INFO] Nothing to compile - all classes are up to date
@@ -37,17 +37,18 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-08-30 15:18:53.772  INFO 23192 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 1.8.0_192 on jiawen with PID 23192 (D:\code\gk-job-helper\target\classes started by jiawen.peng in D:\code\gk-job-helper)
-2026-08-30 15:18:53.774  INFO 23192 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
-2026-08-30 15:18:54.488  INFO 23192 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
-2026-08-30 15:18:54.502  INFO 23192 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-08-30 15:18:54.502  INFO 23192 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
-2026-08-30 15:18:54.873  INFO 23192 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-08-30 15:18:54.873  INFO 23192 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1083 ms
-2026-08-30 15:18:55.395  INFO 23192 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
-2026-08-30 15:18:55.402  INFO 23192 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 1.848 seconds (JVM running for 2.02)
-2026-08-30 15:18:55.406  INFO 23192 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-08-30 15:18:55.463  INFO 23192 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-08-30 15:18:55.590  INFO 23192 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-08-30 15:18:55.590  INFO 23192 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-08-30 15:18:55.592  INFO 23192 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-08-31 17:14:33.106  INFO 43044 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 11.0.23 on SJ-DN0520 with PID 43044 (D:\studyCode\gk-job-helper\target\classes started by jiawen.peng in D:\studyCode\gk-job-helper)
+2026-08-31 17:14:33.112  INFO 43044 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-08-31 17:14:34.964  INFO 43044 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2026-08-31 17:14:34.976  INFO 43044 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-31 17:14:34.976  INFO 43044 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-08-31 17:14:35.202  INFO 43044 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-31 17:14:35.206  INFO 43044 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2051 ms
+2026-08-31 17:14:36.831  INFO 43044 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2026-08-31 17:14:36.859  INFO 43044 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 4.325 seconds (JVM running for 4.717)
+2026-08-31 17:14:36.873  INFO 43044 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-31 17:14:37.155  INFO 43044 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-31 17:14:37.785  INFO 43044 --- [nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-31 17:14:37.788  INFO 43044 --- [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-31 17:14:37.790  INFO 43044 --- [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-08-31 17:52:09.306  WARN 43044 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=3m31s482ms30?s500ns).

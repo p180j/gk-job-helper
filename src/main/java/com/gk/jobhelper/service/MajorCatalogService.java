@@ -225,6 +225,50 @@ public class MajorCatalogService {
         return false;
     }
 
+    /**
+     * 返回用于历史分同类比较的稳定专业锚点。锚点只来自官方目录的 parent_id 树：
+     * 本科/职教的具体专业向上取 CLASS；研究生的 DISCIPLINE/FIELD 取自身；
+     * CATEGORY（如工学）绝不作为锚点。
+     */
+    public String similarityAnchorKey(Long itemId) {
+        if (itemId == null) {
+            return null;
+        }
+        MajorCatalogItem item = majorCatalogItemMapper.selectById(itemId);
+        if (item == null) {
+            return null;
+        }
+        MajorCatalogItem anchor = similarityAnchor(item);
+        if (anchor == null || anchor.getMajorCode() == null) {
+            return null;
+        }
+        MajorCatalog catalog = majorCatalogMapper.selectById(anchor.getCatalogId());
+        if (catalog == null || catalog.getEducationLevel() == null) {
+            return null;
+        }
+        return catalog.getEducationLevel() + "|" + anchor.getItemLevel() + "|"
+                + MajorNameNormalizer.normalizeCode(anchor.getMajorCode());
+    }
+
+    private MajorCatalogItem similarityAnchor(MajorCatalogItem item) {
+        if ("CATEGORY".equals(item.getItemLevel())) {
+            return null;
+        }
+        if ("CLASS".equals(item.getItemLevel()) || "DISCIPLINE".equals(item.getItemLevel())
+                || "FIELD".equals(item.getItemLevel())) {
+            return item;
+        }
+        if ("MAJOR".equals(item.getItemLevel())) {
+            for (MajorCatalogItem ancestor : getAncestors(item)) {
+                if ("CLASS".equals(ancestor.getItemLevel())) {
+                    return ancestor;
+                }
+            }
+        }
+        // 没有专业类父节点时保留具体官方节点，绝不退回到学科门类。
+        return item;
+    }
+
     /** 节点的全部后代（深度优先，按 sort_no 排序；防御环） */
     public List<MajorCatalogItem> getDescendants(MajorCatalogItem node) {
         List<MajorCatalogItem> descendants = new ArrayList<>();

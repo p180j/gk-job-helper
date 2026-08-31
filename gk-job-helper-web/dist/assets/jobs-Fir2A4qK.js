@@ -1,1 +1,0 @@
-import{g as o}from"./http-DWK_zMrH.js";function t(a){return o(`/api/jobs/${a}`)}function i(a){return o(`/api/job-features/${a}`)}function e(a,r=2026){return o(`/api/jobs/${a}/historical-analysis`,{params:{examYear:r}})}function n(a,r){return o("/api/jobs/compare",{params:{profileId:a,jobIds:r.join(",")}})}export{i as a,e as b,n as c,t as f};

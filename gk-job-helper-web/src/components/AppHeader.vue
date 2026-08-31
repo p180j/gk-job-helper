@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Document, HomeFilled, MagicStick, StarFilled, UserFilled } from '@element-plus/icons-vue'
+import { Document, HomeFilled, MagicStick, StarFilled, UserFilled, Bell } from '@element-plus/icons-vue'
 </script>
 
 <template>
@@ -12,6 +12,7 @@ import { Document, HomeFilled, MagicStick, StarFilled, UserFilled } from '@eleme
         <el-menu-item index="/import"><el-icon><Document /></el-icon>职位表</el-menu-item>
         <el-menu-item index="/favorites"><el-icon><StarFilled /></el-icon>我的收藏</el-menu-item>
         <el-menu-item index="/recommend"><el-icon><MagicStick /></el-icon>为我优选</el-menu-item>
+        <el-menu-item index="/recruitment"><el-icon><Bell /></el-icon>招聘发现</el-menu-item>
       </el-menu>
     </nav>
   </header>

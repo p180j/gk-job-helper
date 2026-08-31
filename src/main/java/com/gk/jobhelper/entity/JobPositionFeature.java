@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public class JobPositionFeature {
     private Long positionId; private Integer examSubjectCount; private String examSubjects;
     private String examSubjectGroup; private String examSubjectStatus; private String rawExamSubjectText;
-    private String majorRestrictionType; private String majorDomains; private Integer majorScopeCount;
+    private String majorRestrictionType; private String majorDomains; private String majorSimilarityKeys; private Integer majorScopeCount;
     private String majorAnalysisStatus; private String organizationLevel; private String organizationLevelStatus;
     private LocalDateTime createdAt; private LocalDateTime updatedAt;
     public Long getPositionId(){return positionId;} public void setPositionId(Long v){positionId=v;}
@@ -16,6 +16,7 @@ public class JobPositionFeature {
     public String getRawExamSubjectText(){return rawExamSubjectText;} public void setRawExamSubjectText(String v){rawExamSubjectText=v;}
     public String getMajorRestrictionType(){return majorRestrictionType;} public void setMajorRestrictionType(String v){majorRestrictionType=v;}
     public String getMajorDomains(){return majorDomains;} public void setMajorDomains(String v){majorDomains=v;}
+    public String getMajorSimilarityKeys(){return majorSimilarityKeys;} public void setMajorSimilarityKeys(String v){majorSimilarityKeys=v;}
     public Integer getMajorScopeCount(){return majorScopeCount;} public void setMajorScopeCount(Integer v){majorScopeCount=v;}
     public String getMajorAnalysisStatus(){return majorAnalysisStatus;} public void setMajorAnalysisStatus(String v){majorAnalysisStatus=v;}
     public String getOrganizationLevel(){return organizationLevel;} public void setOrganizationLevel(String v){organizationLevel=v;}

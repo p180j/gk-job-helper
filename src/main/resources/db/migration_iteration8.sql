@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS job_position_feature (
     raw_exam_subject_text VARCHAR(1000) DEFAULT NULL,
     major_restriction_type VARCHAR(32) NOT NULL DEFAULT 'UNCERTAIN',
     major_domains TEXT,
+    major_similarity_keys TEXT,
     major_scope_count INT DEFAULT NULL,
     major_analysis_status VARCHAR(16) NOT NULL DEFAULT 'UNKNOWN',
     organization_level VARCHAR(32) DEFAULT NULL,

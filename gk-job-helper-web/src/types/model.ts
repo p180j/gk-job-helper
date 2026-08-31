@@ -4,6 +4,9 @@ export interface ApiResponse<T> {
   message: string
   data: T | null
 }
+export type RecruitmentNoticeStatus='NEW'|'INTERESTED'|'FOLLOWING'|'IGNORED'
+export interface RecruitmentNotice {id:number;title:string;noticeUrl:string;publishDate:string|null;noticeType:string;userStatus:RecruitmentNoticeStatus;viewedAt:string|null;discoveredAt:string;sourceCode:string;sourceName:string}
+export interface RecruitmentDiscoveryResult {fetchedCount:number;newCount:number;duplicateCount:number;failedCount:number}
 
 /** 用户个人档案 */
 export interface UserProfile {
