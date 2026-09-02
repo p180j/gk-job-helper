@@ -35,6 +35,8 @@ public class UserProfile {
     private String veteran;
     /** 持有证书(逗号分隔) */
     private String certificates;
+    /** 英语等级：NONE / CET4 / CET6；CET6 自动满足 CET4。 */
+    private String englishLevel;
     private String targetRegion;
     private String notes;
     private LocalDateTime createdAt;
@@ -183,6 +185,9 @@ public class UserProfile {
     public void setCertificates(String certificates) {
         this.certificates = certificates;
     }
+
+    public String getEnglishLevel() { return englishLevel; }
+    public void setEnglishLevel(String englishLevel) { this.englishLevel = englishLevel; }
 
     public String getTargetRegion() {
         return targetRegion;

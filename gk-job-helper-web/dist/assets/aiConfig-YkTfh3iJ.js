@@ -1,0 +1,1 @@
+const a="ai-provider-config";function n(){var i,o,t,l;const e=localStorage.getItem(a);if(!e)return null;try{const r=JSON.parse(e);return!((i=r.apiKey)!=null&&i.trim())||!((o=r.provider)!=null&&o.trim())||!((t=r.model)!=null&&t.trim())||!((l=r.baseUrl)!=null&&l.trim())?null:{provider:r.provider,model:r.model,baseUrl:r.baseUrl,apiKey:r.apiKey}}catch{return null}}export{n as l};

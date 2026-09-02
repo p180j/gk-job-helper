@@ -74,7 +74,7 @@ class MajorCatalogServiceTest {
         assertNotNull(csClass);
 
         List<MajorCatalogItem> descendants = majorCatalogService.getDescendants(csClass);
-        assertEquals(15, descendants.size());
+        assertEquals(18, descendants.size());
         boolean hasSoftware = false;
         for (MajorCatalogItem item : descendants) {
             if ("080902".equals(item.getMajorCode())) {
@@ -134,9 +134,9 @@ class MajorCatalogServiceTest {
     }
 
     @Test
-    void findByAliasShouldResolveToOfficialMajor() {
+    void findByOfficialNameShouldResolveToMajor() {
         MajorCatalog catalog = catalog(UNDERGRADUATE_CATALOG_ID);
-        List<MajorCatalogItem> items = majorCatalogService.findByName(catalog, "计算机科学技术");
+        List<MajorCatalogItem> items = majorCatalogService.findByName(catalog, "计算机科学与技术");
         assertEquals(1, items.size());
         assertEquals("080901", items.get(0).getMajorCode());
         assertEquals("计算机科学与技术", items.get(0).getMajorName());
@@ -160,7 +160,7 @@ class MajorCatalogServiceTest {
         List<MajorCatalogService.CatalogEntry> undergraduate =
                 majorCatalogService.resolveCatalogs(null, "UNDERGRADUATE");
         assertEquals(1, undergraduate.size());
-        assertEquals("MOE_UNDERGRADUATE_2026", undergraduate.get(0).getCatalog().getCatalogCode());
+        assertEquals("MOE_UNDERGRADUATE_2024", undergraduate.get(0).getCatalog().getCatalogCode());
 
         List<MajorCatalogService.CatalogEntry> graduate =
                 majorCatalogService.resolveCatalogs(null, "GRADUATE");

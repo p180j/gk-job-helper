@@ -1,1 +1,0 @@
-import{g as o,A as r,a as e,p as t}from"./http-CvmvoRYX.js";function f(){return o("/api/profile")}function n(i){return i instanceof r&&i.code===40401}function p(i){return t("/api/profile",i)}function u(i){return e("/api/profile",i)}export{p as c,f,n as i,u};

@@ -1,6 +1,7 @@
 package com.gk.jobhelper.service;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.gk.jobhelper.common.BusinessException;
 import com.gk.jobhelper.dto.ExcelPreviewResult;
@@ -88,6 +89,29 @@ class ExcelPreviewParserTest {
         assertEquals(15, result.getTotalRows());
         assertEquals(10, result.getPreviewRows().size());
         assertEquals("部门10", result.getPreviewRows().get(9).get(0));
+    }
+
+    @Test
+    void parseAllShouldReturnEverySheet() throws IOException {
+        File file = new File(tempDir, "multi-sheet.xlsx");
+        List<List<String>> rows = new ArrayList<>();
+        rows.add(Arrays.asList("部门", "职位名称", "招考人数"));
+        rows.add(Arrays.asList("测试单位", "北京职位", "1"));
+        ExcelWriter writer = EasyExcel.write(file).build();
+        try {
+            writer.write(rows, EasyExcel.writerSheet("北京").build());
+            writer.write(rows, EasyExcel.writerSheet("其他地区").build());
+        } finally {
+            writer.finish();
+        }
+
+        List<ExcelPreviewResult> results = parser.parseAll(file);
+
+        assertEquals(2, results.size());
+        assertEquals("北京", results.get(0).getSheetName());
+        assertEquals("其他地区", results.get(1).getSheetName());
+        assertEquals(1, results.get(0).getTotalRows());
+        assertEquals(1, results.get(1).getTotalRows());
     }
 
     @Test

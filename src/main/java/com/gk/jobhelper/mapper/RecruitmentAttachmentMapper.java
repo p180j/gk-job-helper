@@ -1,0 +1,3 @@
+package com.gk.jobhelper.mapper;
+import com.gk.jobhelper.dto.RecruitmentAttachmentVO;import com.gk.jobhelper.entity.RecruitmentAttachment;import java.util.*;import org.apache.ibatis.annotations.*;
+@Mapper public interface RecruitmentAttachmentMapper {List<RecruitmentAttachmentVO> selectByNoticeId(Long noticeId);List<RecruitmentAttachment> selectPositionDataByNoticeId(Long noticeId);int upsert(RecruitmentAttachment attachment);int updateParseResult(@Param("id")Long id,@Param("fileType")String fileType,@Param("status")String status,@Param("error")String error,@Param("positionCount")int positionCount,@Param("parsedAt")java.time.LocalDateTime parsedAt);}

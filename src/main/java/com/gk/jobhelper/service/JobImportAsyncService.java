@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 /** 单线程后台岗位导入，避免长 Excel 导入阻塞 HTTP 请求线程。 */
 @Service
@@ -35,19 +37,27 @@ public class JobImportAsyncService {
         try {
             ImportFile record = importFileMapper.selectById(importId);
             if (record == null) return;
-            ExcelRawSheet sheet = excelRowReader.read(new File(record.getStoredPath()), record.getSheetName());
-            ConversionResult conversion = jobPositionConverter.convert(sheet, request.getMappings(), importId);
-            List<JobPosition> positions = conversion.getPositions();
+            List<String> sheetNames = new ArrayList<>(new LinkedHashSet<>(request.getSheetNames()));
+            if (sheetNames.isEmpty()) sheetNames.add(request.getSheetName() == null || request.getSheetName().trim().isEmpty()
+                    ? record.getSheetName() : request.getSheetName().trim());
+            List<JobPosition> positions = new ArrayList<>();
+            int failedRows = 0;
+            for (String sheetName : sheetNames) {
+                ExcelRawSheet sheet = excelRowReader.read(new File(record.getStoredPath()), sheetName);
+                ConversionResult conversion = jobPositionConverter.convert(sheet, request.getMappings(), importId);
+                positions.addAll(conversion.getPositions());
+                failedRows += conversion.getFailures().size();
+            }
             jobPositionMapper.deleteByImportFileId(importId);
             int processed = 0;
             for (int start = 0; start < positions.size(); start += BATCH_SIZE) {
                 int end = Math.min(start + BATCH_SIZE, positions.size());
                 jobPositionMapper.insertBatch(positions.subList(start, end));
                 processed = end;
-                progressStore.update(importId, "IMPORTING", processed, processed, conversion.getFailures().size(), null);
+                progressStore.update(importId, "IMPORTING", processed, processed, failedRows, null);
             }
             importFileMapper.updateStatus(importId, "IMPORTED");
-            progressStore.update(importId, "IMPORTED", positions.size(), positions.size(), conversion.getFailures().size(), null);
+            progressStore.update(importId, "IMPORTED", positions.size(), positions.size(), failedRows, null);
         } catch (Exception e) {
             ImportFile current = progressStore.get(importId);
             int processed = current == null || current.getProcessedRows() == null ? 0 : current.getProcessedRows();

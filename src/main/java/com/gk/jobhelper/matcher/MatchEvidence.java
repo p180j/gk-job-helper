@@ -8,7 +8,7 @@ package com.gk.jobhelper.matcher;
  */
 public class MatchEvidence {
 
-    /** 使用的专业目录编码，如 MOE_UNDERGRADUATE_2026 */
+    /** 使用的专业目录编码，如 MOE_UNDERGRADUATE_2024 */
     private String catalogCode;
     /** 使用的专业目录名称，如 普通高等学校本科专业目录(2026年) */
     private String catalogName;

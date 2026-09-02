@@ -47,12 +47,13 @@ public class JobFavoriteService {
         favoriteMapper.delete(profileId, positionId);
     }
 
-    public PageVO<MatchPositionResultVO> page(Long profileId, int page, int size) {
+    public PageVO<MatchPositionResultVO> page(Long profileId, Long importId, int page, int size) {
         requireProfile(profileId);
         int safePage = Math.max(1, page);
         int safeSize = Math.min(Math.max(1, size), MAX_PAGE_SIZE);
         FavoriteQuery query = new FavoriteQuery();
         query.setProfileId(profileId);
+        query.setImportId(importId);
         query.setOffset((safePage - 1) * safeSize);
         query.setSize(safeSize);
         long total = favoriteMapper.countPage(query);

@@ -10,6 +10,7 @@ public class FieldMappingPreviewVO {
 
     private Long importId;
     private String sheetName;
+    private List<ExcelSheetPreviewVO> sheets = new ArrayList<>();
     private List<HeaderSuggestion> headers = new ArrayList<>();
 
     public Long getImportId() {
@@ -27,6 +28,9 @@ public class FieldMappingPreviewVO {
     public void setSheetName(String sheetName) {
         this.sheetName = sheetName;
     }
+
+    public List<ExcelSheetPreviewVO> getSheets() { return sheets; }
+    public void setSheets(List<ExcelSheetPreviewVO> sheets) { this.sheets = sheets; }
 
     public List<HeaderSuggestion> getHeaders() {
         return headers;

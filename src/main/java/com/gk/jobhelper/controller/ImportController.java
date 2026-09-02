@@ -1,6 +1,8 @@
 package com.gk.jobhelper.controller;
 
 import com.gk.jobhelper.common.ApiResponse;
+import com.gk.jobhelper.ai.AiProviderConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gk.jobhelper.dto.ExcelPreviewVO;
 import com.gk.jobhelper.dto.FieldMappingPreviewVO;
 import com.gk.jobhelper.dto.ImportConfirmRequest;
@@ -37,13 +39,16 @@ public class ImportController {
     private final JobImportService jobImportService;
     private final DashboardService dashboardService;
     private final ImportProgressStore importProgressStore;
+    private final ObjectMapper objectMapper;
 
     public ImportController(ExcelImportService excelImportService, JobImportService jobImportService,
-                            DashboardService dashboardService, ImportProgressStore importProgressStore) {
+                            DashboardService dashboardService, ImportProgressStore importProgressStore,
+                            ObjectMapper objectMapper) {
         this.excelImportService = excelImportService;
         this.jobImportService = jobImportService;
         this.dashboardService = dashboardService;
         this.importProgressStore = importProgressStore;
+        this.objectMapper = objectMapper;
     }
 
     /** 首页"最近分析"卡片：最近一次导入记录 + 当前档案匹配统计；无记录时 data 为 null */
@@ -74,18 +79,29 @@ public class ImportController {
     }
 
     @PostMapping("/upload")
-    public ApiResponse<ExcelPreviewVO> upload(@RequestParam("file") MultipartFile file) {
-        return ApiResponse.ok(excelImportService.upload(file));
+    public ApiResponse<ExcelPreviewVO> upload(@RequestParam("file") MultipartFile file,
+                                               @RequestParam(value = "aiConfig", required = false) String aiConfigJson) {
+        return ApiResponse.ok(excelImportService.upload(file, parseAiConfig(aiConfigJson)));
     }
 
     @GetMapping("/{id}/mapping")
-    public ApiResponse<FieldMappingPreviewVO> getMapping(@PathVariable("id") Long id) {
-        return ApiResponse.ok(jobImportService.getMapping(id));
+    public ApiResponse<FieldMappingPreviewVO> getMapping(@PathVariable("id") Long id,
+                                                          @RequestParam(value = "sheetNames", required = false) java.util.List<String> sheetNames) {
+        return ApiResponse.ok(jobImportService.getMapping(id, sheetNames));
     }
 
     @PostMapping("/{id}/confirm")
     public ApiResponse<ImportResultVO> confirm(@PathVariable("id") Long id,
                                                @Valid @RequestBody ImportConfirmRequest request) {
         return ApiResponse.ok(jobImportService.confirm(id, request));
+    }
+
+    private AiProviderConfig parseAiConfig(String json) {
+        if (json == null || json.trim().isEmpty()) return null;
+        try {
+            return objectMapper.readValue(json, AiProviderConfig.class);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 }

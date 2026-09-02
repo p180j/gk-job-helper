@@ -23,6 +23,8 @@ public class ExcelPreviewVO {
     private Integer totalRows;
     /** 前 10 行数据预览，每行为 表头 -> 值 */
     private List<Map<String, String>> previewRows = new ArrayList<>();
+    /** 工作簿内全部 Sheet，供用户选择需要合并导入的职位页。 */
+    private List<ExcelSheetPreviewVO> sheets = new ArrayList<>();
 
     public Long getFileId() {
         return fileId;
@@ -79,4 +81,7 @@ public class ExcelPreviewVO {
     public void setPreviewRows(List<Map<String, String>> previewRows) {
         this.previewRows = previewRows;
     }
+
+    public List<ExcelSheetPreviewVO> getSheets() { return sheets; }
+    public void setSheets(List<ExcelSheetPreviewVO> sheets) { this.sheets = sheets; }
 }

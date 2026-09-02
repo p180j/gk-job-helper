@@ -9,6 +9,6 @@ export function removeFavorite(positionId: number, profileId: number) {
   return del<void>(`/api/favorites/${positionId}`, { params: { profileId } })
 }
 
-export function fetchFavorites(profileId: number, page: number, size: number) {
-  return get<PageVO<MatchPositionResult>>('/api/favorites', { params: { profileId, page, size } })
+export function fetchFavorites(profileId: number, importId: number, page: number, size: number) {
+  return get<PageVO<MatchPositionResult>>('/api/favorites', { params: { profileId, importId, page, size } })
 }

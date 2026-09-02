@@ -29,10 +29,11 @@ const router = createRouter({
       component: () => import('@/views/ExecuteView.vue')
     },
     {
-      path: '/results/:importId',
+      path: '/positions',
       name: 'results',
       component: () => import('@/views/ResultsView.vue')
     },
+    { path: '/results/:importId', redirect: to => ({ path: '/positions', query: { importId: String(to.params.importId), result: String(to.query.result || '') } }) },
     {
       path: '/jobs/:id',
       name: 'jobDetail',
@@ -54,8 +55,12 @@ const router = createRouter({
     {
       path: '/interview-scores/import', name: 'interviewScoreImport', component: () => import('@/views/InterviewScoreImportView.vue')
     },
-    { path: '/recruitment', name: 'recruitment', component: () => import('@/views/RecruitmentDiscoveryView.vue')
-    }
+    { path: '/recruitment', name: 'recruitment', component: () => import('@/views/RecruitmentDiscoveryView.vue') },
+    { path: '/recruitment/notices/:id', name: 'recruitment-notice-detail', component: () => import('@/views/RecruitmentNoticeDetailView.vue')
+    },
+    { path: '/recruitment/notices/:id/positions', name: 'recruitment-position-list', component: () => import('@/views/RecruitmentPositionListView.vue') },
+    { path: '/recruitment/positions/:id', name: 'recruitment-position-detail', component: () => import('@/views/RecruitmentPositionDetailView.vue') },
+    { path: '/ai-settings', name: 'aiSettings', component: () => import('@/views/AiSettingsView.vue') }
   ]
 })
 

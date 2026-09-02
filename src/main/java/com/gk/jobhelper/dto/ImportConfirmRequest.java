@@ -15,6 +15,9 @@ public class ImportConfirmRequest {
     /** 指定导入的 Sheet 名称，为空时使用导入记录中的 Sheet */
     private String sheetName;
 
+    /** 需合并导入的 Sheet 名称；为空时兼容旧流程，仅导入默认 Sheet。 */
+    private List<String> sheetNames = new ArrayList<>();
+
     @NotEmpty(message = "字段映射不能为空")
     @Valid
     private List<MappingItem> mappings = new ArrayList<>();
@@ -26,6 +29,9 @@ public class ImportConfirmRequest {
     public void setSheetName(String sheetName) {
         this.sheetName = sheetName;
     }
+
+    public List<String> getSheetNames() { return sheetNames; }
+    public void setSheetNames(List<String> sheetNames) { this.sheetNames = sheetNames == null ? new ArrayList<String>() : sheetNames; }
 
     public List<MappingItem> getMappings() {
         return mappings;

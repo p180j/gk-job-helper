@@ -38,8 +38,9 @@ public class FavoriteController {
     @GetMapping
     public ApiResponse<PageVO<MatchPositionResultVO>> page(
             @RequestParam("profileId") Long profileId,
+            @RequestParam(value = "importId", required = false) Long importId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "20") int size) {
-        return ApiResponse.ok(favoriteService.page(profileId, page, size));
+        return ApiResponse.ok(favoriteService.page(profileId, importId, page, size));
     }
 }

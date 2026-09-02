@@ -22,7 +22,11 @@
     </select>
 
     <select id="countPage" resultType="long">
-        SELECT COUNT(*) FROM job_favorite WHERE profile_id = #{profileId}
+        SELECT COUNT(*)
+        FROM job_favorite f
+        JOIN job_position p ON p.id = f.position_id
+        WHERE f.profile_id = #{profileId}
+        <if test="importId != null">AND p.import_file_id = #{importId}</if>
     </select>
 
     <select id="selectPage" resultType="com.gk.jobhelper.dto.MatchPositionResultVO">
@@ -45,6 +49,7 @@
         JOIN job_position p ON p.id = f.position_id
         LEFT JOIN job_match m ON m.profile_id = f.profile_id AND m.job_position_id = f.position_id
         WHERE f.profile_id = #{profileId}
+        <if test="importId != null">AND p.import_file_id = #{importId}</if>
         ORDER BY f.created_at DESC, f.id DESC
         LIMIT #{offset}, #{size}
     </select>

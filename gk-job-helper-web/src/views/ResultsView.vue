@@ -5,17 +5,21 @@ import { ElMessage } from 'element-plus'
 import { Star, StarFilled } from '@element-plus/icons-vue'
 import { fetchProfile, isProfileNotFound } from '@/api/profile'
 import { fetchMatchRegions, fetchMatchResults } from '@/api/match'
+import { fetchImports } from '@/api/import'
 import { addFavorite, removeFavorite } from '@/api/favorites'
 import { showError } from '@/api/http'
 import { matchStatus } from '@/utils/matchStatus'
 import type { MatchPositionResult, MatchResultValue } from '@/types/model'
+import type { RecentImport } from '@/types/model'
+import PositionLibraryBar from '@/components/PositionLibraryBar.vue'
 
 type StatusFilter = 'ALL' | MatchResultValue
 type RecruitFilter = 'ALL' | '1' | '2' | '3_PLUS'
 
 const route = useRoute()
 const router = useRouter()
-const importId = Number(route.params.importId)
+const importId = ref(Number(route.query.importId))
+const imports = ref<RecentImport[]>([])
 const profileId = ref<number>()
 const total = ref(0)
 const items = ref<MatchPositionResult[]>([])
@@ -41,10 +45,14 @@ const selectedCount = computed(() => selectedIds.value.length)
 
 onMounted(async () => {
   try {
+    const importRecords = await fetchImports(1, 100)
+    imports.value = importRecords.items.filter(item => item.status === 'IMPORTED')
+    if (!imports.value.some(item => item.importId === importId.value)) importId.value = imports.value[0]?.importId || 0
+    if (!importId.value) return
     const profile = await fetchProfile()
     if (!profile) return
     profileId.value = profile.id
-    ;[regions.value] = await Promise.all([fetchMatchRegions(profile.id, importId), load()])
+    ;[regions.value] = await Promise.all([fetchMatchRegions(profile.id, importId.value), load()])
   } catch (error) {
     if (isProfileNotFound(error)) router.replace('/profile')
     else showError(error, '读取岗位匹配结果失败。')
@@ -57,7 +65,7 @@ async function load() {
   try {
     const recruit = recruitRange(filters.recruitCount)
     const data = await fetchMatchResults({
-      profileId: profileId.value, importId,
+      profileId: profileId.value, importId: importId.value,
       status: filters.status === 'ALL' ? undefined : filters.status,
       region: filters.region || undefined,
       organizationKeyword: filters.organizationKeyword || undefined,
@@ -97,7 +105,14 @@ function resetFilters() {
 function changePage(value: number) { page.value = value; load() }
 
 function openDetail(item: MatchPositionResult) {
-  router.push({ path: `/jobs/${item.jobId}`, query: { importId: String(importId), ...(filters.status === 'ALL' ? {} : { result: filters.status }) } })
+  router.push({ path: `/jobs/${item.jobId}`, query: { importId: String(importId.value), ...(filters.status === 'ALL' ? {} : { result: filters.status }) } })
+}
+
+async function changeImport(value: number) {
+  importId.value = value; page.value = 1; selectedIds.value = []
+  await router.replace({ path: '/positions', query: { importId: String(value) } })
+  if (profileId.value) regions.value = await fetchMatchRegions(profileId.value, value)
+  await load()
 }
 
 async function toggleFavorite(item: MatchPositionResult) {
@@ -135,8 +150,9 @@ function subjects(item: MatchPositionResult) { try { return item.examSubjectsJso
 
 <template>
   <section>
+    <PositionLibraryBar :imports="imports" :import-id="importId" active="all" @select="changeImport" />
     <div class="page-card result-head">
-      <h1 class="page-title">岗位匹配结果</h1>
+      <h2 class="page-title">全部岗位</h2>
       <p class="page-subtitle">筛选由后端分页执行；匹配结论仅供报考前核验。</p>
       <el-form class="filter-form" label-position="top" @submit.prevent="applyFilters">
         <div class="filter-grid">

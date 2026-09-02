@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 public class MajorCatalog {
 
     private Long id;
-    /** 目录编码，如 MOE_UNDERGRADUATE_2026 */
+    /** 目录编码，如 MOE_UNDERGRADUATE_2024 */
     private String catalogCode;
-    /** 目录名称，如 普通高等学校本科专业目录(2026年) */
+    /** 目录名称，如 普通高等学校本科专业目录(2024年) */
     private String catalogName;
     /** MOE / EXAM / AGENCY / CUSTOM，见 CatalogType */
     private String catalogType;

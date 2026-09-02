@@ -4,6 +4,8 @@ import com.gk.jobhelper.common.ApiResponse;
 import com.gk.jobhelper.common.BusinessException;
 import com.gk.jobhelper.dto.ConversionResult;
 import com.gk.jobhelper.dto.ExcelRawSheet;
+import com.gk.jobhelper.dto.ExcelPreviewResult;
+import com.gk.jobhelper.dto.ExcelSheetPreviewVO;
 import com.gk.jobhelper.dto.FieldMappingPreviewVO;
 import com.gk.jobhelper.dto.ImportConfirmRequest;
 import com.gk.jobhelper.dto.ImportResultVO;
@@ -16,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -37,13 +41,14 @@ public class JobImportService {
     private final FieldMappingService fieldMappingService;
     private final JobImportAsyncService jobImportAsyncService;
     private final ImportProgressStore progressStore;
+    private final ExcelPreviewParser excelPreviewParser;
 
     public JobImportService(ImportFileMapper importFileMapper,
                             JobPositionMapper jobPositionMapper,
                             ExcelRowReader excelRowReader,
                             JobPositionConverter jobPositionConverter,
                             FieldMappingService fieldMappingService, JobImportAsyncService jobImportAsyncService,
-                            ImportProgressStore progressStore) {
+                            ImportProgressStore progressStore, ExcelPreviewParser excelPreviewParser) {
         this.importFileMapper = importFileMapper;
         this.jobPositionMapper = jobPositionMapper;
         this.excelRowReader = excelRowReader;
@@ -51,19 +56,24 @@ public class JobImportService {
         this.fieldMappingService = fieldMappingService;
         this.jobImportAsyncService = jobImportAsyncService;
         this.progressStore = progressStore;
+        this.excelPreviewParser = excelPreviewParser;
     }
 
     /**
      * 字段映射预览
      */
-    public FieldMappingPreviewVO getMapping(Long importId) {
+    public FieldMappingPreviewVO getMapping(Long importId, List<String> requestedSheetNames) {
         ImportFile record = requireImportFile(importId);
         File file = requireFile(record);
-        ExcelRawSheet sheet = excelRowReader.read(file, record.getSheetName());
+        List<String> sheetNames = normalizeSheetNames(requestedSheetNames, record.getSheetName());
+        List<ExcelRawSheet> sheets = readSheets(file, sheetNames);
+        validateSameHeaders(sheets);
+        ExcelRawSheet sheet = sheets.get(0);
 
         FieldMappingPreviewVO vo = new FieldMappingPreviewVO();
         vo.setImportId(importId);
         vo.setSheetName(sheet.getSheetName());
+        vo.setSheets(toSheetPreviews(file, record.getSheetName()));
         vo.setHeaders(fieldMappingService.suggestAll(sheet.getHeaders()));
         return vo;
     }
@@ -76,24 +86,76 @@ public class JobImportService {
         ImportFile record = requireImportFile(importId);
         File file = requireFile(record);
 
-        // 确定读取的 Sheet：请求指定优先，否则用上传时记录的 Sheet
-        String sheetName = request.getSheetName() == null || request.getSheetName().trim().isEmpty()
-                ? record.getSheetName() : request.getSheetName().trim();
-        ExcelRawSheet sheet = excelRowReader.read(file, sheetName);
+        List<String> sheetNames = normalizeSheetNames(request.getSheetNames(), request.getSheetName());
+        if (sheetNames.isEmpty()) sheetNames = Collections.singletonList(record.getSheetName());
+        List<ExcelRawSheet> sheets = readSheets(file, sheetNames);
+        validateSameHeaders(sheets);
 
-        // 校验用户映射：sourceField 必须存在于表头，targetField 必须为合法标准字段或空
-        validateMappings(sheet, request.getMappings());
+        for (ExcelRawSheet sheet : sheets) validateMappings(sheet, request.getMappings());
 
         // 创建后台任务并立即返回，前端通过 progress 接口展示实时进度。
-        progressStore.start(importId, record.getTotalRows() == null ? 0 : record.getTotalRows());
+        int totalRows = 0;
+        for (ExcelRawSheet sheet : sheets) totalRows += sheet.getRows().size();
+        progressStore.start(importId, totalRows);
         jobImportAsyncService.execute(importId, request);
 
         ImportResultVO vo = new ImportResultVO();
         vo.setImportId(importId);
-        vo.setTotalRows(record.getTotalRows() == null ? 0 : record.getTotalRows());
+        vo.setTotalRows(totalRows);
         vo.setSuccessRows(0);
         vo.setFailedRows(0);
         return vo;
+    }
+
+    private List<String> normalizeSheetNames(List<String> sheetNames, String fallback) {
+        LinkedHashSet<String> names = new LinkedHashSet<>();
+        if (sheetNames != null) for (String name : sheetNames) if (name != null && !name.trim().isEmpty()) names.add(name.trim());
+        if (names.isEmpty() && fallback != null && !fallback.trim().isEmpty()) names.add(fallback.trim());
+        return new ArrayList<>(names);
+    }
+
+    private List<ExcelRawSheet> readSheets(File file, List<String> sheetNames) {
+        List<ExcelRawSheet> sheets = new ArrayList<>();
+        for (String sheetName : sheetNames) sheets.add(excelRowReader.read(file, sheetName));
+        if (sheets.isEmpty()) throw new BusinessException("请至少选择一个职位 Sheet");
+        return sheets;
+    }
+
+    private void validateSameHeaders(List<ExcelRawSheet> sheets) {
+        List<String> expected = sheets.get(0).getHeaders();
+        for (int i = 1; i < sheets.size(); i++) {
+            List<String> headers = sheets.get(i).getHeaders();
+            if (expected.size() != headers.size()) throw new BusinessException("所选 Sheet 表头不一致，请分别导入: " + sheets.get(i).getSheetName());
+            for (int column = 0; column < expected.size(); column++) {
+                if (!com.gk.jobhelper.constant.PositionStandardField.normalize(expected.get(column))
+                        .equals(com.gk.jobhelper.constant.PositionStandardField.normalize(headers.get(column)))) {
+                    throw new BusinessException("所选 Sheet 表头不一致，请分别导入: " + sheets.get(i).getSheetName());
+                }
+            }
+        }
+    }
+
+    private List<ExcelSheetPreviewVO> toSheetPreviews(File file, String defaultSheetName) {
+        List<ExcelSheetPreviewVO> previews = new ArrayList<>();
+        for (ExcelPreviewResult sheet : excelPreviewParser.parseAll(file)) {
+            ExcelSheetPreviewVO preview = new ExcelSheetPreviewVO();
+            preview.setSheetName(sheet.getSheetName()); preview.setHeaders(sheet.getHeaders());
+            preview.setTotalRows(sheet.getTotalRows());
+            preview.setSuggestedForImport(isPositionLike(sheet));
+            previews.add(preview);
+        }
+        return previews;
+    }
+
+    private boolean isPositionLike(ExcelPreviewResult sheet) {
+        int recognized = 0;
+        boolean hasPositionName = false;
+        for (String header : sheet.getHeaders()) {
+            String suggested = fieldMappingService.suggest(header).getSuggestedField();
+            if (suggested != null) recognized++;
+            if ("positionName".equals(suggested)) hasPositionName = true;
+        }
+        return hasPositionName && recognized >= 2 && sheet.getTotalRows() > 0;
     }
 
     private void validateMappings(ExcelRawSheet sheet, List<ImportConfirmRequest.MappingItem> mappings) {

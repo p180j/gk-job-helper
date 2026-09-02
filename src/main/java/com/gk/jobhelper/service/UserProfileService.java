@@ -114,11 +114,20 @@ public class UserProfileService {
         if (request.getCertificates() != null) {
             profile.setCertificates(request.getCertificates());
         }
+        if (request.getEnglishLevel() != null) {
+            profile.setEnglishLevel(normalizeEnglishLevel(request.getEnglishLevel()));
+        }
         if (request.getTargetRegion() != null) {
             profile.setTargetRegion(request.getTargetRegion());
         }
         if (request.getNotes() != null) {
             profile.setNotes(request.getNotes());
         }
+    }
+
+    private String normalizeEnglishLevel(String value) {
+        String level = value.trim().toUpperCase(java.util.Locale.ROOT);
+        if ("NONE".equals(level) || "CET4".equals(level) || "CET6".equals(level)) return level;
+        throw new BusinessException(ApiResponse.CODE_BAD_REQUEST, "英语等级只能为 NONE、CET4 或 CET6");
     }
 }

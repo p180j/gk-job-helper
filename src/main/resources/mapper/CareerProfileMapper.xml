@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.jobhelper.mapper.CareerProfileMapper">
+    <resultMap id="BaseResultMap" type="com.gk.jobhelper.entity.CareerProfile">
+        <id property="id" column="id"/>
+        <result property="profileId" column="profile_id"/>
+        <result property="currentPosition" column="current_position"/>
+        <result property="totalWorkYears" column="total_work_years"/>
+        <result property="careerDirections" column="career_directions"/>
+        <result property="industries" column="industries"/>
+        <result property="educationExperiences" column="education_experiences"/>
+        <result property="workExperiences" column="work_experiences"/>
+        <result property="projectExperiences" column="project_experiences"/>
+        <result property="skills" column="skills"/>
+        <result property="certificates" column="certificates"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <select id="selectByProfileId" resultMap="BaseResultMap">
+        SELECT * FROM career_profile WHERE profile_id = #{profileId}
+    </select>
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM career_profile WHERE id = #{id}
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO career_profile (profile_id, current_position, total_work_years, career_directions, industries,
+                                    education_experiences, work_experiences, project_experiences, skills, certificates, created_at, updated_at)
+        VALUES (#{profileId}, #{currentPosition}, #{totalWorkYears}, #{careerDirections}, #{industries},
+                #{educationExperiences}, #{workExperiences}, #{projectExperiences}, #{skills}, #{certificates}, #{createdAt}, #{updatedAt})
+    </insert>
+    <update id="updateByProfileId">
+        UPDATE career_profile SET current_position = #{currentPosition}, total_work_years = #{totalWorkYears},
+        career_directions = #{careerDirections}, industries = #{industries}, education_experiences = #{educationExperiences},
+        work_experiences = #{workExperiences}, project_experiences = #{projectExperiences}, skills = #{skills}, certificates = #{certificates},
+        updated_at = #{updatedAt} WHERE profile_id = #{profileId}
+    </update>
+    <delete id="deleteAll">DELETE FROM career_profile</delete>
+</mapper>

@@ -25,6 +25,7 @@ public class RemarkMatcher implements JobConditionMatcher {
     private static final Pattern GRADUATE_YEAR = Pattern.compile("限?(\\d{4})届(?:普通高校|普通高等学校)?毕业生");
     private static final Pattern LEGAL_A_CERTIFICATE = Pattern.compile("法律职业资格(?:证书)?A证|法律职业资格考试.*成绩合格");
     private static final Pattern MILITARY_SERVICE_YEARS = Pattern.compile("(?:军队|部队)?服役\\s*(\\d+)\\s*年");
+    private static final Pattern CET_REQUIREMENT = Pattern.compile("(?:全国)?大学英语([四六46])级(?:考试)?(?:成绩)?(?:达到|不低于|不少于)?(\\d{3})?分?(?:及以上|以上)?");
 
     @Override
     public ConditionType support() {
@@ -64,6 +65,12 @@ public class RemarkMatcher implements JobConditionMatcher {
             result = worse(result, certificateResult);
         }
 
+        MatchResult cetResult = matchCet(profile, remark, userValues, reasons);
+        if (cetResult != null) {
+            recognized = true;
+            result = worse(result, cetResult);
+        }
+
         if (containsServiceProjectOrVeteranRestriction(remark)) {
             recognized = true;
             MatchResult serviceResult = matchServiceProjectOrVeteran(profile, remark, userValues, reasons);
@@ -78,6 +85,43 @@ public class RemarkMatcher implements JobConditionMatcher {
         }
 
         return build(result, join(userValues), remarkRaw, join(reasons));
+    }
+
+    private MatchResult matchCet(UserProfile profile, String remark, List<String> userValues, List<String> reasons) {
+        Matcher matcher = CET_REQUIREMENT.matcher(remark);
+        MatchResult result = null;
+        while (matcher.find()) {
+            int requiredLevel = "六".equals(matcher.group(1)) || "6".equals(matcher.group(1)) ? 6 : 4;
+            Integer requiredScore = matcher.group(2) == null ? null : Integer.valueOf(matcher.group(2));
+            String level = TextNormalizer.normalize(profile.getEnglishLevel()).toUpperCase(java.util.Locale.ROOT);
+            userValues.add("英语等级：" + englishLevelDisplay(level));
+            if (level.isEmpty()) {
+                reasons.add("备注要求大学英语" + requiredLevel + "级，但档案尚未选择英语等级，无法确认。 ");
+                result = worse(result == null ? MatchResult.MATCH : result, MatchResult.UNCERTAIN);
+                continue;
+            }
+            int actualLevel = "CET6".equals(level) ? 6 : "CET4".equals(level) ? 4 : 0;
+            if (actualLevel < requiredLevel) {
+                reasons.add("档案英语等级为“" + englishLevelDisplay(level) + "”，不符合大学英语" + requiredLevel + "级要求。");
+                result = worse(result == null ? MatchResult.MATCH : result, MatchResult.NOT_MATCH);
+                continue;
+            }
+            if (requiredScore != null && requiredScore > 425) {
+                reasons.add("档案仅记录英语等级通过，无法确认是否达到" + requiredScore + "分。");
+                result = worse(result == null ? MatchResult.MATCH : result, MatchResult.UNCERTAIN);
+                continue;
+            }
+            reasons.add("档案已通过大学英语" + actualLevel + "级；通过成绩不低于425分，符合岗位要求。 ");
+            result = worse(result == null ? MatchResult.MATCH : result, MatchResult.MATCH);
+        }
+        return result;
+    }
+
+    private String englishLevelDisplay(String level) {
+        if ("CET6".equals(level)) return "已通过六级";
+        if ("CET4".equals(level)) return "已通过四级";
+        if ("NONE".equals(level)) return "未通过四级";
+        return "未填写";
     }
 
     private MatchResult matchGraduateYear(UserProfile profile, int requiredYear,

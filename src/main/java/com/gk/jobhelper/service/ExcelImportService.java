@@ -2,6 +2,8 @@ package com.gk.jobhelper.service;
 
 import com.gk.jobhelper.common.ApiResponse;
 import com.gk.jobhelper.common.BusinessException;
+import com.gk.jobhelper.ai.AiProviderConfig;
+import com.gk.jobhelper.dto.ExcelSheetPreviewVO;
 import com.gk.jobhelper.config.UploadProperties;
 import com.gk.jobhelper.dto.ExcelPreviewResult;
 import com.gk.jobhelper.dto.ExcelPreviewVO;
@@ -47,20 +49,25 @@ public class ExcelImportService {
     private final UploadProperties uploadProperties;
     private final JobPositionMapper jobPositionMapper;
     private final JobMatchMapper jobMatchMapper;
+    private final FieldMappingService fieldMappingService;
+    private final ExcelSheetAiAssistant excelSheetAiAssistant;
 
     public ExcelImportService(ExcelPreviewParser excelPreviewParser,
                               ImportFileMapper importFileMapper,
                               UploadProperties uploadProperties,
                               JobPositionMapper jobPositionMapper,
-                              JobMatchMapper jobMatchMapper) {
+                              JobMatchMapper jobMatchMapper, FieldMappingService fieldMappingService,
+                              ExcelSheetAiAssistant excelSheetAiAssistant) {
         this.excelPreviewParser = excelPreviewParser;
         this.importFileMapper = importFileMapper;
         this.uploadProperties = uploadProperties;
         this.jobPositionMapper = jobPositionMapper;
         this.jobMatchMapper = jobMatchMapper;
+        this.fieldMappingService = fieldMappingService;
+        this.excelSheetAiAssistant = excelSheetAiAssistant;
     }
 
-    public ExcelPreviewVO upload(MultipartFile file) {
+    public ExcelPreviewVO upload(MultipartFile file, AiProviderConfig aiConfig) {
         if (file == null || file.isEmpty()) {
             throw new BusinessException("上传文件不能为空");
         }
@@ -77,30 +84,34 @@ public class ExcelImportService {
         Path storedFile = saveFile(file, extension);
 
         // 2. 解析预览（解析失败则删除已保存文件）
-        ExcelPreviewResult result;
+        List<ExcelPreviewResult> results;
         try {
-            result = excelPreviewParser.parse(storedFile.toFile());
+            results = excelPreviewParser.parseAll(storedFile.toFile());
         } catch (RuntimeException e) {
             deleteQuietly(storedFile);
             throw e;
         }
 
-        // 3. 记录导入文件元信息（保留表头，供后续字段映射使用）
+        List<String> aiSuggestedSheets = excelSheetAiAssistant.suggestPositionSheets(aiConfig, results);
+        List<ExcelSheetPreviewVO> sheets = toSheets(results, aiSuggestedSheets);
+        ExcelPreviewResult primary = choosePrimary(results, sheets);
+
+        // 3. 记录导入文件元信息（默认 Sheet 供旧流程兼容，后续可选择多个 Sheet）
         ImportFile record = new ImportFile();
         record.setOriginalName(fileNameOnly(originalName));
         record.setStoredName(storedFile.getFileName().toString());
         record.setStoredPath(storedFile.toString());
         record.setFileSize(file.getSize());
         record.setFileType(extension);
-        record.setSheetName(result.getSheetName());
-        record.setHeaders(String.join(",", result.getHeaders()));
-        record.setTotalRows(result.getTotalRows());
+        record.setSheetName(primary.getSheetName());
+        record.setHeaders(String.join(",", primary.getHeaders()));
+        record.setTotalRows(primary.getTotalRows());
         record.setExamYear(ImportExamYearResolver.resolve(fileNameOnly(originalName)));
         record.setStatus("PREVIEWED");
         record.setCreatedAt(LocalDateTime.now());
         importFileMapper.insert(record);
 
-        return toVO(record, result);
+        return toVO(record, primary, sheets);
     }
 
     /** 删除一条导入记录及其岗位、匹配结果和已保存的原始文件。 */
@@ -139,7 +150,7 @@ public class ExcelImportService {
         }
     }
 
-    private ExcelPreviewVO toVO(ImportFile record, ExcelPreviewResult result) {
+    private ExcelPreviewVO toVO(ImportFile record, ExcelPreviewResult result, List<ExcelSheetPreviewVO> sheets) {
         ExcelPreviewVO vo = new ExcelPreviewVO();
         vo.setFileId(record.getId());
         vo.setFileName(record.getOriginalName());
@@ -164,7 +175,50 @@ public class ExcelImportService {
             previewRows.add(rowMap);
         }
         vo.setPreviewRows(previewRows);
+        vo.setSheets(sheets);
         return vo;
+    }
+
+    private List<ExcelSheetPreviewVO> toSheets(List<ExcelPreviewResult> results, List<String> aiSuggestedSheets) {
+        List<ExcelSheetPreviewVO> sheets = new ArrayList<>();
+        for (ExcelPreviewResult result : results) {
+            ExcelSheetPreviewVO sheet = new ExcelSheetPreviewVO();
+            sheet.setSheetName(result.getSheetName());
+            sheet.setHeaders(result.getHeaders());
+            sheet.setTotalRows(result.getTotalRows());
+            sheet.setSuggestedForImport(aiSuggestedSheets.contains(result.getSheetName()) || isPositionLike(result));
+            List<Map<String, String>> previewRows = new ArrayList<>();
+            for (Map<Integer, String> rawRow : result.getPreviewRows()) {
+                previewRows.add(toRowMap(result.getHeaders(), rawRow));
+            }
+            sheet.setPreviewRows(previewRows);
+            sheets.add(sheet);
+        }
+        return sheets;
+    }
+
+    private ExcelPreviewResult choosePrimary(List<ExcelPreviewResult> results, List<ExcelSheetPreviewVO> sheets) {
+        for (int i = 0; i < sheets.size(); i++) {
+            if (sheets.get(i).isSuggestedForImport()) return results.get(i);
+        }
+        return results.get(0);
+    }
+
+    private boolean isPositionLike(ExcelPreviewResult sheet) {
+        int recognized = 0;
+        boolean hasPositionName = false;
+        for (String header : sheet.getHeaders()) {
+            String suggested = fieldMappingService.suggest(header).getSuggestedField();
+            if (suggested != null) recognized++;
+            if ("positionName".equals(suggested)) hasPositionName = true;
+        }
+        return hasPositionName && recognized >= 2 && sheet.getTotalRows() > 0;
+    }
+
+    private Map<String, String> toRowMap(List<String> headers, Map<Integer, String> rawRow) {
+        Map<String, String> rowMap = new LinkedHashMap<>();
+        for (int i = 0; i < headers.size(); i++) rowMap.put(headers.get(i), rawRow.get(i) == null ? "" : rawRow.get(i));
+        return rowMap;
     }
 
     private String extensionOf(String name) {

@@ -156,6 +156,22 @@ class Iteration7ApiTest {
     }
 
     @Test
+    void favoriteListShouldFilterByImportFile() throws Exception {
+        favorite(jobIds.get(0));
+        Long anotherImportId = insertImport();
+        JobPosition anotherPosition = position("G007", "历史岗位", "南昌", "东湖区", "省信息中心", null,
+                1, "本科", "计算机类");
+        anotherPosition.setImportFileId(anotherImportId);
+        positionMapper.insertBatch(Arrays.asList(anotherPosition));
+        favorite(anotherPosition.getId());
+
+        JsonNode page = success(get("/api/favorites").param("profileId", profileId.toString())
+                .param("importId", importId.toString()).param("page", "1").param("size", "20")).get("data");
+        assertEquals(1, page.get("total").asInt());
+        assertEquals(jobIds.get(0).longValue(), page.get("items").get(0).get("jobId").asLong());
+    }
+
+    @Test
     void compareTwoJobs() throws Exception {
         JsonNode data = compare(jobIds.subList(0, 2));
         assertEquals(2, data.size());

@@ -5,7 +5,7 @@
 --   CREATE DATABASE gk_job_helper DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 --   USE gk_job_helper;
 -- 存量库升级(Iteration 3 -> 4)请执行 db/migration_iteration4.sql
--- 专业目录内置样例数据见 db/data_major_catalog.sql（数据来源说明见 docs/major-catalog.md）
+-- 专业目录由应用启动时从仓库内官方 CSV 导入（数据来源说明见 docs/major-catalog.md）
 -- =============================================================
 
 -- 用户个人档案（Iteration 1 单档案模式；Iteration 2 补充 8 个档案字段）
@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS user_profile (
     service_project_type  VARCHAR(64)   DEFAULT NULL,            -- 服务基层项目类型
     veteran               VARCHAR(16)   DEFAULT NULL,            -- 退役军人(是/否)
     certificates          VARCHAR(500)  DEFAULT NULL,            -- 持有证书(逗号分隔)
+    english_level         VARCHAR(16)   DEFAULT NULL,            -- 英语等级：NONE/CET4/CET6（通过六级即同时通过四级）
     target_region         VARCHAR(128)  DEFAULT NULL,            -- 目标报考地区
     notes                 VARCHAR(1000) DEFAULT NULL,            -- 备注
     created_at            DATETIME      DEFAULT NULL,            -- 创建时间
@@ -52,6 +53,25 @@ CREATE TABLE IF NOT EXISTS user_education (
     PRIMARY KEY (id)
 );
 CREATE INDEX idx_user_education_profile ON user_education (profile_id, enabled);
+
+-- 招聘职业画像：只保存用户确认后的结构化简历信息，不保存简历原文件和原文。
+CREATE TABLE IF NOT EXISTS career_profile (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    profile_id BIGINT NOT NULL,
+    current_position VARCHAR(255) DEFAULT NULL,
+    total_work_years VARCHAR(64) DEFAULT NULL,
+    career_directions TEXT DEFAULT NULL,
+    industries TEXT DEFAULT NULL,
+    education_experiences TEXT DEFAULT NULL,
+    work_experiences TEXT DEFAULT NULL,
+    project_experiences TEXT DEFAULT NULL,
+    skills TEXT DEFAULT NULL,
+    certificates TEXT DEFAULT NULL,
+    created_at DATETIME DEFAULT NULL,
+    updated_at DATETIME DEFAULT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_career_profile_profile (profile_id)
+);
 
 -- 考试（一次岗位表导入对应一场考试，后续迭代使用）
 CREATE TABLE IF NOT EXISTS exam (
@@ -187,8 +207,8 @@ CREATE INDEX idx_job_favorite_profile_created ON job_favorite (profile_id, creat
 -- =============================================================
 CREATE TABLE IF NOT EXISTS major_catalog (
     id               BIGINT        NOT NULL AUTO_INCREMENT, -- 主键
-    catalog_code     VARCHAR(64)   NOT NULL,                -- 目录编码，如 MOE_UNDERGRADUATE_2026
-    catalog_name     VARCHAR(255)  NOT NULL,                -- 目录名称，如 普通高等学校本科专业目录(2026年)
+    catalog_code     VARCHAR(64)   NOT NULL,                -- 目录编码，如 MOE_UNDERGRADUATE_2024
+    catalog_name     VARCHAR(255)  NOT NULL,                -- 目录名称，如 普通高等学校本科专业目录(2024年)
     catalog_type     VARCHAR(16)   NOT NULL,                -- MOE / EXAM / AGENCY / CUSTOM
     education_level  VARCHAR(16)   NOT NULL,                -- UNDERGRADUATE / GRADUATE / VOCATIONAL / MIXED
     version          VARCHAR(32)   DEFAULT NULL,            -- 目录版本(年份等)
@@ -323,4 +343,7 @@ CREATE TABLE IF NOT EXISTS job_preference (
 CREATE UNIQUE INDEX uk_job_preference_profile ON job_preference (profile_id);
 
 CREATE TABLE IF NOT EXISTS recruitment_source (id BIGINT NOT NULL AUTO_INCREMENT,source_code VARCHAR(64) NOT NULL,source_name VARCHAR(255) NOT NULL,source_type VARCHAR(32) NOT NULL,list_url VARCHAR(1000) NOT NULL,enabled TINYINT NOT NULL DEFAULT 1,last_fetch_time DATETIME DEFAULT NULL,last_fetch_status VARCHAR(255) DEFAULT NULL,created_at DATETIME DEFAULT NULL,updated_at DATETIME DEFAULT NULL,PRIMARY KEY(id),UNIQUE KEY uk_recruitment_source_code(source_code));
-CREATE TABLE IF NOT EXISTS recruitment_notice (id BIGINT NOT NULL AUTO_INCREMENT,source_id BIGINT NOT NULL,title VARCHAR(1000) NOT NULL,notice_url VARCHAR(512) NOT NULL,publish_date DATETIME DEFAULT NULL,notice_type VARCHAR(32) NOT NULL,parent_notice_id BIGINT DEFAULT NULL,user_status VARCHAR(32) NOT NULL,viewed_at DATETIME DEFAULT NULL,discovered_at DATETIME NOT NULL,created_at DATETIME DEFAULT NULL,updated_at DATETIME DEFAULT NULL,PRIMARY KEY(id),UNIQUE KEY uk_recruitment_notice_source_url(source_id,notice_url),KEY idx_recruitment_notice_status(user_status),CONSTRAINT fk_recruitment_notice_source FOREIGN KEY(source_id) REFERENCES recruitment_source(id));
+CREATE TABLE IF NOT EXISTS recruitment_notice (id BIGINT NOT NULL AUTO_INCREMENT,source_id BIGINT NOT NULL,title VARCHAR(1000) NOT NULL,notice_url VARCHAR(512) NOT NULL,publish_date DATETIME DEFAULT NULL,notice_type VARCHAR(32) NOT NULL,parent_notice_id BIGINT DEFAULT NULL,user_status VARCHAR(32) NOT NULL,detail_status VARCHAR(16) NOT NULL DEFAULT 'DISCOVERED',body_html LONGTEXT DEFAULT NULL,body_text LONGTEXT DEFAULT NULL,detail_fetched_at DATETIME DEFAULT NULL,detail_error VARCHAR(500) DEFAULT NULL,viewed_at DATETIME DEFAULT NULL,discovered_at DATETIME NOT NULL,created_at DATETIME DEFAULT NULL,updated_at DATETIME DEFAULT NULL,PRIMARY KEY(id),UNIQUE KEY uk_recruitment_notice_source_url(source_id,notice_url),KEY idx_recruitment_notice_status(user_status),CONSTRAINT fk_recruitment_notice_source FOREIGN KEY(source_id) REFERENCES recruitment_source(id));
+CREATE TABLE IF NOT EXISTS recruitment_attachment (id BIGINT NOT NULL AUTO_INCREMENT,notice_id BIGINT NOT NULL,file_name VARCHAR(1000) NOT NULL,file_url VARCHAR(700) NOT NULL,dedupe_key CHAR(64) NOT NULL,file_type VARCHAR(16) NOT NULL,attachment_type VARCHAR(32) NOT NULL,parse_status VARCHAR(16) NOT NULL DEFAULT 'UNPARSED',parse_error VARCHAR(500) DEFAULT NULL,parsed_at DATETIME DEFAULT NULL,position_count INT NOT NULL DEFAULT 0,source_text VARCHAR(1000) DEFAULT NULL,created_at DATETIME DEFAULT NULL,updated_at DATETIME DEFAULT NULL,PRIMARY KEY(id),UNIQUE KEY uk_recruitment_attachment_notice_dedupe(notice_id,dedupe_key),CONSTRAINT fk_recruitment_attachment_notice FOREIGN KEY(notice_id) REFERENCES recruitment_notice(id));
+CREATE TABLE IF NOT EXISTS recruitment_position (id BIGINT NOT NULL AUTO_INCREMENT,notice_id BIGINT NOT NULL,source_attachment_id BIGINT NOT NULL,organization_name VARCHAR(255) DEFAULT NULL,department_name VARCHAR(255) DEFAULT NULL,position_name VARCHAR(255) NOT NULL,position_code VARCHAR(128) DEFAULT NULL,recruit_count INT DEFAULT NULL,work_location VARCHAR(255) DEFAULT NULL,education_requirement VARCHAR(500) DEFAULT NULL,degree_requirement VARCHAR(500) DEFAULT NULL,major_requirement TEXT,age_requirement VARCHAR(500) DEFAULT NULL,work_years_requirement VARCHAR(500) DEFAULT NULL,responsibility TEXT,other_requirement TEXT,preferred_requirement TEXT,raw_requirement TEXT,source_sheet VARCHAR(255) NOT NULL,source_row INT NOT NULL,created_at DATETIME DEFAULT NULL,updated_at DATETIME DEFAULT NULL,PRIMARY KEY(id),UNIQUE KEY uk_recruitment_position_source(source_attachment_id,source_sheet,source_row),KEY idx_recruitment_position_notice(notice_id),CONSTRAINT fk_recruitment_position_notice FOREIGN KEY(notice_id) REFERENCES recruitment_notice(id),CONSTRAINT fk_recruitment_position_attachment FOREIGN KEY(source_attachment_id) REFERENCES recruitment_attachment(id));
+CREATE TABLE IF NOT EXISTS recruitment_requirement (id BIGINT NOT NULL AUTO_INCREMENT,position_id BIGINT NOT NULL,requirement_type VARCHAR(32) NOT NULL,requirement_level VARCHAR(16) NOT NULL,raw_text TEXT,normalized_value VARCHAR(1000) DEFAULT NULL,source_text TEXT,created_at DATETIME DEFAULT NULL,PRIMARY KEY(id),KEY idx_recruitment_requirement_position(position_id),CONSTRAINT fk_recruitment_requirement_position FOREIGN KEY(position_id) REFERENCES recruitment_position(id) ON DELETE CASCADE);

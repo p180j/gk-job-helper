@@ -13,7 +13,6 @@ spring:
       mode: always
       encoding: UTF-8
       schema-locations: classpath:db/schema.sql
-      data-locations: classpath:db/data_major_catalog.sql
 
 upload:
   # 测试上传目录，避免污染正式 uploads 目录

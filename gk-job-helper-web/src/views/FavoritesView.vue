@@ -1,16 +1,20 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { StarFilled } from '@element-plus/icons-vue'
 import { fetchProfile, isProfileNotFound } from '@/api/profile'
 import { fetchFavorites, removeFavorite } from '@/api/favorites'
+import { fetchImports } from '@/api/import'
 import { showError } from '@/api/http'
 import { matchStatus } from '@/utils/matchStatus'
-import type { MatchPositionResult } from '@/types/model'
+import type { MatchPositionResult, RecentImport } from '@/types/model'
+import PositionLibraryBar from '@/components/PositionLibraryBar.vue'
 
-const router = useRouter()
+const router = useRouter(); const route = useRoute()
 const profileId = ref<number>()
+const imports = ref<RecentImport[]>([])
+const importId = ref<number>()
 const items = ref<MatchPositionResult[]>([])
 const total = ref(0)
 const page = ref(1)
@@ -24,6 +28,10 @@ onMounted(async () => {
     const profile = await fetchProfile()
     if (!profile) return
     profileId.value = profile.id
+    const data = await fetchImports(1, 100)
+    imports.value = data.items.filter(item => item.status === 'IMPORTED')
+    const requested = Number(route.query.importId)
+    importId.value = imports.value.some(item => item.importId === requested) ? requested : imports.value[0]?.importId
     await load()
   } catch (error) {
     if (isProfileNotFound(error)) router.replace('/profile')
@@ -32,10 +40,10 @@ onMounted(async () => {
 })
 
 async function load() {
-  if (!profileId.value) return
+  if (!profileId.value || !importId.value) { items.value = []; total.value = 0; return }
   loading.value = true
   try {
-    const data = await fetchFavorites(profileId.value, page.value, size)
+    const data = await fetchFavorites(profileId.value, importId.value, page.value, size)
     items.value = data.items
     total.value = data.total
   } catch (error) { showError(error, '读取收藏岗位失败。') }
@@ -70,13 +78,16 @@ function startCompare() {
 }
 
 function changePage(value: number) { page.value = value; load() }
+async function changeImport(value: number) { importId.value = value; page.value = 1; selectedIds.value = []; await router.replace({ path: '/favorites', query: { importId: String(value) } }); load() }
 </script>
 
 <template>
   <section>
-    <div class="page-card favorite-head"><h1 class="page-title">我的收藏</h1><p class="page-subtitle">收藏感兴趣的岗位，并选择 2—4 个进行横向对比。</p></div>
+    <PositionLibraryBar :imports="imports" :import-id="importId" active="favorites" @select="changeImport" />
+    <div class="page-card favorite-head"><h2 class="page-title">我的收藏</h2><p class="page-subtitle">按当前职位表查看收藏岗位，并选择 2—4 个进行横向对比。</p></div>
     <div v-loading="loading" class="favorite-list">
-      <el-empty v-if="!items.length && !loading" description="暂无收藏岗位" />
+      <el-empty v-if="!imports.length && !loading" description="暂无已导入的职位表，请先导入职位表。" />
+      <el-empty v-else-if="!items.length && !loading" description="当前职位表暂无收藏岗位" />
       <article v-for="item in items" :key="item.jobId" class="favorite-card">
         <el-checkbox :model-value="selectedIds.includes(item.jobId)" :disabled="selectedCount >= 4 && !selectedIds.includes(item.jobId)" @change="onCompareChange(item.jobId, $event)" />
         <div class="favorite-main">
@@ -93,5 +104,5 @@ function changePage(value: number) { page.value = value; load() }
 </template>
 
 <style scoped>
-.favorite-head{margin-bottom:18px}.favorite-list{min-height:260px;padding-bottom:64px}.favorite-card{display:flex;align-items:center;gap:16px;margin-bottom:14px;padding:20px 22px;border:1px solid #ebeef5;border-radius:10px;background:#fff}.favorite-main{min-width:0;flex:1}.title-line{display:flex;align-items:center;gap:10px}.title-line h2{margin:0;font-size:17px}.favorite-main p{margin:9px 0 14px;color:#606266}.meta{display:flex;flex-wrap:wrap;gap:12px 20px;color:#606266;font-size:13px}.actions{display:flex;align-items:center;white-space:nowrap}.pager{text-align:right;margin:24px 0}.compare-bar{position:fixed;z-index:20;left:50%;bottom:24px;transform:translateX(-50%);min-width:360px;padding:13px 18px;background:#303133;color:#fff;border-radius:10px;box-shadow:0 8px 26px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:space-between;gap:24px}.compare-bar strong{color:#79bbff}
+.favorite-head{margin-bottom:18px}.import-selector{display:flex;align-items:center;gap:14px;margin-top:18px;font-weight:600}.import-selector .el-select{width:min(620px,100%)}.favorite-list{min-height:260px;padding-bottom:64px}.favorite-card{display:flex;align-items:center;gap:16px;margin-bottom:14px;padding:20px 22px;border:1px solid #ebeef5;border-radius:10px;background:#fff}.favorite-main{min-width:0;flex:1}.title-line{display:flex;align-items:center;gap:10px}.title-line h2{margin:0;font-size:17px}.favorite-main p{margin:9px 0 14px;color:#606266}.meta{display:flex;flex-wrap:wrap;gap:12px 20px;color:#606266;font-size:13px}.actions{display:flex;align-items:center;white-space:nowrap}.pager{text-align:right;margin:24px 0}.compare-bar{position:fixed;z-index:20;left:50%;bottom:24px;transform:translateX(-50%);min-width:360px;padding:13px 18px;background:#303133;color:#fff;border-radius:10px;box-shadow:0 8px 26px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:space-between;gap:24px}.compare-bar strong{color:#79bbff}
 </style>

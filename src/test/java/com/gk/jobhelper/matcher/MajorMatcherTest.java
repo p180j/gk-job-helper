@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 专业资格匹配器测试（基于内置官方样例目录: 本科 0809 计算机类 15 个专业 + 研究生 0812/0835/0839/0854）。
+ * 专业资格匹配器测试（基于仓库内完整官方专业目录）。
  * 覆盖: 不限专业 / 名称精确 / 代码精确 / 专业类归属 / 多类别 OR / 相关专业 / 括号排除 /
  * 名称代码冲突 / 学历分段 / 目录优先级 / 同优先级目录冲突。
  * 事务回滚: 测试内插入的考试目录数据不污染其他测试。
@@ -112,7 +112,7 @@ class MajorMatcherTest {
         MatchItemResult result = match("软件工程", null, "本科", "计算机类", null);
         assertResult(result, MatchResult.MATCH);
         assertNotNull(result.getEvidence());
-        assertEquals("MOE_UNDERGRADUATE_2026", result.getEvidence().getCatalogCode());
+        assertEquals("MOE_UNDERGRADUATE_2024", result.getEvidence().getCatalogCode());
         assertEquals("080902", result.getEvidence().getMajorCode());
         assertEquals("软件工程", result.getEvidence().getMajorName());
         assertEquals("0809", result.getEvidence().getParentCode());
@@ -143,9 +143,9 @@ class MajorMatcherTest {
     }
 
     @Test
-    void aliasShouldResolveToOfficialMajor() {
-        // 别名 "计算机科学技术" -> 080901 计算机科学与技术 -> 属于计算机类
-        MatchItemResult result = match("计算机科学技术", null, "本科", "计算机类", null);
+    void officialMajorShouldResolveToClass() {
+        // 官方专业 "计算机科学与技术" -> 属于计算机类
+        MatchItemResult result = match("计算机科学与技术", null, "本科", "计算机类", null);
         assertResult(result, MatchResult.MATCH);
         assertEquals("080901", result.getEvidence().getMajorCode());
     }
@@ -192,7 +192,7 @@ class MajorMatcherTest {
 
     @Test
     void unknownUserMajorShouldBeUncertain() {
-        MatchItemResult result = match("哲学", null, "本科", "计算机类", null);
+        MatchItemResult result = match("未收录测试专业", null, "本科", "计算机类", null);
         assertResult(result, MatchResult.UNCERTAIN);
         assertTrue(result.getReason().contains("未收录"));
     }
@@ -305,7 +305,7 @@ class MajorMatcherTest {
 
     @Test
     void graduateDisciplineShouldMatchInGraduateCatalog() {
-        MatchItemResult result = match("计算机科学与技术", null, "硕士研究生", "0812 计算机科学与技术", null);
+        MatchItemResult result = match("计算机科学与技术（可授工学、理学学位）", "0812", "硕士研究生", "0812", null);
         assertResult(result, MatchResult.MATCH);
         assertEquals("MOE_GRADUATE_2022", result.getEvidence().getCatalogCode());
         assertEquals("0812", result.getEvidence().getMajorCode());
@@ -336,8 +336,8 @@ class MajorMatcherTest {
 
     @Test
     void multipleClassesWithUnrecognizedOneShouldBeUncertain() {
-        // 用户明确不属于已识别的法学类，但"电子信息类"未收录 -> 不能直接 NOT_MATCH -> UNCERTAIN
-        MatchItemResult result = match("软件工程", "080902", "本科", "法学类、电子信息类", null);
+        // 用户明确不属于已识别的法学类，但另一专业类未收录 -> 不能直接 NOT_MATCH -> UNCERTAIN
+        MatchItemResult result = match("软件工程", "080902", "本科", "法学类、未收录测试专业类", null);
         assertResult(result, MatchResult.UNCERTAIN);
         assertTrue(result.getReason().contains("未收录"));
     }
@@ -348,8 +348,8 @@ class MajorMatcherTest {
 
     @Test
     void noAvailableCatalogShouldBeUncertain() {
-        // 专科层级无对应目录且岗位无考试绑定 -> 无可用目录
-        MatchItemResult result = match("软件工程", null, "大专", "计算机类", null);
+        // 中专层级无对应目录且岗位无考试绑定 -> 无可用目录
+        MatchItemResult result = match("软件工程", null, "中专", "计算机类", null);
         assertResult(result, MatchResult.UNCERTAIN);
         assertTrue(result.getReason().contains("无可用专业目录"));
     }

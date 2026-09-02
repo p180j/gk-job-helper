@@ -9,7 +9,6 @@ import com.gk.jobhelper.mapper.MajorCatalogMapper;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,6 @@ import java.util.Map;
  * 目录文件由 tools/generate_major_catalog.py 从 docs 中记载的官方原件生成。
  */
 @Component
-@Profile("!test")
 public class MajorCatalogCsvImporter {
 
     private final MajorCatalogMapper catalogMapper;

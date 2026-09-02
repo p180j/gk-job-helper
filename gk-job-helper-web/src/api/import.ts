@@ -6,24 +6,26 @@ import type {
   MappingItem,
   ImportProgress,
   RecentImport,
-  PageVO
+  PageVO,
+  AiProviderConfig
 } from '@/types/model'
 
 /** 上传 Excel 职位表并返回预览（multipart，由 axios 自动携带 boundary） */
-export function uploadExcel(file: File): Promise<ExcelPreview> {
+export function uploadExcel(file: File, aiConfig?: AiProviderConfig | null): Promise<ExcelPreview> {
   const formData = new FormData()
   formData.append('file', file)
+  if (aiConfig?.apiKey.trim()) formData.append('aiConfig', JSON.stringify(aiConfig))
   return post<ExcelPreview>('/api/import/upload', formData)
 }
 
 /** 字段映射建议预览 */
-export function fetchMapping(importId: number): Promise<FieldMappingPreview> {
-  return get<FieldMappingPreview>(`/api/import/${importId}/mapping`)
+export function fetchMapping(importId: number, sheetNames?: string[]): Promise<FieldMappingPreview> {
+  return get<FieldMappingPreview>(`/api/import/${importId}/mapping`, { params: sheetNames?.length ? { sheetNames: sheetNames.join(',') } : undefined })
 }
 
 /** 按确认的映射正式导入岗位 */
-export function confirmImport(importId: number, mappings: MappingItem[]): Promise<ImportResult> {
-  return post<ImportResult>(`/api/import/${importId}/confirm`, { mappings })
+export function confirmImport(importId: number, mappings: MappingItem[], sheetNames: string[]): Promise<ImportResult> {
+  return post<ImportResult>(`/api/import/${importId}/confirm`, { mappings, sheetNames })
 }
 
 export function fetchImportProgress(importId: number): Promise<ImportProgress> {

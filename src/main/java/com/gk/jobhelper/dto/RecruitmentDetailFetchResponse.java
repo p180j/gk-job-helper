@@ -1,0 +1,2 @@
+package com.gk.jobhelper.dto;
+public class RecruitmentDetailFetchResponse {private final Long noticeId;private final String detailStatus;private final int attachmentCount;public RecruitmentDetailFetchResponse(Long id,String status,int count){noticeId=id;detailStatus=status;attachmentCount=count;}public Long getNoticeId(){return noticeId;}public String getDetailStatus(){return detailStatus;}public int getAttachmentCount(){return attachmentCount;}}

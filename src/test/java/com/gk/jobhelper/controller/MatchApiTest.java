@@ -124,7 +124,7 @@ class MatchApiTest {
         assertTrue(items.get(4).get("reason").asText().contains("计算机类(0809)"));
         JsonNode evidence = items.get(4).get("evidence");
         assertNotNull(evidence);
-        assertEquals("MOE_UNDERGRADUATE_2026", evidence.get("catalogCode").asText());
+        assertEquals("MOE_UNDERGRADUATE_2024", evidence.get("catalogCode").asText());
         assertEquals("080902", evidence.get("majorCode").asText());
         assertEquals("0809", evidence.get("parentCode").asText());
 
@@ -143,7 +143,7 @@ class MatchApiTest {
         JobMatchItem majorItem = persistedItems.get(4);
         assertEquals("MAJOR", majorItem.getConditionType());
         assertNotNull(majorItem.getEvidence());
-        assertTrue(majorItem.getEvidence().contains("MOE_UNDERGRADUATE_2026"));
+        assertTrue(majorItem.getEvidence().contains("MOE_UNDERGRADUATE_2024"));
     }
 
     @Test
@@ -185,7 +185,7 @@ class MatchApiTest {
         JsonNode majorItem = data.get("items").get(4);
         assertEquals("MAJOR", majorItem.get("conditionType").asText());
         assertNotNull(majorItem.get("evidence"));
-        assertEquals("MOE_UNDERGRADUATE_2026",
+        assertEquals("MOE_UNDERGRADUATE_2024",
                 majorItem.get("evidence").get("catalogCode").asText());
 
         // UNCERTAIN 岗位明细: 各条件 reason 可读

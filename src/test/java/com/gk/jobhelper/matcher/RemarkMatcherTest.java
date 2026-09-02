@@ -82,6 +82,25 @@ class RemarkMatcherTest {
     }
 
     @Test
+    void cetPassShouldMeet425ThresholdAndCet6ShouldMeetCet4() {
+        UserProfile profile = new UserProfile();
+        profile.setEnglishLevel("CET6");
+        assertEquals(MatchResult.MATCH, match(profile, "全国大学英语四级考试成绩达到425分及以上").getResult());
+        assertEquals(MatchResult.MATCH, match(profile, "全国大学英语六级考试成绩达到425分及以上").getResult());
+        profile.setEnglishLevel("CET4");
+        assertEquals(MatchResult.NOT_MATCH, match(profile, "全国大学英语六级考试成绩达到425分及以上").getResult());
+        profile.setEnglishLevel("NONE");
+        assertEquals(MatchResult.NOT_MATCH, match(profile, "全国大学英语四级考试成绩达到425分及以上").getResult());
+    }
+
+    @Test
+    void cetScoreAbovePassLineShouldRequireConfirmation() {
+        UserProfile profile = new UserProfile();
+        profile.setEnglishLevel("CET6");
+        assertEquals(MatchResult.UNCERTAIN, match(profile, "大学英语六级成绩达到500分及以上").getResult());
+    }
+
+    @Test
     void unknownQualificationRestrictionShouldBeUncertain() {
         assertEquals(MatchResult.UNCERTAIN,
                 match(new UserProfile(), "限本县事业单位工作5年以上人员报考").getResult());

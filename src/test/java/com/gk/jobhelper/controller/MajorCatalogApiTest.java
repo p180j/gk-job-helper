@@ -27,8 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class MajorCatalogApiTest {
 
-    private static final Long UNDERGRADUATE_CATALOG_ID = 1L;
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -37,10 +35,10 @@ class MajorCatalogApiTest {
     @Test
     void listCatalogsShouldReturnBuiltInCatalogs() throws Exception {
         JsonNode data = getJson("/api/major/catalogs");
-        assertEquals(2, data.size());
+        assertEquals(3, data.size());
 
         JsonNode undergraduate = data.get(0);
-        assertEquals("MOE_UNDERGRADUATE_2026", undergraduate.get("catalogCode").asText());
+        assertEquals("MOE_UNDERGRADUATE_2024", undergraduate.get("catalogCode").asText());
         assertEquals("MOE", undergraduate.get("catalogType").asText());
         assertEquals("UNDERGRADUATE", undergraduate.get("educationLevel").asText());
         assertEquals("中华人民共和国教育部", undergraduate.get("sourceName").asText());
@@ -48,11 +46,12 @@ class MajorCatalogApiTest {
         JsonNode graduate = data.get(1);
         assertEquals("MOE_GRADUATE_2022", graduate.get("catalogCode").asText());
         assertEquals("GRADUATE", graduate.get("educationLevel").asText());
+        assertEquals("MOE_VOCATIONAL_2021", data.get(2).get("catalogCode").asText());
     }
 
     @Test
     void listCatalogItemsShouldSupportKeywordFilter() throws Exception {
-        JsonNode data = getJson("/api/major/catalogs/" + UNDERGRADUATE_CATALOG_ID + "/items?keyword=软件");
+        JsonNode data = getJson("/api/major/catalogs/" + undergraduateCatalogId() + "/items?keyword=软件");
         assertTrue(data.get("total").asLong() >= 1);
         boolean found = false;
         for (JsonNode item : data.get("items")) {
@@ -68,7 +67,7 @@ class MajorCatalogApiTest {
 
     @Test
     void listCatalogItemsShouldSupportMajorCodeFilter() throws Exception {
-        JsonNode data = getJson("/api/major/catalogs/" + UNDERGRADUATE_CATALOG_ID + "/items?majorCode=080902");
+        JsonNode data = getJson("/api/major/catalogs/" + undergraduateCatalogId() + "/items?majorCode=080902");
         assertEquals(1, data.get("total").asLong());
         JsonNode item = data.get("items").get(0);
         assertEquals("软件工程", item.get("majorName").asText());
@@ -77,7 +76,7 @@ class MajorCatalogApiTest {
 
     @Test
     void listCatalogItemsShouldSupportMajorNameFilterAndPaging() throws Exception {
-        JsonNode page1 = getJson("/api/major/catalogs/" + UNDERGRADUATE_CATALOG_ID
+        JsonNode page1 = getJson("/api/major/catalogs/" + undergraduateCatalogId()
                 + "/items?majorName=技术&page=1&size=5");
         assertTrue(page1.get("total").asLong() > 5);
         assertEquals(5, page1.get("items").size());
@@ -86,10 +85,9 @@ class MajorCatalogApiTest {
 
     @Test
     void listCatalogItemsShouldReturnAllWithoutFilter() throws Exception {
-        JsonNode data = getJson("/api/major/catalogs/" + UNDERGRADUATE_CATALOG_ID + "/items?size=100");
-        // 08 工学 + 0809 计算机类 + 15 个专业 + 03 法学 + 0301 法学类 + 法学
-        assertEquals(20, data.get("total").asLong());
-        assertEquals(20, data.get("items").size());
+        JsonNode data = getJson("/api/major/catalogs/" + undergraduateCatalogId() + "/items?size=100");
+        assertEquals(917, data.get("total").asLong());
+        assertEquals(100, data.get("items").size());
     }
 
     @Test
@@ -105,7 +103,7 @@ class MajorCatalogApiTest {
         assertTrue(data.size() >= 2);
 
         JsonNode undergraduate = data.get(0);
-        assertEquals("MOE_UNDERGRADUATE_2026", undergraduate.get("catalogCode").asText());
+        assertEquals("MOE_UNDERGRADUATE_2024", undergraduate.get("catalogCode").asText());
         assertEquals("080902", undergraduate.get("majorCode").asText());
         assertEquals("软件工程", undergraduate.get("majorName").asText());
         assertEquals("0809", undergraduate.get("parentCode").asText());
@@ -140,6 +138,16 @@ class MajorCatalogApiTest {
         JsonNode root = readTree(result);
         assertEquals(0, root.get("code").asInt());
         return root.get("data");
+    }
+
+    private long undergraduateCatalogId() throws Exception {
+        JsonNode catalogs = getJson("/api/major/catalogs");
+        for (JsonNode catalog : catalogs) {
+            if ("MOE_UNDERGRADUATE_2024".equals(catalog.get("catalogCode").asText())) {
+                return catalog.get("id").asLong();
+            }
+        }
+        throw new AssertionError("未找到完整本科专业目录");
     }
 
     private JsonNode readTree(MvcResult result) throws Exception {

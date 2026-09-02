@@ -7,6 +7,7 @@ import { fetchProfile, isProfileNotFound } from '@/api/profile'
 import { deleteImport, fetchImports } from '@/api/import'
 import { showError } from '@/api/http'
 import { fetchMatchProgress, type MatchProgress } from '@/api/match'
+import { loadAiProviderConfig } from '@/utils/aiConfig'
 import type { RecentImport, UserProfile } from '@/types/model'
 
 const router = useRouter()
@@ -18,6 +19,8 @@ const page = ref(1)
 const pageSize = 10
 const loading = ref(true)
 const matchProgress = ref<MatchProgress | null>(null)
+const aiConfigured = ref(false)
+const aiModelSummary = ref('')
 let progressTimer: number | undefined
 const profileSummary = computed(() => profile.value ? `${profile.value.education ?? '学历未填'} · ${profile.value.major ?? '专业未填'} · ${profile.value.birthDate ? `${new Date().getFullYear() - new Date(profile.value.birthDate).getFullYear()}岁` : '年龄未填'}` : '')
 const matchingImportId = computed(() => {
@@ -30,6 +33,9 @@ const matching = computed(() => matchingImportId.value !== null
 const matchingRecord = computed(() => records.value.find(record => record.importId === matchingImportId.value))
 
 onMounted(async () => {
+  const aiConfig = loadAiProviderConfig()
+  aiConfigured.value = !!aiConfig
+  aiModelSummary.value = aiConfig ? `${aiConfig.provider === 'DEEPSEEK' ? 'DeepSeek' : aiConfig.provider} · ${aiConfig.model}` : ''
   try { profile.value = await fetchProfile() } catch (error) { if (!isProfileNotFound(error)) showError(error, '读取个人档案失败。') }
   await loadRecords()
   const importId = Number(route.query.matching)
@@ -123,6 +129,7 @@ function openProgressResult() {
       <el-button type="primary" size="large" :icon="UploadFilled" @click="router.push('/import')">上传职位表</el-button>
     </div>
     <div class="page-card profile-card"><h2 class="page-title">我的报考档案</h2><template v-if="profile"><p class="profile-main">{{ profileSummary }}</p><p class="muted">{{ profile.politicalStatus ?? '政治面貌未填' }} · {{ profile.workYears ?? 0 }}年基层工作经历</p><el-button @click="router.push('/profile')">编辑档案</el-button></template><el-empty v-else description="请先完善报考档案" :image-size="72"><el-button type="primary" @click="router.push('/profile')">立即创建</el-button></el-empty></div>
+    <div class="page-card ai-card"><div><h2 class="page-title">AI 助手</h2><p class="page-subtitle">{{ aiConfigured ? `当前模型：${aiModelSummary}，可辅助识别职位表 Tab。` : '尚未配置 AI；不配置也可以正常导入和匹配。' }}</p></div><el-button :type="aiConfigured ? 'default' : 'primary'" @click="router.push('/ai-settings')">{{ aiConfigured ? '修改配置' : '配置 AI' }}</el-button></div>
     <div class="page-card recent-card">
       <h2 class="page-title">我的匹配记录</h2>
       <p class="page-subtitle">可查看、继续导入或删除指定职位表记录。</p>
@@ -190,7 +197,7 @@ function openProgressResult() {
 </template>
 
 <style scoped>
-.hero { background: #fff; border-radius: 8px; padding: 30px 34px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #409eff; }.hero h1 { margin: 0 0 8px; font-size: 26px; }.hero p { margin: 0; color: #606266; }.profile-card { min-height: 175px; }.profile-main { font-size: 18px; margin: 28px 0 8px; }.recent-card { margin-top: 20px; }.progress-panel { margin: 20px 0 14px; padding: 16px 18px; border: 1px solid #a0cfff; border-radius: 8px; background: #ecf5ff; }.progress-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }.progress-meta { display: block; margin-bottom: 8px; color: #606266; }.row-matching-tag { margin-left: 10px; }.match-count { margin-right: 12px; white-space: nowrap; }.success { color: #67c23a; }.warning { color: #e6a23c; }.danger { color: #f56c6c; }.pager { margin-top: 20px; text-align: right; }
+.hero { background: #fff; border-radius: 8px; padding: 30px 34px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #409eff; }.hero h1 { margin: 0 0 8px; font-size: 26px; }.hero p { margin: 0; color: #606266; }.profile-card { min-height: 175px; }.profile-main { font-size: 18px; margin: 28px 0 8px; }.ai-card{margin-top:20px;display:flex;justify-content:space-between;align-items:center}.ai-card .page-subtitle{margin-bottom:0}.recent-card { margin-top: 20px; }.progress-panel { margin: 20px 0 14px; padding: 16px 18px; border: 1px solid #a0cfff; border-radius: 8px; background: #ecf5ff; }.progress-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }.progress-meta { display: block; margin-bottom: 8px; color: #606266; }.row-matching-tag { margin-left: 10px; }.match-count { margin-right: 12px; white-space: nowrap; }.success { color: #67c23a; }.warning { color: #e6a23c; }.danger { color: #f56c6c; }.pager { margin-top: 20px; text-align: right; }
 :deep(.el-table .matching-row > td.el-table__cell) { background: #ecf5ff !important; }
 :global(.delete-confirm-dialog) { width: 430px; max-width: calc(100vw - 32px); padding: 22px 24px 18px; border-radius: 12px; }
 :global(.delete-confirm-dialog .el-message-box__title) { font-size: 18px; font-weight: 600; color: #303133; }

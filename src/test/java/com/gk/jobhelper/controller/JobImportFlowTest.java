@@ -1,6 +1,7 @@
 package com.gk.jobhelper.controller;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -158,6 +159,32 @@ class JobImportFlowTest {
 
         assertEquals(2, second.get("successRows").asInt());
         assertEquals(2, jobPositionMapper.selectByImportFileId(importId).size());
+    }
+
+    @Test
+    void confirmShouldMergeSelectedSheetsAndKeepSourceSheet() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "国考多地区岗位表.xlsx", XLSX_CONTENT_TYPE, buildMultiSheetExcel());
+        JsonNode upload = readTree(mockMvc.perform(multipart("/api/import/upload").file(file))
+                .andExpect(status().isOk()).andReturn());
+        assertEquals(0, upload.get("code").asInt());
+        long importId = upload.get("data").get("fileId").asLong();
+        assertEquals(2, upload.get("data").get("sheets").size());
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("mappings", defaultUserMappings());
+        body.put("sheetNames", Arrays.asList("北京", "其他地区"));
+        MvcResult result = mockMvc.perform(post("/api/import/" + importId + "/confirm")
+                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isOk()).andReturn();
+        assertEquals(0, readTree(result).get("code").asInt());
+        JsonNode progress = waitForImport(importId);
+        assertEquals(2, progress.get("successRows").asInt());
+
+        List<JobPosition> positions = jobPositionMapper.selectByImportFileId(importId);
+        assertEquals(2, positions.size());
+        assertTrue(positions.stream().anyMatch(item -> "北京".equals(item.getSourceSheet())));
+        assertTrue(positions.stream().anyMatch(item -> "其他地区".equals(item.getSourceSheet())));
     }
 
     @Test
@@ -385,6 +412,23 @@ class JobImportFlowTest {
         rows.add(Arrays.asList("部门C", "网络管理员", null, "2", "7000"));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         EasyExcel.write(out).excelType(ExcelTypeEnum.XLSX).sheet(SHEET_NAME).doWrite(rows);
+        return out.toByteArray();
+    }
+
+    private byte[] buildMultiSheetExcel() throws IOException {
+        List<List<String>> headersAndRow = new ArrayList<>();
+        headersAndRow.add(Arrays.asList("招录机关", "岗位名称", "职位代码", "招聘人数", "薪资待遇"));
+        headersAndRow.add(Arrays.asList("测试部门", "测试岗位", "9001001", "1", "-"));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExcelWriter writer = EasyExcel.write(out).excelType(ExcelTypeEnum.XLSX).build();
+        try {
+            writer.write(headersAndRow, EasyExcel.writerSheet("北京").build());
+            List<List<String>> other = new ArrayList<>(headersAndRow);
+            other.set(1, Arrays.asList("测试部门", "其他岗位", "9001002", "1", "-"));
+            writer.write(other, EasyExcel.writerSheet("其他地区").build());
+        } finally {
+            writer.finish();
+        }
         return out.toByteArray();
     }
 }

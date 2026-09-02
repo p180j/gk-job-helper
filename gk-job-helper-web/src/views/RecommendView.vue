@@ -10,6 +10,7 @@ import { fetchImports } from '@/api/import'
 import { showError } from '@/api/http'
 import type { JobPreference, RecommendationItem, RecentImport } from '@/types/model'
 import { normalizeRegionPreference, regionOptions } from '@/constants/regions'
+import PositionLibraryBar from '@/components/PositionLibraryBar.vue'
 
 const route=useRoute(),router=useRouter();const profileId=ref<number>();const loading=ref(false),saving=ref(false);const items=ref<RecommendationItem[]>([]),total=ref(0),page=ref(1),priority=ref('');const imports=ref<RecentImport[]>([]),selectedImportId=ref<number>();const size=20
 const currentImport=computed(()=>imports.value.find(item=>item.importId===selectedImportId.value))
@@ -31,8 +32,9 @@ function openDetail(positionId:number){router.push({path:`/jobs/${positionId}`,q
 </script>
 
 <template><section>
- <div class="page-card preference"><div class="head"><div><h1 class="page-title">为我优选</h1><p class="page-subtitle">仅从当前岗位表“可以报”的岗位中优选，不改变资格匹配结论。</p></div><router-link v-if="selectedImportId" :to="interviewImportRoute"><el-button>导入进面名单</el-button></router-link></div>
-  <div class="current-import"><span class="context-label">当前岗位表</span><el-select v-model="selectedImportId" placeholder="请选择已完成匹配的岗位表" @change="changeImport"><el-option v-for="record in imports" :key="record.importId" :label="`${record.fileName}${record.examYear?`（${record.examYear}）`:''}`" :value="record.importId" /></el-select><div v-if="currentImport" class="context-summary"><strong>{{ currentImport.matchStats.match }}</strong><span>个 MATCH 岗位</span><i></i><strong>{{ currentImport.examYear||'—' }}</strong><span>进面年度</span></div></div>
+ <PositionLibraryBar :imports="imports" :import-id="selectedImportId" active="recommend" @select="selectedImportId = $event; changeImport()" />
+ <div class="page-card preference"><div class="head"><div><h2 class="page-title">为我优选</h2><p class="page-subtitle">仅从当前岗位表“可以报”的岗位中优选，不改变资格匹配结论。</p></div><router-link v-if="selectedImportId" :to="interviewImportRoute"><el-button>导入进面名单</el-button></router-link></div>
+  <div v-if="currentImport" class="context-summary"><strong>{{ currentImport.matchStats.match }}</strong><span>个 MATCH 岗位</span><i></i><strong>{{ currentImport.examYear||'—' }}</strong><span>进面年度</span></div>
   <el-form label-position="top"><div class="pref-grid">
    <el-form-item label="偏好地区"><el-cascader v-model="preference.preferredRegions" :options="regionOptions" :props="regionCascaderProps" clearable collapse-tags collapse-tags-tooltip filterable placeholder="先选省份，再选择市或区" /></el-form-item>
    <el-form-item label="接受的单位层级"><el-select v-model="preference.acceptedOrgLevels" multiple clearable><el-option v-for="o in orgOptions" :key="o.value" :label="o.label" :value="o.value" /></el-select></el-form-item>

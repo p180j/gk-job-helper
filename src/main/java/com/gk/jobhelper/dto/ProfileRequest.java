@@ -67,6 +67,10 @@ public class ProfileRequest {
     @Size(max = 500, message = "长度不能超过 500")
     private String certificates;
 
+    /** 英语等级：NONE / CET4 / CET6；通过六级即同时通过四级。 */
+    @Size(max = 16, message = "长度不能超过 16")
+    private String englishLevel;
+
     @Size(max = 128, message = "长度不能超过 128")
     private String targetRegion;
 
@@ -200,6 +204,9 @@ public class ProfileRequest {
     public void setCertificates(String certificates) {
         this.certificates = certificates;
     }
+
+    public String getEnglishLevel() { return englishLevel; }
+    public void setEnglishLevel(String englishLevel) { this.englishLevel = englishLevel; }
 
     public String getTargetRegion() {
         return targetRegion;

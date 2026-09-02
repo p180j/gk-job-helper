@@ -185,6 +185,7 @@ class ProfileApiTest {
         body.put("serviceProjectType", "无");
         body.put("veteran", "否");
         body.put("certificates", "法律职业资格证,英语六级");
+        body.put("englishLevel", "CET6");
 
         JsonNode data = performPost(body);
         assertEquals("学士", data.get("degree").asText());
@@ -195,6 +196,7 @@ class ProfileApiTest {
         assertEquals("无", data.get("serviceProjectType").asText());
         assertEquals("否", data.get("veteran").asText());
         assertEquals("法律职业资格证,英语六级", data.get("certificates").asText());
+        assertEquals("CET6", data.get("englishLevel").asText());
 
         // 更新仅修改新增字段，其余保持原值
         Map<String, Object> update = new LinkedHashMap<>();

@@ -4,9 +4,25 @@ export interface ApiResponse<T> {
   message: string
   data: T | null
 }
+
+export interface AiProviderConfig {
+  provider: string
+  model: string
+  apiKey: string
+  baseUrl: string
+}
+
+export interface AiTestResult {
+  success: boolean
+  message: string
+}
 export type RecruitmentNoticeStatus='NEW'|'INTERESTED'|'FOLLOWING'|'IGNORED'
-export interface RecruitmentNotice {id:number;title:string;noticeUrl:string;publishDate:string|null;noticeType:string;userStatus:RecruitmentNoticeStatus;viewedAt:string|null;discoveredAt:string;sourceCode:string;sourceName:string}
+export interface RecruitmentAttachment {id:number;fileName:string;fileUrl:string;fileType:string;attachmentType:string;parseStatus?:'UNPARSED'|'PARSING'|'PARSED'|'FAILED';parseError?:string|null;positionCount?:number;sourceText:string|null}
+export interface RecruitmentNotice {id:number;title:string;noticeUrl:string;publishDate:string|null;noticeType:string;userStatus:RecruitmentNoticeStatus;viewedAt:string|null;discoveredAt:string;sourceCode:string;sourceName:string;detailStatus?:'DISCOVERED'|'FETCHING'|'FETCHED'|'FAILED';detailFetchedAt?:string|null;detailError?:string|null;bodyHtml?:string|null;bodyText?:string|null;attachments?:RecruitmentAttachment[]}
 export interface RecruitmentDiscoveryResult {fetchedCount:number;newCount:number;duplicateCount:number;failedCount:number}
+export interface RecruitmentRequirement {id:number;requirementType:string;requirementLevel:string;rawText:string|null;normalizedValue:string|null;sourceText:string|null}
+export interface RecruitmentPosition {id:number;noticeId:number;sourceAttachmentId:number;organizationName:string|null;departmentName:string|null;positionName:string;positionCode:string|null;recruitCount:number|null;workLocation:string|null;educationRequirement:string|null;degreeRequirement:string|null;majorRequirement:string|null;ageRequirement:string|null;workYearsRequirement:string|null;responsibility:string|null;otherRequirement:string|null;preferredRequirement:string|null;rawRequirement:string|null;sourceSheet:string;sourceRow:number;requirements?:RecruitmentRequirement[]}
+export interface RecruitmentPositionExtractionResponse {noticeId:number;attachmentCount:number;positionCount:number;failedAttachmentCount:number}
 
 /** 用户个人档案 */
 export interface UserProfile {
@@ -27,11 +43,56 @@ export interface UserProfile {
   serviceProjectType: string | null
   veteran: string | null
   certificates: string | null
+  englishLevel: 'NONE' | 'CET4' | 'CET6' | null
   targetRegion: string | null
   notes: string | null
 }
 
 export type ProfileForm = Omit<UserProfile, 'id'> & { id?: number }
+
+export interface CareerEducation {
+  school: string | null
+  degree: string | null
+  major: string | null
+  startDate: string | null
+  endDate: string | null
+  description: string | null
+}
+
+export interface CareerWorkExperience {
+  company: string | null
+  position: string | null
+  startDate: string | null
+  endDate: string | null
+  description: string | null
+}
+
+export interface CareerProjectExperience {
+  name: string | null
+  role: string | null
+  startDate: string | null
+  endDate: string | null
+  description: string | null
+}
+
+export interface CareerProfileDraft {
+  fileName?: string
+  currentPosition: string | null
+  totalWorkYears: string | null
+  careerDirections: string[]
+  industries: string[]
+  educationExperiences: CareerEducation[]
+  workExperiences: CareerWorkExperience[]
+  projectExperiences: CareerProjectExperience[]
+  skills: string[]
+  certificates: string[]
+}
+
+export interface CareerProfile extends CareerProfileDraft {
+  id: number
+  profileId: number
+  updatedAt: string | null
+}
 
 /** Excel 上传预览 */
 export interface ExcelPreview {
@@ -42,6 +103,15 @@ export interface ExcelPreview {
   headers: string[]
   totalRows: number
   previewRows: Array<Record<string, string>>
+  sheets: ExcelSheetPreview[]
+}
+
+export interface ExcelSheetPreview {
+  sheetName: string
+  headers: string[]
+  totalRows: number
+  previewRows: Array<Record<string, string>>
+  suggestedForImport: boolean
 }
 
 /** 字段映射置信度 */
@@ -57,6 +127,7 @@ export interface FieldMappingPreview {
   importId: number
   sheetName: string
   headers: HeaderSuggestion[]
+  sheets: ExcelSheetPreview[]
 }
 
 export interface MappingItem {
