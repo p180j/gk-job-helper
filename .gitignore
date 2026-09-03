@@ -86,4 +86,4 @@ atlassian-ide-plugin.xml
 /uploads/
 /data/*.xls
 /data/*.xlsx!
-/runtime-logs/
+runtime-logs/
