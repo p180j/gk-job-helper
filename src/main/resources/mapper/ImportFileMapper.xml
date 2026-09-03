@@ -31,14 +31,14 @@
     <select id="selectLatest" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM import_file
-        ORDER BY id DESC
+        ORDER BY created_at DESC, id DESC
         LIMIT 1
     </select>
 
     <select id="selectPage" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM import_file
-        ORDER BY id DESC
+        ORDER BY created_at DESC, id DESC
         LIMIT #{offset}, #{size}
     </select>
 

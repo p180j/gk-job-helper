@@ -82,6 +82,14 @@ class RemarkMatcherTest {
     }
 
     @Test
+    void plainCollegeGraduateAndGenderRestrictionsShouldNotBeTreatedAsInformationalText() {
+        MatchItemResult result = match(new UserProfile(), "2026届高校毕业生，男性");
+        assertEquals(MatchResult.UNCERTAIN, result.getResult());
+        assertTrue(result.getReason().contains("2026届毕业生"));
+        assertTrue(result.getReason().contains("性别"));
+    }
+
+    @Test
     void cetPassShouldMeet425ThresholdAndCet6ShouldMeetCet4() {
         UserProfile profile = new UserProfile();
         profile.setEnglishLevel("CET6");

@@ -9,7 +9,11 @@ public class MatchResultQuery {
     private Long importFileId;
     /** MATCH / UNCERTAIN / NOT_MATCH，null 表示不过滤 */
     private String matchResult;
+    /** 兼容旧接口传入的完整地区文本。 */
     private String region;
+    /** 级联地区筛选拆出的省份和市/区名称。 */
+    private String regionProvince;
+    private String regionLocality;
     private String organizationKeyword;
     private String positionKeyword;
     private Integer recruitCountMin;
@@ -45,6 +49,10 @@ public class MatchResultQuery {
 
     public String getRegion() { return region; }
     public void setRegion(String region) { this.region = region; }
+    public String getRegionProvince() { return regionProvince; }
+    public void setRegionProvince(String regionProvince) { this.regionProvince = regionProvince; }
+    public String getRegionLocality() { return regionLocality; }
+    public void setRegionLocality(String regionLocality) { this.regionLocality = regionLocality; }
     public String getOrganizationKeyword() { return organizationKeyword; }
     public void setOrganizationKeyword(String organizationKeyword) { this.organizationKeyword = organizationKeyword; }
     public String getPositionKeyword() { return positionKeyword; }

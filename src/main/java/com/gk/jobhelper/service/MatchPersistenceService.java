@@ -17,7 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 匹配结果持久化服务：独立事务保存 job_match + job_match_item。
@@ -40,49 +43,72 @@ public class MatchPersistenceService {
     @Transactional
     public void persist(UserProfile profile, JobPosition position, MatchResult overall,
                         LocalDate referenceDate, List<MatchItemResult> items) {
-        LocalDateTime now = LocalDateTime.now();
-        Long matchId;
+        persistBatch(profile, Collections.singletonList(new PendingMatch(position, overall, referenceDate, items)));
+    }
 
-        JobMatch existing = jobMatchMapper.selectByProfileAndPosition(profile.getId(), position.getId());
-        if (existing != null) {
-            existing.setMatchResult(overall.name());
-            existing.setReferenceDate(referenceDate);
-            existing.setImportFileId(position.getImportFileId());
-            existing.setUpdatedAt(now);
-            jobMatchMapper.updateMatch(existing);
-            matchId = existing.getId();
-            jobMatchMapper.deleteItemsByMatchId(matchId);
-        } else {
-            JobMatch record = new JobMatch();
-            record.setProfileId(profile.getId());
-            record.setJobPositionId(position.getId());
-            record.setImportFileId(position.getImportFileId());
-            record.setMatchResult(overall.name());
-            record.setReferenceDate(referenceDate);
-            record.setCreatedAt(now);
-            record.setUpdatedAt(now);
-            jobMatchMapper.insert(record);
-            matchId = record.getId();
-        }
-
-        if (items == null || items.isEmpty()) {
+    /** 同一批岗位仅用一次事务完成汇总 upsert 和条件明细替换，避免逐岗位事务往返。 */
+    @Transactional
+    public void persistBatch(UserProfile profile, List<PendingMatch> pendingMatches) {
+        if (pendingMatches == null || pendingMatches.isEmpty()) {
             return;
         }
-        List<JobMatchItem> entities = new ArrayList<>(items.size());
-        for (MatchItemResult item : items) {
-            JobMatchItem entity = new JobMatchItem();
-            entity.setJobMatchId(matchId);
-            entity.setJobPositionId(position.getId());
-            entity.setConditionType(item.getConditionType().name());
-            entity.setMatchResult(item.getResult().name());
-            entity.setUserValue(truncate(item.getUserValue(), 255));
-            entity.setRequirementValue(truncate(item.getRequirementValue(), 500));
-            entity.setReason(truncate(item.getReason(), 1000));
-            entity.setEvidence(toEvidenceJson(item.getEvidence()));
-            entity.setCreatedAt(now);
-            entities.add(entity);
+        LocalDateTime now = LocalDateTime.now();
+        List<JobMatch> records = new ArrayList<>(pendingMatches.size());
+        List<Long> positionIds = new ArrayList<>(pendingMatches.size());
+        for (PendingMatch pending : pendingMatches) {
+            JobMatch record = new JobMatch();
+            record.setProfileId(profile.getId());
+            record.setJobPositionId(pending.position.getId());
+            record.setImportFileId(pending.position.getImportFileId());
+            record.setMatchResult(pending.overall.name());
+            record.setReferenceDate(pending.referenceDate);
+            record.setCreatedAt(now);
+            record.setUpdatedAt(now);
+            records.add(record);
+            positionIds.add(record.getJobPositionId());
+        }
+        jobMatchMapper.upsertBatch(records);
+        Map<Long, Long> matchIds = new HashMap<>();
+        List<Long> persistedIds = new ArrayList<>();
+        for (JobMatch record : jobMatchMapper.selectByProfileAndPositionIds(profile.getId(), positionIds)) {
+            matchIds.put(record.getJobPositionId(), record.getId());
+            persistedIds.add(record.getId());
+        }
+        if (matchIds.size() != pendingMatches.size()) {
+            throw new IllegalStateException("批量保存匹配结果后未能读取完整结果");
+        }
+        jobMatchMapper.deleteItemsByMatchIds(persistedIds);
+        List<JobMatchItem> entities = new ArrayList<>();
+        for (PendingMatch pending : pendingMatches) {
+            if (pending.items == null) continue;
+            for (MatchItemResult item : pending.items) {
+                JobMatchItem entity = new JobMatchItem();
+                entity.setJobMatchId(matchIds.get(pending.position.getId()));
+                entity.setJobPositionId(pending.position.getId());
+                entity.setConditionType(item.getConditionType().name());
+                entity.setMatchResult(item.getResult().name());
+                entity.setUserValue(truncate(item.getUserValue(), 255));
+                entity.setRequirementValue(truncate(item.getRequirementValue(), 500));
+                entity.setReason(truncate(item.getReason(), 1000));
+                entity.setEvidence(toEvidenceJson(item.getEvidence()));
+                entity.setCreatedAt(now);
+                entities.add(entity);
+            }
         }
         jobMatchMapper.insertItems(entities);
+    }
+
+    public static class PendingMatch {
+        private final JobPosition position;
+        private final MatchResult overall;
+        private final LocalDate referenceDate;
+        private final List<MatchItemResult> items;
+        public PendingMatch(JobPosition position, MatchResult overall, LocalDate referenceDate, List<MatchItemResult> items) {
+            this.position = position; this.overall = overall; this.referenceDate = referenceDate; this.items = items;
+        }
+        public MatchResult getOverall() { return overall; }
+        public LocalDate getReferenceDate() { return referenceDate; }
+        public List<MatchItemResult> getItems() { return items; }
     }
 
     /** 结构化证据序列化为 JSON（VARCHAR/TEXT 保存，MySQL 兼容）；序列化失败时仅丢失证据不影响 reason */

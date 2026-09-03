@@ -4,13 +4,14 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Star, StarFilled } from '@element-plus/icons-vue'
 import { fetchProfile, isProfileNotFound } from '@/api/profile'
-import { fetchMatchRegions, fetchMatchResults } from '@/api/match'
+import { fetchMatchResults } from '@/api/match'
 import { fetchImports } from '@/api/import'
 import { addFavorite, removeFavorite } from '@/api/favorites'
 import { showError } from '@/api/http'
 import { matchStatus } from '@/utils/matchStatus'
 import type { MatchPositionResult, MatchResultValue } from '@/types/model'
 import type { RecentImport } from '@/types/model'
+import { regionOptions } from '@/constants/regions'
 import PositionLibraryBar from '@/components/PositionLibraryBar.vue'
 
 type StatusFilter = 'ALL' | MatchResultValue
@@ -23,13 +24,13 @@ const imports = ref<RecentImport[]>([])
 const profileId = ref<number>()
 const total = ref(0)
 const items = ref<MatchPositionResult[]>([])
-const regions = ref<string[]>([])
 const page = ref(1)
 const size = 10
 const loading = ref(false)
 const selectedIds = ref<number[]>([])
 const favoriteLoading = ref<number[]>([])
 const initialStatus = String(route.query.result || 'MATCH') as StatusFilter
+const regionCascaderProps = { checkStrictly: true, emitPath: false }
 
 const filters = reactive({
   status: (['ALL', 'MATCH', 'UNCERTAIN', 'NOT_MATCH'].includes(initialStatus) ? initialStatus : 'MATCH') as StatusFilter,
@@ -52,7 +53,7 @@ onMounted(async () => {
     const profile = await fetchProfile()
     if (!profile) return
     profileId.value = profile.id
-    ;[regions.value] = await Promise.all([fetchMatchRegions(profile.id, importId.value), load()])
+    await load()
   } catch (error) {
     if (isProfileNotFound(error)) router.replace('/profile')
     else showError(error, '读取岗位匹配结果失败。')
@@ -67,7 +68,7 @@ async function load() {
     const data = await fetchMatchResults({
       profileId: profileId.value, importId: importId.value,
       status: filters.status === 'ALL' ? undefined : filters.status,
-      region: filters.region || undefined,
+      region: regionFilterValue(filters.region),
       organizationKeyword: filters.organizationKeyword || undefined,
       positionKeyword: filters.positionKeyword || undefined,
       recruitCountMin: recruit.min, recruitCountMax: recruit.max,
@@ -108,10 +109,14 @@ function openDetail(item: MatchPositionResult) {
   router.push({ path: `/jobs/${item.jobId}`, query: { importId: String(importId.value), ...(filters.status === 'ALL' ? {} : { result: filters.status }) } })
 }
 
+function regionFilterValue(value: string) {
+  if (!value) return undefined
+  return value.includes('/') ? value : `${value}/`
+}
+
 async function changeImport(value: number) {
   importId.value = value; page.value = 1; selectedIds.value = []
   await router.replace({ path: '/positions', query: { importId: String(value) } })
-  if (profileId.value) regions.value = await fetchMatchRegions(profileId.value, value)
   await load()
 }
 
@@ -157,11 +162,11 @@ function subjects(item: MatchPositionResult) { try { return item.examSubjectsJso
       <el-form class="filter-form" label-position="top" @submit.prevent="applyFilters">
         <div class="filter-grid">
           <el-form-item label="匹配状态"><el-select v-model="filters.status"><el-option label="全部" value="ALL" /><el-option label="可以报" value="MATCH" /><el-option label="待确认" value="UNCERTAIN" /><el-option label="不符合" value="NOT_MATCH" /></el-select></el-form-item>
-          <el-form-item label="地区"><el-select v-model="filters.region" clearable filterable placeholder="全部地区"><el-option label="全部" value="" /><el-option v-for="region in regions" :key="region" :label="region" :value="region" /></el-select></el-form-item>
+          <el-form-item label="地区"><el-cascader v-model="filters.region" :options="regionOptions" :props="regionCascaderProps" clearable filterable placeholder="全部地区" /></el-form-item>
           <el-form-item label="招录单位"><el-input v-model="filters.organizationKeyword" clearable placeholder="单位关键字" /></el-form-item>
           <el-form-item label="岗位名称"><el-input v-model="filters.positionKeyword" clearable placeholder="岗位关键字" /></el-form-item>
           <el-form-item label="招录人数"><el-select v-model="filters.recruitCount"><el-option label="全部" value="ALL" /><el-option label="1人" value="1" /><el-option label="2人" value="2" /><el-option label="3人及以上" value="3_PLUS" /></el-select></el-form-item>
-          <el-form-item label="学历要求"><el-input v-model="filters.educationKeyword" clearable placeholder="如：本科" /></el-form-item>
+          <el-form-item label="最低学历要求"><el-select v-model="filters.educationKeyword" clearable placeholder="全部"><el-option label="全部" value="" /><el-option label="不限" value="不限" /><el-option label="专科（含专科及以上）" value="专科" /><el-option label="本科（含本科及以上）" value="本科" /><el-option label="硕士（含硕士及以上）" value="硕士" /><el-option label="博士（含博士及以上）" value="博士" /></el-select></el-form-item>
           <el-form-item label="专业要求"><el-input v-model="filters.majorKeyword" clearable placeholder="如：计算机类" /></el-form-item>
         </div>
         <div class="filter-actions"><el-button @click="resetFilters">重置</el-button><el-button type="primary" @click="applyFilters">查询</el-button></div>
@@ -188,6 +193,6 @@ function subjects(item: MatchPositionResult) { try { return item.examSubjectsJso
 </template>
 
 <style scoped>
-.result-head{margin-bottom:18px}.filter-form{margin-top:20px;padding-top:18px;border-top:1px solid #ebeef5}.filter-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 18px}.filter-actions{text-align:right}.jobs{min-height:260px;padding-bottom:64px}.job-card{position:relative;background:#fff;border-radius:10px;padding:20px 22px;margin-bottom:14px;display:flex;align-items:center;gap:16px;border:1px solid #ebeef5;transition:.2s}.job-card:hover{border-color:#a0cfff;box-shadow:0 5px 16px rgba(64,158,255,.08)}.compare-check{align-self:flex-start;margin-top:3px}.job-main{min-width:0;flex:1}.job-title-line{display:flex;align-items:center;gap:10px}.job-main h2{font-size:17px;margin:0}.job-main p{margin:9px 0 14px;color:#606266}.job-meta{display:flex;gap:12px 20px;flex-wrap:wrap;font-size:13px;color:#606266}.job-actions{display:flex;align-items:center;white-space:nowrap}.pager{text-align:right;margin:24px 0}.compare-bar{position:fixed;z-index:20;left:50%;bottom:24px;transform:translateX(-50%);min-width:380px;padding:13px 18px;background:#303133;color:#fff;border-radius:10px;box-shadow:0 8px 26px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:space-between;gap:24px}.compare-bar strong{color:#79bbff}.el-form-item{margin-bottom:14px}@media(max-width:900px){.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.job-card{align-items:flex-start}.job-actions{flex-direction:column;gap:8px}.compare-bar{min-width:calc(100vw - 32px)}}
+.result-head{margin-bottom:18px}.filter-form{margin-top:20px;padding-top:18px;border-top:1px solid #ebeef5}.filter-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 18px}.filter-grid :deep(.el-select),.filter-grid :deep(.el-cascader),.filter-grid :deep(.el-input){width:100%}.filter-actions{text-align:right}.jobs{min-height:260px;padding-bottom:64px}.job-card{position:relative;background:#fff;border-radius:10px;padding:20px 22px;margin-bottom:14px;display:flex;align-items:center;gap:16px;border:1px solid #ebeef5;transition:.2s}.job-card:hover{border-color:#a0cfff;box-shadow:0 5px 16px rgba(64,158,255,.08)}.compare-check{align-self:flex-start;margin-top:3px}.job-main{min-width:0;flex:1}.job-title-line{display:flex;align-items:center;gap:10px}.job-main h2{font-size:17px;margin:0}.job-main p{margin:9px 0 14px;color:#606266}.job-meta{display:flex;gap:12px 20px;flex-wrap:wrap;font-size:13px;color:#606266}.job-actions{display:flex;align-items:center;white-space:nowrap}.pager{text-align:right;margin:24px 0}.compare-bar{position:fixed;z-index:20;left:50%;bottom:24px;transform:translateX(-50%);min-width:380px;padding:13px 18px;background:#303133;color:#fff;border-radius:10px;box-shadow:0 8px 26px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:space-between;gap:24px}.compare-bar strong{color:#79bbff}.el-form-item{margin-bottom:14px}@media(max-width:900px){.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.job-card{align-items:flex-start}.job-actions{flex-direction:column;gap:8px}.compare-bar{min-width:calc(100vw - 32px)}}
 .reference-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;color:#606266;font-size:13px}
 </style>

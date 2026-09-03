@@ -2,10 +2,10 @@
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { UploadFile, UploadUserFile } from 'element-plus/es/components/upload/src/upload'
-import { fetchCareerProfile, parseResume, saveCareerProfile } from '@/api/careerProfile'
+import { currentResumeContentUrl, fetchCareerProfile, fetchCurrentResume, parseResume, saveCareerProfile } from '@/api/careerProfile'
 import { showError } from '@/api/http'
 import { loadAiProviderConfig } from '@/utils/aiConfig'
-import type { CareerProfile, CareerProfileDraft } from '@/types/model'
+import type { CareerProfile, CareerProfileDraft, ResumeFile } from '@/types/model'
 
 const selectedFile = ref<File | null>(null)
 const fileList = ref<UploadUserFile[]>([])
@@ -13,9 +13,11 @@ const parsing = ref(false)
 const saving = ref(false)
 const savedProfile = ref<CareerProfile | null>(null)
 const draft = ref<CareerProfileDraft | null>(null)
+const currentResume = ref<ResumeFile | null>(null)
 
 onMounted(async () => {
-  try { savedProfile.value = await fetchCareerProfile() } catch (error) { showError(error, '读取职业画像失败。') }
+  try { const [profile, resume] = await Promise.all([fetchCareerProfile(), fetchCurrentResume()]); savedProfile.value = profile; currentResume.value = resume }
+  catch (error) { showError(error, '读取职业画像或当前简历失败。') }
 })
 
 function chooseFile(uploadFile: UploadFile): void {
@@ -37,9 +39,13 @@ async function createDraft(): Promise<void> {
   parsing.value = true
   try {
     draft.value = await parseResume(selectedFile.value, config)
+    currentResume.value = await fetchCurrentResume()
     clearResumeSelection()
     ElMessage.success('AI 已生成职业画像草稿，请核对并修改后确认保存。')
-  } catch (error) { showError(error, '简历解析失败。') } finally { parsing.value = false }
+  } catch (error) {
+    showError(error, '简历解析失败。')
+    try { currentResume.value = await fetchCurrentResume() } catch { /* 原始文件已由服务端保存，刷新页面后仍可获取 */ }
+  } finally { parsing.value = false }
 }
 
 function currentDraft(): CareerProfileDraft { if (!draft.value) throw new Error('职业画像草稿不存在'); return draft.value }
@@ -68,6 +74,9 @@ function editSaved(): void {
 function dates(startDate: string | null, endDate: string | null): string {
   return [startDate, endDate].filter(Boolean).join(' 至 ') || '时间未填写'
 }
+function formatSize(size: number): string { return size < 1024 * 1024 ? `${Math.max(1, Math.round(size / 1024))}KB` : `${(size / 1024 / 1024).toFixed(1)}MB` }
+function formatDate(value: string | null): string { return value ? value.replace('T', ' ') : '-' }
+function openResume(): void { window.open(currentResumeContentUrl, '_blank', 'noopener') }
 </script>
 
 <template>
@@ -77,9 +86,15 @@ function dates(startDate: string | null, endDate: string | null): string {
       <el-button v-if="savedProfile && !draft" @click="editSaved">修改职业画像</el-button>
     </div>
 
+    <div v-if="!draft && currentResume" class="resume-file-card">
+      <div><strong>📄 {{ currentResume.originalFilename }}</strong><p>{{ currentResume.fileType === 'application/pdf' ? 'PDF' : 'DOCX' }} · {{ formatSize(currentResume.fileSize) }} · 上传时间 {{ formatDate(currentResume.uploadedAt) }}</p></div>
+      <div><el-button @click="openResume">查看简历</el-button></div>
+    </div>
+    <p v-else-if="!draft && savedProfile" class="resume-missing">暂无已保存的原始简历；已保存职业画像仍可正常使用。</p>
+
     <div v-if="!draft" class="resume-upload">
       <el-upload v-model:file-list="fileList" :auto-upload="false" :show-file-list="true" :limit="1" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" :on-change="chooseFile" :on-remove="clearResumeSelection">
-        <el-button>选择简历</el-button><template #tip><div class="el-upload__tip">支持 PDF、DOCX，最大 10MB；扫描版 PDF 暂不支持。</div></template>
+        <el-button>{{ currentResume ? '重新上传' : '选择简历' }}</el-button><template #tip><div class="el-upload__tip">支持 PDF、DOCX，最大 10MB；新文件会先保存，再生成职业画像草稿；确认前不会覆盖已保存职业画像。</div></template>
       </el-upload>
       <el-button type="primary" :loading="parsing" :disabled="!selectedFile" @click="createDraft">AI 解析简历</el-button>
     </div>
@@ -112,5 +127,5 @@ function dates(startDate: string | null, endDate: string | null): string {
 </template>
 
 <style scoped>
-.career-card { margin-top:20px; }.section-head,.resume-upload,.saved-summary { display:flex; justify-content:space-between; align-items:center; gap:18px; }.resume-upload { margin-top:22px; align-items:flex-end; }.saved-summary { margin-top:18px; color:#606266; justify-content:flex-start; }.career-card h3 { margin:24px 0 10px; font-size:16px; }.overview-card { margin-top:10px; padding:16px; border:1px solid #dcdfe6; border-radius:8px; background:#fafafa; }.overview-card .el-select { width:100%; }.saved-overview { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }.saved-overview > div { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }.label { color:#909399; min-width:88px; }.compact-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto; gap:10px; margin:10px 0; align-items:center; }.experience-card { margin:10px 0; padding:16px; border:1px solid #dcdfe6; border-radius:8px; background:#fff; }.card-title,.work-summary { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }.work-summary { justify-content:flex-start; flex-wrap:wrap; }.work-summary span { color:#606266; }.work-basic { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:10px; }.saved-block p { margin:0; white-space:pre-wrap; color:#606266; line-height:1.7; }.skill-certificate-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }.skill-certificate-grid h3 { margin-top:24px; }.skill-certificate-grid .el-select { width:100%; }.draft-actions { margin-top:20px; text-align:right; } @media (max-width:900px) { .section-head,.resume-upload { align-items:flex-start; flex-direction:column; }.saved-overview,.skill-certificate-grid,.compact-row,.work-basic { grid-template-columns:1fr; } }
+.career-card { margin-top:20px; }.section-head,.resume-upload,.saved-summary,.resume-file-card { display:flex; justify-content:space-between; align-items:center; gap:18px; }.resume-upload { margin-top:18px; align-items:flex-end; }.resume-file-card { margin-top:22px; padding:14px 16px; border:1px solid #b3d8ff; border-radius:8px; background:#ecf5ff; }.resume-file-card p,.resume-missing { margin:6px 0 0; color:#606266; }.resume-missing { margin-top:18px; }.saved-summary { margin-top:18px; color:#606266; justify-content:flex-start; }.career-card h3 { margin:24px 0 10px; font-size:16px; }.overview-card { margin-top:10px; padding:16px; border:1px solid #dcdfe6; border-radius:8px; background:#fafafa; }.overview-card .el-select { width:100%; }.saved-overview { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }.saved-overview > div { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }.label { color:#909399; min-width:88px; }.compact-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto; gap:10px; margin:10px 0; align-items:center; }.experience-card { margin:10px 0; padding:16px; border:1px solid #dcdfe6; border-radius:8px; background:#fff; }.card-title,.work-summary { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }.work-summary { justify-content:flex-start; flex-wrap:wrap; }.work-summary span { color:#606266; }.work-basic { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:10px; }.saved-block p { margin:0; white-space:pre-wrap; color:#606266; line-height:1.7; }.skill-certificate-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }.skill-certificate-grid h3 { margin-top:24px; }.skill-certificate-grid .el-select { width:100%; }.draft-actions { margin-top:20px; text-align:right; } @media (max-width:900px) { .section-head,.resume-upload,.resume-file-card { align-items:flex-start; flex-direction:column; }.saved-overview,.skill-certificate-grid,.compact-row,.work-basic { grid-template-columns:1fr; } }
 </style>

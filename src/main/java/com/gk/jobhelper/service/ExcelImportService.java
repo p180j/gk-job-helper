@@ -41,6 +41,7 @@ import java.util.UUID;
 @Service
 public class ExcelImportService {
 
+    private static final int MAX_RECENT_IMPORTS = 5;
     private static final Set<String> ALLOWED_EXTENSIONS =
             new HashSet<>(Arrays.asList(".xls", ".xlsx"));
 
@@ -126,6 +127,19 @@ public class ExcelImportService {
         jobPositionMapper.deleteByImportFileId(importId);
         importFileMapper.deleteById(importId);
         deleteQuietly(Paths.get(record.getStoredPath()));
+    }
+
+    /** 保留最新上传的五条导入记录，清理更早记录及其关联岗位、匹配结果和原文件。 */
+    @Transactional
+    public void retainMostRecentImports() {
+        long count = importFileMapper.countAll();
+        if (count <= MAX_RECENT_IMPORTS) {
+            return;
+        }
+        int excess = (int) Math.min(Integer.MAX_VALUE, count - MAX_RECENT_IMPORTS);
+        for (ImportFile record : importFileMapper.selectPage(MAX_RECENT_IMPORTS, excess)) {
+            deleteImport(record.getId());
+        }
     }
 
     public ImportFile getImportFile(Long importId) {

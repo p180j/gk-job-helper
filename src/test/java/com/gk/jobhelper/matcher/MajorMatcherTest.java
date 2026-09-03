@@ -342,6 +342,18 @@ class MajorMatcherTest {
         assertTrue(result.getReason().contains("未收录"));
     }
 
+    @Test
+    void recognizedCombinedCategoryShouldUseItsOfficialMembers() {
+        // “财会审计类”不是官方目录单一节点，但可明确映射到会计学、财务管理、审计学。
+        assertResult(match("会计学", "120203K", "本科", "财会审计类", null), MatchResult.MATCH);
+        assertResult(match("软件工程", "080902", "本科", "财政学类、财会审计类", null), MatchResult.NOT_MATCH);
+    }
+
+    @Test
+    void unrecognizedCombinedCategoryShouldRemainUncertain() {
+        assertResult(match("软件工程", "080902", "本科", "未收录测试组合类", null), MatchResult.UNCERTAIN);
+    }
+
     // =============================================================
     // 无可用目录
     // =============================================================

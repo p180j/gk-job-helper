@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.jobhelper.mapper.ResumeFileMapper">
+    <resultMap id="BaseResultMap" type="com.gk.jobhelper.entity.ResumeFile">
+        <id property="id" column="id"/><result property="profileId" column="profile_id"/>
+        <result property="originalFilename" column="original_filename"/><result property="fileType" column="file_type"/>
+        <result property="fileSize" column="file_size"/><result property="storagePath" column="storage_path"/>
+        <result property="uploadedAt" column="uploaded_at"/><result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <select id="selectByProfileId" resultMap="BaseResultMap">SELECT * FROM resume_file WHERE profile_id = #{profileId}</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO resume_file (profile_id, original_filename, file_type, file_size, storage_path, uploaded_at, updated_at)
+        VALUES (#{profileId}, #{originalFilename}, #{fileType}, #{fileSize}, #{storagePath}, #{uploadedAt}, #{updatedAt})
+    </insert>
+    <update id="updateByProfileId">
+        UPDATE resume_file SET original_filename=#{originalFilename}, file_type=#{fileType}, file_size=#{fileSize},
+        storage_path=#{storagePath}, uploaded_at=#{uploadedAt}, updated_at=#{updatedAt} WHERE profile_id=#{profileId}
+    </update>
+</mapper>

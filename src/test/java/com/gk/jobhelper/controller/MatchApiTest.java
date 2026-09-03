@@ -11,6 +11,7 @@ import com.gk.jobhelper.mapper.ImportFileMapper;
 import com.gk.jobhelper.mapper.JobMatchMapper;
 import com.gk.jobhelper.mapper.JobPositionMapper;
 import com.gk.jobhelper.mapper.UserProfileMapper;
+import com.gk.jobhelper.service.ExcelImportService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -62,6 +64,9 @@ class MatchApiTest {
 
     @Autowired
     private JobMatchMapper jobMatchMapper;
+
+    @Autowired
+    private ExcelImportService excelImportService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -97,9 +102,9 @@ class MatchApiTest {
         assertEquals("MATCH", data.get("result").asText());
         assertEquals(REFERENCE_DATE, data.get("referenceDate").asText());
 
-        // 6 个条件明细，全部 MATCH（包含专业和备注条件）
+        // 7 个条件明细，全部 MATCH（包含专业、性别和备注条件）
         JsonNode items = data.get("items");
-        assertEquals(6, items.size());
+        assertEquals(7, items.size());
         assertEquals("EDUCATION", items.get(0).get("conditionType").asText());
         assertEquals("MATCH", items.get(0).get("result").asText());
         assertEquals("本科", items.get(0).get("userValue").asText());
@@ -128,8 +133,10 @@ class MatchApiTest {
         assertEquals("080902", evidence.get("majorCode").asText());
         assertEquals("0809", evidence.get("parentCode").asText());
 
-        assertEquals("REMARK", items.get(5).get("conditionType").asText());
+        assertEquals("GENDER", items.get(5).get("conditionType").asText());
         assertEquals("MATCH", items.get(5).get("result").asText());
+        assertEquals("REMARK", items.get(6).get("conditionType").asText());
+        assertEquals("MATCH", items.get(6).get("result").asText());
 
         // 匹配结果落库校验
         JobMatch match = jobMatchMapper.selectByProfileAndPosition(profileId, matchJobId);
@@ -138,7 +145,7 @@ class MatchApiTest {
         assertEquals(LocalDate.of(2026, 8, 27), match.getReferenceDate());
         assertEquals(importId, match.getImportFileId());
         List<JobMatchItem> persistedItems = jobMatchMapper.selectItemsByMatchId(match.getId());
-        assertEquals(6, persistedItems.size());
+        assertEquals(7, persistedItems.size());
         // MAJOR 明细证据以 JSON 落库
         JobMatchItem majorItem = persistedItems.get(4);
         assertEquals("MAJOR", majorItem.getConditionType());
@@ -169,8 +176,8 @@ class MatchApiTest {
         assertNotNull(match);
         assertEquals(LocalDate.of(2026, 8, 28), match.getReferenceDate());
         assertEquals("MATCH", match.getMatchResult());
-        // items 删旧插新，仍为 6 条
-        assertEquals(6, jobMatchMapper.selectItemsByMatchId(match.getId()).size());
+        // items 删旧插新，仍为 7 条
+        assertEquals(7, jobMatchMapper.selectItemsByMatchId(match.getId()).size());
     }
 
     @Test
@@ -179,7 +186,7 @@ class MatchApiTest {
 
         JsonNode data = getJson("/api/jobs/" + matchJobId + "/match?profileId=" + profileId);
         assertEquals("MATCH", data.get("result").asText());
-        assertEquals(6, data.get("items").size());
+        assertEquals(7, data.get("items").size());
         assertEquals(REFERENCE_DATE, data.get("referenceDate").asText());
         // 详情接口反序列化返回 MAJOR 证据
         JsonNode majorItem = data.get("items").get(4);
@@ -192,7 +199,7 @@ class MatchApiTest {
         postJson("/api/jobs/" + uncertainJobId + "/match", matchBody(REFERENCE_DATE));
         JsonNode uncertain = getJson("/api/jobs/" + uncertainJobId + "/match?profileId=" + profileId);
         assertEquals("UNCERTAIN", uncertain.get("result").asText());
-        assertEquals(6, uncertain.get("items").size());
+        assertEquals(7, uncertain.get("items").size());
         JsonNode ageItem = uncertain.get("items").get(1);
         assertEquals("MATCH", ageItem.get("result").asText());
         assertTrue(ageItem.get("reason").asText().contains("未设置"));
@@ -200,7 +207,7 @@ class MatchApiTest {
         assertEquals("MAJOR", uncertainMajorItem.get("conditionType").asText());
         assertEquals("MATCH", uncertainMajorItem.get("result").asText());
         assertTrue(uncertainMajorItem.get("reason").asText().contains("未设置"));
-        JsonNode remarkItem = uncertain.get("items").get(5);
+        JsonNode remarkItem = uncertain.get("items").get(6);
         assertEquals("REMARK", remarkItem.get("conditionType").asText());
         assertEquals("UNCERTAIN", remarkItem.get("result").asText());
         assertTrue(remarkItem.get("reason").asText().contains("人工核验"));
@@ -271,6 +278,22 @@ class MatchApiTest {
         // 批量结果可通过分页接口查询
         JsonNode page = getJson("/api/match/result?profileId=" + profileId + "&importId=" + importId);
         assertEquals(3, page.get("total").asLong());
+    }
+
+    @Test
+    void retainMostRecentImportsShouldDeleteOlderRecordAndItsMatchData() throws Exception {
+        executeBatch();
+        LocalDateTime base = LocalDateTime.now();
+        for (int i = 1; i <= 5; i++) {
+            insertImportFile("最新岗位表" + i + ".xlsx", base.plusSeconds(i));
+        }
+
+        excelImportService.retainMostRecentImports();
+
+        assertEquals(5, importFileMapper.countAll());
+        assertNull(importFileMapper.selectById(importId));
+        assertTrue(jobPositionMapper.selectByImportFileId(importId).isEmpty());
+        assertNull(jobMatchMapper.selectByProfileAndPosition(profileId, matchJobId));
     }
 
     @Test
@@ -395,8 +418,12 @@ class MatchApiTest {
     }
 
     private Long insertImportFile() {
+        return insertImportFile("国考岗位表.xlsx", LocalDateTime.now());
+    }
+
+    private Long insertImportFile(String originalName, LocalDateTime createdAt) {
         ImportFile record = new ImportFile();
-        record.setOriginalName("国考岗位表.xlsx");
+        record.setOriginalName(originalName);
         record.setStoredName("stored_test.xlsx");
         record.setStoredPath("./target/test-uploads/stored_test.xlsx");
         record.setFileSize(1024L);
@@ -404,7 +431,7 @@ class MatchApiTest {
         record.setSheetName("职位表");
         record.setTotalRows(3);
         record.setStatus("IMPORTED");
-        record.setCreatedAt(LocalDateTime.now());
+        record.setCreatedAt(createdAt);
         importFileMapper.insert(record);
         return record.getId();
     }

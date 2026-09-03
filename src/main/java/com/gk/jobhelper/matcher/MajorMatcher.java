@@ -39,6 +39,13 @@ import java.util.Map;
 @Component
 public class MajorMatcher implements JobConditionMatcher {
 
+    /**
+     * 招录公告中常用、但不属于教育部目录单一节点的明确组合类别。
+     * 仅收录可无歧义拆解为官方专业节点的名称；未收录词仍按 UNCERTAIN 处理，禁止模糊推断。
+     */
+    private static final Map<String, List<String>> RECOGNIZED_COMBINED_CATEGORY_MEMBERS =
+            recognizedCombinedCategoryMembers();
+
     private final MajorCatalogService majorCatalogService;
 
     public MajorMatcher(MajorCatalogService majorCatalogService) {
@@ -301,7 +308,7 @@ public class MajorMatcher implements JobConditionMatcher {
                 ? null : majorCatalogService.findByCode(catalog, token.getCode());
         List<MajorCatalogItem> byName = token.getName() == null
                 ? Collections.<MajorCatalogItem>emptyList()
-                : majorCatalogService.findByName(catalog, token.getName());
+                : resolveRequirementNodesByName(catalog, token.getName());
         if (byCode != null || !byName.isEmpty()) {
             requirementResolved[0] = true;
         }
@@ -402,6 +409,37 @@ public class MajorMatcher implements JobConditionMatcher {
         }
         String nodeComparison = MajorNameNormalizer.comparisonName(matchedUser.getMajorName());
         return !nodeComparison.isEmpty() && excludedComparison.contains(nodeComparison);
+    }
+
+    /**
+     * 先按目录名称精确匹配；仅当命中已登记的组合类别时，再展开为对应的官方专业节点。
+     */
+    private List<MajorCatalogItem> resolveRequirementNodesByName(MajorCatalog catalog, String rawName) {
+        Map<Long, MajorCatalogItem> nodes = new LinkedHashMap<>();
+        for (MajorCatalogItem item : majorCatalogService.findByName(catalog, rawName)) {
+            nodes.put(item.getId(), item);
+        }
+        List<String> members = RECOGNIZED_COMBINED_CATEGORY_MEMBERS.get(MajorNameNormalizer.comparisonName(rawName));
+        if (members != null) {
+            for (String member : members) {
+                for (MajorCatalogItem item : majorCatalogService.findByName(catalog, member)) {
+                    nodes.put(item.getId(), item);
+                }
+            }
+        }
+        return new ArrayList<>(nodes.values());
+    }
+
+    private static Map<String, List<String>> recognizedCombinedCategoryMembers() {
+        Map<String, List<String>> categories = new LinkedHashMap<>();
+        categories.put("财会审计类", asList("会计学", "财务管理", "审计学"));
+        return Collections.unmodifiableMap(categories);
+    }
+
+    private static List<String> asList(String... values) {
+        List<String> result = new ArrayList<>();
+        Collections.addAll(result, values);
+        return Collections.unmodifiableList(result);
     }
 
     // =============================================================

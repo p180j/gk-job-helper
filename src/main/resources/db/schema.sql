@@ -54,7 +54,21 @@ CREATE TABLE IF NOT EXISTS user_education (
 );
 CREATE INDEX idx_user_education_profile ON user_education (profile_id, enabled);
 
--- 招聘职业画像：只保存用户确认后的结构化简历信息，不保存简历原文件和原文。
+-- 当前原始简历：只保存文件元信息和受控存储路径，不向前端暴露物理路径。
+CREATE TABLE IF NOT EXISTS resume_file (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    profile_id BIGINT NOT NULL,
+    original_filename VARCHAR(512) NOT NULL,
+    file_type VARCHAR(128) NOT NULL,
+    file_size BIGINT NOT NULL,
+    storage_path VARCHAR(1024) NOT NULL,
+    uploaded_at DATETIME DEFAULT NULL,
+    updated_at DATETIME DEFAULT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_resume_file_profile (profile_id)
+);
+
+-- 招聘职业画像：只保存用户确认后的结构化简历信息；原文件单独由 resume_file 管理。
 CREATE TABLE IF NOT EXISTS career_profile (
     id BIGINT NOT NULL AUTO_INCREMENT,
     profile_id BIGINT NOT NULL,

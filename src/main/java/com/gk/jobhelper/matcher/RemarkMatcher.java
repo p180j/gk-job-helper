@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 @Component
 public class RemarkMatcher implements JobConditionMatcher {
 
-    private static final Pattern GRADUATE_YEAR = Pattern.compile("限?(\\d{4})届(?:普通高校|普通高等学校)?毕业生");
+    private static final Pattern GRADUATE_YEAR = Pattern.compile("(?:限|仅限)?(\\d{4})届(?:(?:普通)?高校|普通高等学校)?毕业生");
     private static final Pattern LEGAL_A_CERTIFICATE = Pattern.compile("法律职业资格(?:证书)?A证|法律职业资格考试.*成绩合格");
     private static final Pattern MILITARY_SERVICE_YEARS = Pattern.compile("(?:军队|部队)?服役\\s*(\\d+)\\s*年");
     private static final Pattern CET_REQUIREMENT = Pattern.compile("(?:全国)?大学英语([四六46])级(?:考试)?(?:成绩)?(?:达到|不低于|不少于)?(\\d{3})?分?(?:及以上|以上)?");
@@ -149,9 +149,9 @@ public class RemarkMatcher implements JobConditionMatcher {
     private MatchResult matchGender(UserProfile profile, String remark,
                                     List<String> userValues, List<String> reasons) {
         String required = null;
-        if (remark.contains("限男性")) {
+        if (remark.matches(".*(?:限|仅限)?男性(?:[，,；;。.]|$).*")) {
             required = "男";
-        } else if (remark.contains("限女性")) {
+        } else if (remark.matches(".*(?:限|仅限)?女性(?:[，,；;。.]|$).*")) {
             required = "女";
         }
         if (required == null) {

@@ -106,6 +106,7 @@ public class JobMatchService {
         long total = jobPositionMapper.countByImportFileId(request.getImportId());
         MatchSummaryVO summary = new MatchSummaryVO();
         summary.setTotal(total);
+        progressReporter.accept(summary);
 
         int batchSize = Math.max(1, matchProperties.getBatchSize());
         int maxFailedItems = Math.max(0, matchProperties.getMaxFailedItems());
@@ -116,10 +117,10 @@ public class JobMatchService {
             if (positions == null || positions.isEmpty()) {
                 break;
             }
+            List<MatchPersistenceService.PendingMatch> pendingMatches = new ArrayList<>(positions.size());
             for (JobPosition position : positions) {
                 try {
-                    MatchResultVO result = executeMatch(profile, position, request.getReferenceDate());
-                    incrementSummary(summary, result.getResult());
+                    pendingMatches.add(calculateMatch(profile, position, request.getReferenceDate()));
                 } catch (Exception e) {
                     // 单岗位失败不影响整个批次
                     log.warn("批量匹配单岗位失败, jobId={}, reason={}", position.getId(), e.getMessage());
@@ -129,7 +130,19 @@ public class JobMatchService {
                                 position.getId(), "匹配执行异常: " + e.getMessage()));
                     }
                 }
-                progressReporter.accept(summary);
+            }
+            try {
+                matchPersistenceService.persistBatch(profile, pendingMatches);
+                for (MatchPersistenceService.PendingMatch pending : pendingMatches) {
+                    incrementSummary(summary, pending.getOverall().name());
+                    progressReporter.accept(summary);
+                }
+            } catch (Exception e) {
+                log.error("批量保存匹配结果失败, importId={}, offset={}, size={}", request.getImportId(), offset, pendingMatches.size(), e);
+                summary.setFailedCount(summary.getFailedCount() + pendingMatches.size());
+                if (summary.getFailedItems().size() < maxFailedItems) {
+                    summary.getFailedItems().add(new MatchSummaryVO.FailedItem(null, "批量保存匹配结果失败: " + e.getMessage()));
+                }
             }
             if (positions.size() < batchSize) {
                 break;
@@ -164,7 +177,7 @@ public class JobMatchService {
         query.setProfileId(profileId);
         query.setImportFileId(importId);
         query.setMatchResult(resultFilter == null ? null : resultFilter.name());
-        query.setRegion(trimToNull(region));
+        applyRegionFilter(query, region);
         query.setOrganizationKeyword(likeValue(organizationKeyword));
         query.setPositionKeyword(likeValue(positionKeyword));
         query.setRecruitCountMin(recruitCountMin);
@@ -177,6 +190,25 @@ public class JobMatchService {
         query.setSize(size);
         List<MatchPositionResultVO> items = jobMatchMapper.selectResultPage(query);
         return new PageVO<>(total, page, size, items);
+    }
+
+    private void applyRegionFilter(MatchResultQuery query, String region) {
+        String value = trimToNull(region);
+        if (value == null || !value.contains("/")) {
+            query.setRegion(value);
+            return;
+        }
+        String[] parts = value.split("/", 2);
+        query.setRegionProvince(normalizeRegionSegment(parts[0]));
+        query.setRegionLocality(normalizeRegionSegment(parts[1]));
+    }
+
+    private String normalizeRegionSegment(String value) {
+        String normalized = trimToNull(value);
+        if (normalized == null) {
+            return null;
+        }
+        return normalized.replaceFirst("(特别行政区|维吾尔自治区|壮族自治区|回族自治区|自治区|省|市|自治州|地区|盟|区|县)$", "");
     }
 
     public List<String> queryResultRegions(Long profileId, Long importId) {
@@ -238,6 +270,12 @@ public class JobMatchService {
 
     /** 依次执行全部 Matcher -> 聚合 -> 持久化 -> 返回 VO */
     private MatchResultVO executeMatch(UserProfile profile, JobPosition position, LocalDate referenceDate) {
+        MatchPersistenceService.PendingMatch pending = calculateMatch(profile, position, referenceDate);
+        matchPersistenceService.persistBatch(profile, java.util.Collections.singletonList(pending));
+        return toMatchResultVO(position.getId(), profile.getId(), pending);
+    }
+
+    private MatchPersistenceService.PendingMatch calculateMatch(UserProfile profile, JobPosition position, LocalDate referenceDate) {
         MatchContext context = MatchContext.of(referenceDate);
         List<MatchItemResult> items = new ArrayList<>(matchers.size());
         List<MatchItemResult> qualificationItems = qualificationEducationResolver.resolve(profile, position, context);
@@ -251,14 +289,16 @@ public class JobMatchService {
             }
         }
         MatchResult overall = aggregate(items);
-        matchPersistenceService.persist(profile, position, overall, context.getReferenceDate(), items);
+        return new MatchPersistenceService.PendingMatch(position, overall, context.getReferenceDate(), items);
+    }
 
+    private MatchResultVO toMatchResultVO(Long jobId, Long profileId, MatchPersistenceService.PendingMatch pending) {
         MatchResultVO vo = new MatchResultVO();
-        vo.setJobId(position.getId());
-        vo.setProfileId(profile.getId());
-        vo.setResult(overall.name());
-        vo.setReferenceDate(context.getReferenceDate());
-        vo.setItems(items);
+        vo.setJobId(jobId);
+        vo.setProfileId(profileId);
+        vo.setResult(pending.getOverall().name());
+        vo.setReferenceDate(pending.getReferenceDate());
+        vo.setItems(pending.getItems());
         return vo;
     }
 

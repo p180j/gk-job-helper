@@ -20,8 +20,8 @@ public class JobMatchAsyncService {
     @Async("matchExecutor")
     public void execute(MatchExecuteRequest request) {
         try {
-            jobFeatureService.rebuild(request.getImportId());
-            progressStore.update(request.getProfileId(), request.getImportId(), new MatchSummaryVO(), "MATCHING", null);
+            jobFeatureService.rebuild(request.getImportId(), current -> progressStore.updateFeature(
+                    request.getProfileId(), request.getImportId(), current.getSuccess(), current.getTotal()));
             MatchSummaryVO summary = jobMatchService.batchExecute(request,
                     current -> progressStore.update(request.getProfileId(), request.getImportId(), current, "MATCHING", null));
             progressStore.update(request.getProfileId(), request.getImportId(), summary, "COMPLETED", null);

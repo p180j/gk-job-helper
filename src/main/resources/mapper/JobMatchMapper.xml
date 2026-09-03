@@ -59,6 +59,31 @@
         WHERE id = #{id}
     </update>
 
+    <insert id="upsertBatch">
+        INSERT INTO job_match (profile_id, job_position_id, import_file_id, match_result, reference_date,
+                               created_at, updated_at)
+        VALUES
+        <foreach collection="records" item="record" separator=",">
+            (#{record.profileId}, #{record.jobPositionId}, #{record.importFileId}, #{record.matchResult},
+             #{record.referenceDate}, #{record.createdAt}, #{record.updatedAt})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+            import_file_id = VALUES(import_file_id),
+            match_result = VALUES(match_result),
+            reference_date = VALUES(reference_date),
+            updated_at = VALUES(updated_at)
+    </insert>
+
+    <select id="selectByProfileAndPositionIds" resultMap="MatchResultMap">
+        SELECT <include refid="Match_Column_List"/>
+        FROM job_match
+        WHERE profile_id = #{profileId}
+          AND job_position_id IN
+        <foreach collection="positionIds" item="positionId" open="(" separator="," close=")">
+            #{positionId}
+        </foreach>
+    </select>
+
     <select id="selectItemsByMatchId" resultMap="MatchItemResultMap">
         SELECT
         <include refid="Item_Column_List"/>
@@ -71,6 +96,14 @@
         DELETE
         FROM job_match_item
         WHERE job_match_id = #{jobMatchId}
+    </delete>
+
+    <delete id="deleteItemsByMatchIds">
+        DELETE FROM job_match_item
+        WHERE job_match_id IN
+        <foreach collection="jobMatchIds" item="jobMatchId" open="(" separator="," close=")">
+            #{jobMatchId}
+        </foreach>
     </delete>
 
     <delete id="deleteItemsByImportFileId">
@@ -104,6 +137,12 @@
         </if>
         <if test="region != null and region != ''">
             AND TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) = #{region}
+        </if>
+        <if test="regionProvince != null and regionProvince != ''">
+            AND TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) LIKE CONCAT('%', #{regionProvince}, '%')
+        </if>
+        <if test="regionLocality != null and regionLocality != ''">
+            AND TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) LIKE CONCAT('%', #{regionLocality}, '%')
         </if>
         <if test="organizationKeyword != null and organizationKeyword != ''">
             AND (p.department_name LIKE #{organizationKeyword} OR p.organization_name LIKE #{organizationKeyword})

@@ -88,6 +88,18 @@ class Iteration7ApiTest {
     }
 
     @Test
+    void filterByCascaderRegionShouldMatchNormalizedProvinceAndCity() throws Exception {
+        JsonNode data = result("region", "江西省/南昌市", "page", "1", "size", "20");
+        assertEquals(3, data.get("total").asInt());
+    }
+
+    @Test
+    void filterByCascaderProvinceShouldMatchAllProvincePositions() throws Exception {
+        JsonNode data = result("region", "江西省/", "page", "1", "size", "20");
+        assertEquals(6, data.get("total").asInt());
+    }
+
+    @Test
     void filterByOrganizationAndPositionKeyword() throws Exception {
         JsonNode organization = result("organizationKeyword", "数据局", "page", "1", "size", "20");
         assertEquals(1, organization.get("total").asInt());

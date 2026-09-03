@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-/** 简历上传、文本提取和 AI 结构化草稿生成；不保存原文件或原文。 */
+/** 简历上传、原文件保存、文本提取和 AI 结构化草稿生成。 */
 @Service
 public class ResumeService {
     private static final long MAX_FILE_SIZE = 10L * 1024 * 1024;
@@ -29,11 +29,14 @@ public class ResumeService {
     private final List<ResumeTextExtractor> extractors;
     private final AiClientFactory aiClientFactory;
     private final ObjectMapper objectMapper;
+    private final ResumeFileService resumeFileService;
 
-    public ResumeService(List<ResumeTextExtractor> extractors, AiClientFactory aiClientFactory, ObjectMapper objectMapper) {
+    public ResumeService(List<ResumeTextExtractor> extractors, AiClientFactory aiClientFactory, ObjectMapper objectMapper,
+                         ResumeFileService resumeFileService) {
         this.extractors = extractors;
         this.aiClientFactory = aiClientFactory;
         this.objectMapper = objectMapper;
+        this.resumeFileService = resumeFileService;
     }
 
     public CareerProfileDraftVO parse(MultipartFile file, AiProviderConfig aiConfig) {
@@ -45,6 +48,8 @@ public class ResumeService {
         ResumeTextExtractor extractor = findExtractor(fileName, contentType);
         byte[] bytes = readBytes(file);
         validateFileSignature(fileName, bytes);
+        // 原始文件先保存；AI 解析失败时也不影响已确认的职业画像。
+        resumeFileService.saveCurrent(fileName, contentType, bytes);
         String text = extractor.extract(new ByteArrayInputStream(bytes));
         String normalizedText = text == null ? "" : text.trim();
         if (normalizedText.isEmpty()) {

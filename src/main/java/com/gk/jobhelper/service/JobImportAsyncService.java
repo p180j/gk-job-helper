@@ -24,12 +24,14 @@ public class JobImportAsyncService {
     private final ExcelRowReader excelRowReader;
     private final JobPositionConverter jobPositionConverter;
     private final ImportProgressStore progressStore;
+    private final ExcelImportService excelImportService;
 
     public JobImportAsyncService(ImportFileMapper importFileMapper, JobPositionMapper jobPositionMapper,
-                                 ExcelRowReader excelRowReader, JobPositionConverter jobPositionConverter, ImportProgressStore progressStore) {
+                                 ExcelRowReader excelRowReader, JobPositionConverter jobPositionConverter, ImportProgressStore progressStore,
+                                 ExcelImportService excelImportService) {
         this.importFileMapper = importFileMapper; this.jobPositionMapper = jobPositionMapper;
         this.excelRowReader = excelRowReader; this.jobPositionConverter = jobPositionConverter;
-        this.progressStore = progressStore;
+        this.progressStore = progressStore; this.excelImportService = excelImportService;
     }
 
     @Async("importExecutor")
@@ -57,6 +59,7 @@ public class JobImportAsyncService {
                 progressStore.update(importId, "IMPORTING", processed, processed, failedRows, null);
             }
             importFileMapper.updateStatus(importId, "IMPORTED");
+            excelImportService.retainMostRecentImports();
             progressStore.update(importId, "IMPORTED", positions.size(), positions.size(), failedRows, null);
         } catch (Exception e) {
             ImportFile current = progressStore.get(importId);

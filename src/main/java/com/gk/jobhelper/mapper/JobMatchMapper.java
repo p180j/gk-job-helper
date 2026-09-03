@@ -29,9 +29,16 @@ public interface JobMatchMapper {
     /** 覆盖更新匹配结果（幂等重匹配） */
     int updateMatch(JobMatch record);
 
+    int upsertBatch(@Param("records") List<JobMatch> records);
+
+    List<JobMatch> selectByProfileAndPositionIds(@Param("profileId") Long profileId,
+                                                 @Param("positionIds") List<Long> positionIds);
+
     List<JobMatchItem> selectItemsByMatchId(@Param("jobMatchId") Long jobMatchId);
 
     int deleteItemsByMatchId(@Param("jobMatchId") Long jobMatchId);
+
+    int deleteItemsByMatchIds(@Param("jobMatchIds") List<Long> jobMatchIds);
 
     /** 删除指定导入批次的匹配明细与汇总（删除导入记录前调用） */
     int deleteItemsByImportFileId(@Param("importFileId") Long importFileId);

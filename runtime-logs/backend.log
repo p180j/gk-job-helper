@@ -13,8 +13,7 @@
 [INFO] Copying 35 resources
 [INFO] 
 [INFO] --- maven-compiler-plugin:3.10.1:compile (default-compile) @ gk-job-helper ---
-[INFO] Changes detected - recompiling the module!
-[INFO] Compiling 198 source files to D:\studyCode\gk-job-helper\target\classes
+[INFO] Nothing to compile - all classes are up to date
 [INFO] 
 [INFO] --- maven-resources-plugin:3.2.0:testResources (default-testResources) @ gk-job-helper ---
 [INFO] Using 'UTF-8' encoding to copy filtered resources.
@@ -22,8 +21,7 @@
 [INFO] Copying 1 resource
 [INFO] 
 [INFO] --- maven-compiler-plugin:3.10.1:testCompile (default-testCompile) @ gk-job-helper ---
-[INFO] Changes detected - recompiling the module!
-[INFO] Compiling 27 source files to D:\studyCode\gk-job-helper\target\test-classes
+[INFO] Nothing to compile - all classes are up to date
 [INFO] 
 [INFO] <<< spring-boot-maven-plugin:2.7.18:run (default-cli) < test-compile @ gk-job-helper <<<
 [INFO] 
@@ -39,26 +37,18 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-09-02 16:36:45.543  INFO 38068 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 11.0.23 on SJ-DN0520 with PID 38068 (D:\studyCode\gk-job-helper\target\classes started by jiawen.peng in D:\studyCode\gk-job-helper)
-2026-09-02 16:36:45.546  INFO 38068 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
-2026-09-02 16:36:47.681  INFO 38068 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
-2026-09-02 16:36:47.697  INFO 38068 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-09-02 16:36:47.697  INFO 38068 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
-2026-09-02 16:36:47.876  INFO 38068 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-09-02 16:36:47.877  INFO 38068 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2284 ms
-2026-09-02 16:36:49.115  INFO 38068 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
-2026-09-02 16:36:49.131  INFO 38068 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 4.209 seconds (JVM running for 4.644)
-2026-09-02 16:36:49.144  INFO 38068 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-09-02 16:36:49.301  INFO 38068 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-09-02 16:36:49.477  INFO 38068 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-09-02 16:36:49.478  INFO 38068 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-09-02 16:36:49.479  INFO 38068 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2026-09-02 16:37:13.304  INFO 38068 --- [nio-8080-exec-7] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2090706253030694912.html, contentType=text/html, charset=UTF-8, htmlLength=114981, title=【社招】国盛证券公开招聘中层副职管理人员公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80, div#.:0, div#.:0, div#.find-error:0]
-2026-09-02 17:23:49.416  INFO 38068 --- [nio-8080-exec-2] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2093165172560048128.html, contentType=text/html, charset=UTF-8, htmlLength=126118, title=【社招】江西国家稀土技术创新中心有限公司公开招聘公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, section#.:80, section#.:80, section#.:80, section#.:6, section#.:6, section#.:6, section#.:80, section#.:80, section#.:28, section#.:6, section#.:6, section#.:6, section#.:6]
-2026-09-02 17:23:49.622  INFO 38068 --- [nio-8080-exec-4] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2093163661411037184.html, contentType=text/html, charset=UTF-8, htmlLength=143380, title=【社招】江钨控股集团所属企业职业经理人市场化选聘公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, section#.:80, section#.:80, section#.:80, section#.:80, section#.:80, section#.:80, section#.:80, section#.:27, section#.:6, section#.:6, section#.:6, section#.:6, section#.:20]
-2026-09-02 17:23:49.767  INFO 38068 --- [nio-8080-exec-6] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2092448603851530240.html, contentType=text/html, charset=UTF-8, htmlLength=144729, title=【社招】江西省长天旅游集团产融控股有限公司2026年公开招聘法务工作人员公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80, div#.:0, div#.:0, div#.find-error:0]
-2026-09-02 17:23:49.924  INFO 38068 --- [nio-8080-exec-8] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2090705843121364992.html, contentType=text/html, charset=UTF-8, htmlLength=186391, title=【社招】招18人！2026年南昌轨道交通地产开发有限公司招聘公告（第四批）, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, section#.:46, section#.:46, section#.:46, section#.:46, section#.:6, section#.:6, section#.:80, section#.:80, section#.:80, section#.:80, section#.:6, section#.:6, section#.:80]
-2026-09-02 17:23:50.067  INFO 38068 --- [io-8080-exec-10] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2089631721490554880.html, contentType=text/html, charset=UTF-8, htmlLength=133267, title=【社招】江铜环境2026年度社会招聘公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, section#.:80, section#.:80, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80, div#.:0, div#.:0, div#.find-error:0]
-2026-09-02 17:23:50.156  INFO 38068 --- [nio-8080-exec-2] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2089190848663461888.html, contentType=text/html, charset=UTF-8, htmlLength=27634, title=【社招】航空工业洪都2026年社会招聘公告, candidates=[div#content.:79, div#.curmb:7, div#.:7, div#.:0, div#.main center:71, div#.xlcon xl-nr:71, div#zoom.:0, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80, div#.:0, div#.:0, div#.find-error:0]
-2026-09-02 17:23:50.328  INFO 38068 --- [nio-8080-exec-4] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2094357040358567936.html, contentType=text/html, charset=UTF-8, htmlLength=180344, title=【社招】南昌空港控股发展集团有限公司2026年公开招聘公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, section#.:80, section#.:80, section#.:80, section#.:80, section#.:6, section#.:6, section#.:63, section#.:63, section#.:63, section#.:63, section#.:9, section#.:9, section#.:63]
-2026-09-02 17:23:50.478  INFO 38068 --- [nio-8080-exec-6] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2094700184967131136.html, contentType=text/html, charset=UTF-8, htmlLength=126188, title=【社招】江西军工集团所属企业2026年度公开招聘公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80, div#.:0, div#.:0, div#.find-error:0]
+2026-09-03 14:43:31.391  INFO 41340 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 11.0.23 on SJ-DN0520 with PID 41340 (D:\studyCode\gk-job-helper\target\classes started by jiawen.peng in D:\studyCode\gk-job-helper)
+2026-09-03 14:43:31.394  INFO 41340 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-09-03 14:43:33.531  INFO 41340 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2026-09-03 14:43:33.546  INFO 41340 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-03 14:43:33.546  INFO 41340 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-09-03 14:43:33.708  INFO 41340 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-09-03 14:43:33.710  INFO 41340 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2273 ms
+2026-09-03 14:43:34.783  INFO 41340 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2026-09-03 14:43:34.800  INFO 41340 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 3.849 seconds (JVM running for 4.325)
+2026-09-03 14:43:34.811  INFO 41340 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-03 14:43:34.912  INFO 41340 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-03 14:43:34.912  INFO 41340 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-03 14:43:34.914  INFO 41340 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-09-03 14:43:34.965  INFO 41340 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-09-03 14:49:22.540  INFO 41340 --- [nio-8080-exec-7] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2095067642689302528.html, contentType=text/html, charset=UTF-8, htmlLength=87012, title=【社招】国家电投集团江西核电（天红科技）招聘公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, section#.:80, section#.:80, section#.:6, section#.:6, section#.:6, section#.:35, section#.:6, section#.:6, section#.:6, section#.:6, section#.:6, section#.:6, section#.:80]

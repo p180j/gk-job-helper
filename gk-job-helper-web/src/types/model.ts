@@ -94,6 +94,14 @@ export interface CareerProfile extends CareerProfileDraft {
   updatedAt: string | null
 }
 
+export interface ResumeFile {
+  resumeId: number
+  originalFilename: string
+  fileType: string
+  fileSize: number
+  uploadedAt: string | null
+}
+
 /** Excel 上传预览 */
 export interface ExcelPreview {
   fileId: number
@@ -374,7 +382,7 @@ export interface RecentImport {
   sheetName: string | null
   totalRows: number
   examYear: number | null
-  status: 'PREVIEWED' | 'IMPORTED'
+  status: 'PREVIEWED' | 'IMPORTING' | 'IMPORTED' | 'IMPORT_FAILED'
   createdAt: string | null
   jobCount: number
   matchStats: {

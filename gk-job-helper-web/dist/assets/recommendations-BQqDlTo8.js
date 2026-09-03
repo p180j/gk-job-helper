@@ -1,0 +1,1 @@
+import{g as t,a,p as i}from"./http-CGe3g2yS.js";function s(e){return t(`/api/preferences/${e}`)}function p(e,r){return a(`/api/preferences/${e}`,r)}function c(e){return t("/api/recommendations",{params:e})}function f(e,r){const n=new FormData;return n.append("file",e),n.append("importId",String(r)),i("/api/interview-scores/import",n)}export{c as a,s as f,f as i,p as s};

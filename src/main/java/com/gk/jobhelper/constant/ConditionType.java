@@ -20,6 +20,9 @@ public enum ConditionType {
     /** 专业要求（Iteration 4） */
     MAJOR,
 
+    /** 职位表结构化性别要求 */
+    GENDER,
+
     /** 备注中的补充报考条件 */
     REMARK
 }

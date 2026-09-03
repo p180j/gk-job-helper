@@ -24,7 +24,15 @@ public class MatchProgressStore {
         MatchProgressVO progress = tasks.computeIfAbsent(key(profileId, importId), key -> new MatchProgressVO());
         progress.setTotal(summary.getTotal()); progress.setMatch(summary.getMatch());
         progress.setUncertain(summary.getUncertain()); progress.setNotMatch(summary.getNotMatch());
-        progress.setFailedCount(summary.getFailedCount()); progress.setStatus(status); progress.setErrorMessage(errorMessage);
+        progress.setFailedCount(summary.getFailedCount());
+        progress.setProcessed(summary.getMatch() + summary.getUncertain() + summary.getNotMatch() + summary.getFailedCount());
+        progress.setStatus(status); progress.setErrorMessage(errorMessage);
+    }
+
+    public void updateFeature(Long profileId, Long importId, int processed, int total) {
+        MatchProgressVO progress = tasks.computeIfAbsent(key(profileId, importId), key -> new MatchProgressVO());
+        progress.setTotal(total); progress.setMatch(0); progress.setUncertain(0); progress.setNotMatch(0);
+        progress.setFailedCount(0); progress.setProcessed(processed); progress.setStatus("FEATURE_BUILDING"); progress.setErrorMessage(null);
     }
 
     private String key(Long profileId, Long importId) { return profileId + ":" + importId; }

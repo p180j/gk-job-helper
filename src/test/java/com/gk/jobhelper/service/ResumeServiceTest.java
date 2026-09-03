@@ -20,6 +20,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import static org.mockito.Mockito.mock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,7 +64,8 @@ class ResumeServiceTest {
             @Override public AiResponse chat(AiProviderConfig config, AiRequest request) { return new AiResponse(response); }
         };
         return new ResumeService(Arrays.<ResumeTextExtractor>asList(new PdfResumeTextExtractor(), new DocxResumeTextExtractor()),
-                new AiClientFactory(Collections.singletonList(client)), new ObjectMapper());
+                new AiClientFactory(Collections.singletonList(client)), new ObjectMapper(),
+                mock(ResumeFileService.class));
     }
 
     private AiProviderConfig config() {
