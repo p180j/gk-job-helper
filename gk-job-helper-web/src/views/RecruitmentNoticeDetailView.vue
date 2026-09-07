@@ -13,6 +13,12 @@ const typeLabels: Record<string, string> = { POSITION_DATA: '岗位数据', APPL
 const detailReady = computed(() => notice.value?.detailStatus === 'FETCHED')
 const independentAttachments = computed(() => notice.value?.attachments?.filter(file => file.attachmentType !== 'QR_ATTACHMENT_HINT') ?? [])
 const hasQrHint = computed(() => notice.value?.attachments?.some(file => file.attachmentType === 'QR_ATTACHMENT_HINT'))
+function attachmentParseText(file: NonNullable<RecruitmentNotice['attachments']>[number]) {
+  if (file.parseStatus === 'OCR_REQUIRED') return '扫描版PDF · 暂不支持自动识别'
+  if (file.parseStatus === 'PARSED') return `${file.fileType} · 已解析 ${file.positionCount || 0} 个岗位`
+  if (file.parseStatus === 'NO_VALID_POSITION') return `${file.fileType} · 未识别到有效岗位`
+  return `${file.fileType} · ${file.parseStatus || 'UNPARSED'} · 已解析 ${file.positionCount || 0} 个岗位`
+}
 const bodyHtml = computed(() => {
   const doc = new DOMParser().parseFromString(notice.value?.bodyHtml ?? '', 'text/html')
   const base = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
@@ -52,7 +58,7 @@ onMounted(load)
         <el-divider>附件与招聘岗位</el-divider>
         <el-empty v-if="!independentAttachments.length" description="该公告未发现独立附件，岗位信息可能位于公告正文中。"/>
         <p v-if="hasQrHint" class="meta">该公告包含二维码入口，请扫码查看相关内容。</p>
-        <div v-if="independentAttachments.length" class="attachments"><div v-for="file in independentAttachments" :key="file.id" class="attachment"><div><strong>{{ file.fileName }}</strong><p>{{ typeLabels[file.attachmentType] || '其他附件' }} · {{ file.fileType }}<span v-if="file.attachmentType==='POSITION_DATA'"> · {{ file.parseStatus || 'UNPARSED' }} · 已解析 {{ file.positionCount || 0 }} 个岗位</span></p></div><div class="attachment-actions"><el-button v-if="file.attachmentType==='POSITION_DATA'" type="primary" :loading="extracting" @click="extract">解析招聘岗位</el-button><el-button v-if="file.attachmentType==='POSITION_DATA'&&file.positionCount" @click="router.push({name:'recruitment-position-list',params:{id}})">查看岗位</el-button><el-button @click="open(file.fileUrl)">打开附件</el-button></div></div></div>
+        <div v-if="independentAttachments.length" class="attachments"><div v-for="file in independentAttachments" :key="file.id" class="attachment"><div><strong>{{ file.fileName }}</strong><p>{{ typeLabels[file.attachmentType] || '其他附件' }}<span v-if="file.attachmentType==='POSITION_DATA'"> · {{ attachmentParseText(file) }}</span></p></div><div class="attachment-actions"><el-button v-if="file.attachmentType==='POSITION_DATA'&&file.parseStatus!=='OCR_REQUIRED'" type="primary" :loading="extracting" @click="extract">解析招聘岗位</el-button><el-button v-if="file.attachmentType==='POSITION_DATA'&&file.positionCount" @click="router.push({name:'recruitment-position-list',params:{id}})">查看岗位</el-button><el-button @click="open(file.fileUrl)">打开附件</el-button></div></div></div>
       </template>
       <el-divider/><div class="bottom-actions"><BackNavigation text="返回招聘发现" to="/recruitment"/><el-button type="primary" plain @click="open(notice.noticeUrl)">查看官方原文</el-button></div>
     </div>

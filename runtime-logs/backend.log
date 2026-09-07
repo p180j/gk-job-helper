@@ -10,7 +10,7 @@
 [INFO] Using 'UTF-8' encoding to copy filtered resources.
 [INFO] Using 'UTF-8' encoding to copy filtered properties files.
 [INFO] Copying 1 resource
-[INFO] Copying 38 resources
+[INFO] Copying 39 resources
 [INFO] 
 [INFO] --- maven-compiler-plugin:3.10.1:compile (default-compile) @ gk-job-helper ---
 [INFO] Nothing to compile - all classes are up to date
@@ -21,7 +21,8 @@
 [INFO] Copying 1 resource
 [INFO] 
 [INFO] --- maven-compiler-plugin:3.10.1:testCompile (default-testCompile) @ gk-job-helper ---
-[INFO] Nothing to compile - all classes are up to date
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 35 source files to D:\studyCode\gk-job-helper\target\test-classes
 [INFO] 
 [INFO] <<< spring-boot-maven-plugin:2.7.18:run (default-cli) < test-compile @ gk-job-helper <<<
 [INFO] 
@@ -37,18 +38,19 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-09-07 14:31:14.943  INFO 53108 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 11.0.23 on SJ-DN0520 with PID 53108 (D:\studyCode\gk-job-helper\target\classes started by jiawen.peng in D:\studyCode\gk-job-helper)
-2026-09-07 14:31:14.945  INFO 53108 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
-2026-09-07 14:31:16.441  INFO 53108 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
-2026-09-07 14:31:16.450  INFO 53108 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-09-07 14:31:16.451  INFO 53108 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
-2026-09-07 14:31:16.563  INFO 53108 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-09-07 14:31:16.564  INFO 53108 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1590 ms
-2026-09-07 14:31:17.410  INFO 53108 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
-2026-09-07 14:31:17.425  INFO 53108 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 2.824 seconds (JVM running for 3.142)
-2026-09-07 14:31:17.436  INFO 53108 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-09-07 14:31:17.604  INFO 53108 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-09-07 14:31:17.604  INFO 53108 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-09-07 14:31:17.606  INFO 53108 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2026-09-07 14:31:17.620  INFO 53108 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-09-07 14:31:37.581  INFO 53108 --- [nio-8080-exec-3] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2095707477879894016.html, contentType=text/html, charset=UTF-8, htmlLength=27537, title=【校招】江西江铃进出口有限责任公司2027届校园招聘正式启动, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:78, div#.xlcon xl-nr:78, div#zoom.:0, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80, div#.:0, div#.:0, div#.find-error:0]
+2026-09-07 16:01:47.259  INFO 31756 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 11.0.23 on SJ-DN0520 with PID 31756 (D:\studyCode\gk-job-helper\target\classes started by jiawen.peng in D:\studyCode\gk-job-helper)
+2026-09-07 16:01:47.263  INFO 31756 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-09-07 16:01:49.557  INFO 31756 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2026-09-07 16:01:49.577  INFO 31756 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-07 16:01:49.577  INFO 31756 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-09-07 16:01:49.792  INFO 31756 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-09-07 16:01:49.793  INFO 31756 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2475 ms
+2026-09-07 16:01:51.153  INFO 31756 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2026-09-07 16:01:51.170  INFO 31756 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 4.4 seconds (JVM running for 4.853)
+2026-09-07 16:01:51.183  INFO 31756 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-07 16:01:51.345  INFO 31756 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-09-07 16:01:51.715  INFO 31756 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-07 16:01:51.717  INFO 31756 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-07 16:01:51.718  INFO 31756 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-09-07 16:02:10.553  INFO 31756 --- [nio-8080-exec-2] j.s.RecruitmentAttachmentDownloadService : 招聘附件中转页：attachmentId=26, method=a[href], relayUrl=http://www.jxpta.com/jxsrskszx/gsgg508/2094715432608542720/VzLur7Zb.xls
+2026-09-07 16:02:10.619  INFO 31756 --- [nio-8080-exec-2] j.s.RecruitmentAttachmentDownloadService : 招聘附件下载完成：attachmentId=26, originalUrl=http://www.jxpta.com/jxsrskszx/gsgg508/pc/content/content_2094715432608542720.html, finalUrl=http://www.jxpta.com/jxsrskszx/gsgg508/2094715432608542720/VzLur7Zb.xls, status=200, contentType=application/vnd.ms-excel, contentDisposition=null, bytes=22528, redirects=0, relays=1, fileType=XLS
