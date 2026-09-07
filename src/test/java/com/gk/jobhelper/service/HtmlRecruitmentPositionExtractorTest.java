@@ -1,0 +1,9 @@
+package com.gk.jobhelper.service;
+import com.gk.jobhelper.entity.RecruitmentPosition;import java.util.List;import org.junit.jupiter.api.Test;import static org.junit.jupiter.api.Assertions.*;
+class HtmlRecruitmentPositionExtractorTest {
+ private final HtmlRecruitmentPositionExtractor extractor=new HtmlRecruitmentPositionExtractor(new RecruitmentExcelHeaderNormalizer());
+ @Test void parsesHeaderAfterTitleAndMultipleRows(){String html="<table><tr><td colspan='4'>岗位表</td></tr><tr><th>岗位名称</th><th>招聘单位</th><th>招聘人数</th><th>学历</th></tr><tr><td>Java工程师</td><td rowspan='2'>甲公司</td><td>2人</td><td>本科</td></tr><tr><td>测试工程师</td><td>1</td><td>本科</td></tr><tr><td>合计</td><td>3</td></tr></table>";List<RecruitmentPosition> result=extractor.extract(html,null,8L);assertEquals(2,result.size());assertEquals("甲公司",result.get(1).getOrganizationName());assertEquals(Integer.valueOf(2),result.get(0).getRecruitCount());assertEquals("BODY_HTML",result.get(0).getSourceType());assertEquals("table[1]",result.get(0).getSourceSheet());}
+ @Test void ignoresUnrelatedTableAndMissingFieldsStayNull(){String html="<table><tr><th>日期</th><th>说明</th></tr><tr><td>1</td><td>无</td></tr></table><table><tr><th>岗位</th><th>人数</th><th>专业</th></tr><tr><td>会计</td><td>1</td><td>会计学</td></tr></table>";List<RecruitmentPosition> result=extractor.extract(html,null,8L);assertEquals(1,result.size());assertNull(result.get(0).getEducationRequirement());}
+ @Test void parsesReliableTextBlocks(){String text="岗位名称：Java开发工程师\n招聘人数：2人\n学历要求：本科及以上\n专业要求：计算机类\n岗位名称：会计\n招聘人数：1\n专业要求：会计学";List<RecruitmentPosition> result=extractor.extract("",text,9L);assertEquals(2,result.size());assertEquals("BODY_TEXT",result.get(0).getSourceType());assertEquals("会计",result.get(1).getPositionName());}
+ @Test void doesNotCreatePositionFromNotesOrWeakText(){assertTrue(extractor.extract("<table><tr><th>岗位</th><th>人数</th></tr><tr><td>说明</td><td>1</td></tr></table>","岗位名称：说明\n备注：无",1L).isEmpty());}
+}

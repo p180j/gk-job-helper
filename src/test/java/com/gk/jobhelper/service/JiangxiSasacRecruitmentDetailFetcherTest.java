@@ -35,17 +35,23 @@ class JiangxiSasacRecruitmentDetailFetcherTest {
 
     @Test
     void recognizesQrCodeAttachmentHintWithoutTreatingItAsDownloadableExcel() throws Exception {
-        String html = "<div><p>附件1：招聘岗位表</p><p><img src=\"/files/qr.webp\"></p><p>扫码下载附件</p></div>";
+        String html = "<div><p>附件1：招聘岗位表</p><p><img data-original=\"/files/qr.webp\"></p><p>扫码下载附件</p></div>";
         JiangxiSasacRecruitmentDetailFetcher fetcher = new JiangxiSasacRecruitmentDetailFetcher(new RecruitmentAttachmentClassifier());
         Method method = JiangxiSasacRecruitmentDetailFetcher.class.getDeclaredMethod("attachments", Element.class, String.class);
         method.setAccessible(true);
         @SuppressWarnings("unchecked")
-        List<RecruitmentAttachmentDraft> attachments = (List<RecruitmentAttachmentDraft>) method.invoke(fetcher, Jsoup.parse(html).body(), "https://example.com/a/b.html");
+        List<RecruitmentAttachmentDraft> attachments = (List<RecruitmentAttachmentDraft>) method.invoke(fetcher, normalizedBody(html), "https://example.com/a/b.html");
 
         assertEquals(1, attachments.size());
         assertEquals("QR_ATTACHMENT_HINT", attachments.get(0).attachmentType);
         assertEquals("OTHER", attachments.get(0).fileType);
         assertEquals("https://example.com/files/qr.webp", attachments.get(0).fileUrl);
+    }
+
+    private Element normalizedBody(String html) {
+        Element body = Jsoup.parse(html).body();
+        RecruitmentBodyImages.normalize(body, "https://example.com/a/b.html");
+        return body;
     }
 
     @Test

@@ -5,6 +5,7 @@ export function fetchRecruitmentNotices(params:{status?:RecruitmentNoticeStatus;
 export function fetchRecruitmentNotice(id:number){return get<RecruitmentNotice>(`/api/recruitment/notices/${id}`)}
 export function fetchRecruitmentNoticeDetail(id:number){return post<{noticeId:number;detailStatus:string;attachmentCount:number}>(`/api/recruitment/notices/${id}/fetch-detail`)}
 export function extractRecruitmentPositions(id:number){return post<RecruitmentPositionExtractionResponse>(`/api/recruitment/notices/${id}/extract-positions`)}
+export function extractRecruitmentBodyPositions(id:number){return post<RecruitmentPositionExtractionResponse>(`/api/recruitment/notices/${id}/extract-body-positions`)}
 export function fetchRecruitmentPositions(id:number){return get<RecruitmentPosition[]>(`/api/recruitment/notices/${id}/positions`)}
 export function fetchRecruitmentPosition(id:number){return get<RecruitmentPosition>(`/api/recruitment/positions/${id}`)}
 export function viewRecruitmentNotice(id:number){return post<void>(`/api/recruitment/notices/${id}/view`)}

@@ -37,18 +37,18 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-09-07 13:49:57.598  INFO 47724 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 11.0.23 on SJ-DN0520 with PID 47724 (D:\studyCode\gk-job-helper\target\classes started by jiawen.peng in D:\studyCode\gk-job-helper)
-2026-09-07 13:49:57.600  INFO 47724 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
-2026-09-07 13:49:59.250  INFO 47724 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
-2026-09-07 13:49:59.267  INFO 47724 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-09-07 13:49:59.267  INFO 47724 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
-2026-09-07 13:49:59.436  INFO 47724 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-09-07 13:49:59.437  INFO 47724 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1802 ms
-2026-09-07 13:50:00.839  INFO 47724 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
-2026-09-07 13:50:00.855  INFO 47724 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 3.722 seconds (JVM running for 4.098)
-2026-09-07 13:50:00.873  INFO 47724 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-09-07 13:50:01.090  INFO 47724 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-09-07 13:50:02.248  INFO 47724 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-09-07 13:50:02.249  INFO 47724 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-09-07 13:50:02.251  INFO 47724 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
-2026-09-07 13:57:12.277  INFO 47724 --- [nio-8080-exec-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/7744?categoryId=7, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=49331, title=江西省人才测评中心, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:75, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:39, div#.contentmsg:43, div#.content:80]
+2026-09-07 14:31:14.943  INFO 53108 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 11.0.23 on SJ-DN0520 with PID 53108 (D:\studyCode\gk-job-helper\target\classes started by jiawen.peng in D:\studyCode\gk-job-helper)
+2026-09-07 14:31:14.945  INFO 53108 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-09-07 14:31:16.441  INFO 53108 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2026-09-07 14:31:16.450  INFO 53108 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-07 14:31:16.451  INFO 53108 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-09-07 14:31:16.563  INFO 53108 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-09-07 14:31:16.564  INFO 53108 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1590 ms
+2026-09-07 14:31:17.410  INFO 53108 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2026-09-07 14:31:17.425  INFO 53108 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 2.824 seconds (JVM running for 3.142)
+2026-09-07 14:31:17.436  INFO 53108 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-07 14:31:17.604  INFO 53108 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-07 14:31:17.604  INFO 53108 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-07 14:31:17.606  INFO 53108 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-09-07 14:31:17.620  INFO 53108 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-09-07 14:31:37.581  INFO 53108 --- [nio-8080-exec-3] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2095707477879894016.html, contentType=text/html, charset=UTF-8, htmlLength=27537, title=【校招】江西江铃进出口有限责任公司2027届校园招聘正式启动, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:78, div#.xlcon xl-nr:78, div#zoom.:0, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80, div#.:0, div#.:0, div#.find-error:0]
