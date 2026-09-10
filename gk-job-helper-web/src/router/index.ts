@@ -33,6 +33,7 @@ const router = createRouter({
       name: 'results',
       component: () => import('@/views/ResultsView.vue')
     },
+    { path: '/positions/recruitment', name: 'recruitment-position-library', component: () => import('@/views/RecruitmentPositionLibraryView.vue') },
     { path: '/results/:importId', redirect: to => ({ path: '/positions', query: { importId: String(to.params.importId), result: String(to.query.result || '') } }) },
     {
       path: '/jobs/:id',

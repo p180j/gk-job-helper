@@ -10,7 +10,7 @@
 [INFO] Using 'UTF-8' encoding to copy filtered resources.
 [INFO] Using 'UTF-8' encoding to copy filtered properties files.
 [INFO] Copying 1 resource
-[INFO] Copying 39 resources
+[INFO] Copying 42 resources
 [INFO] 
 [INFO] --- maven-compiler-plugin:3.10.1:compile (default-compile) @ gk-job-helper ---
 [INFO] Nothing to compile - all classes are up to date
@@ -21,8 +21,7 @@
 [INFO] Copying 1 resource
 [INFO] 
 [INFO] --- maven-compiler-plugin:3.10.1:testCompile (default-testCompile) @ gk-job-helper ---
-[INFO] Changes detected - recompiling the module!
-[INFO] Compiling 35 source files to D:\studyCode\gk-job-helper\target\test-classes
+[INFO] Nothing to compile - all classes are up to date
 [INFO] 
 [INFO] <<< spring-boot-maven-plugin:2.7.18:run (default-cli) < test-compile @ gk-job-helper <<<
 [INFO] 
@@ -38,26 +37,17 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-09-07 16:01:47.259  INFO 31756 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 11.0.23 on SJ-DN0520 with PID 31756 (D:\studyCode\gk-job-helper\target\classes started by jiawen.peng in D:\studyCode\gk-job-helper)
-2026-09-07 16:01:47.263  INFO 31756 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
-2026-09-07 16:01:49.557  INFO 31756 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
-2026-09-07 16:01:49.577  INFO 31756 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-09-07 16:01:49.577  INFO 31756 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
-2026-09-07 16:01:49.792  INFO 31756 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-09-07 16:01:49.793  INFO 31756 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2475 ms
-2026-09-07 16:01:51.153  INFO 31756 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
-2026-09-07 16:01:51.170  INFO 31756 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 4.4 seconds (JVM running for 4.853)
-2026-09-07 16:01:51.183  INFO 31756 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-09-07 16:01:51.345  INFO 31756 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-09-07 16:01:51.715  INFO 31756 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-09-07 16:01:51.717  INFO 31756 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-09-07 16:01:51.718  INFO 31756 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2026-09-07 16:02:10.553  INFO 31756 --- [nio-8080-exec-2] j.s.RecruitmentAttachmentDownloadService : 招聘附件中转页：attachmentId=26, method=a[href], relayUrl=http://www.jxpta.com/jxsrskszx/gsgg508/2094715432608542720/VzLur7Zb.xls
-2026-09-07 16:02:10.619  INFO 31756 --- [nio-8080-exec-2] j.s.RecruitmentAttachmentDownloadService : 招聘附件下载完成：attachmentId=26, originalUrl=http://www.jxpta.com/jxsrskszx/gsgg508/pc/content/content_2094715432608542720.html, finalUrl=http://www.jxpta.com/jxsrskszx/gsgg508/2094715432608542720/VzLur7Zb.xls, status=200, contentType=application/vnd.ms-excel, contentDisposition=null, bytes=22528, redirects=0, relays=1, fileType=XLS
-2026-09-07 16:50:12.138  WARN 31756 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m19s922ms98?s100ns).
-2026-09-07 16:58:25.291  WARN 31756 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m43s28ms308?s900ns).
-2026-09-07 17:02:17.614  WARN 31756 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=3m22s256ms497?s300ns).
-2026-09-07 18:00:03.578  WARN 31756 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=14m15s174ms631?s600ns).
-2026-09-07 18:07:34.789  WARN 31756 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=3m1s135ms688?s900ns).
-2026-09-07 18:08:28.668  WARN 31756 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=53s879ms557?s900ns).
-2026-09-09 09:33:03.569  WARN 31756 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m55s669ms571?s500ns).
+2026-09-10 13:58:16.174  INFO 23548 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 11.0.23 on SJ-DN0520 with PID 23548 (D:\studyCode\gk-job-helper\target\classes started by jiawen.peng in D:\studyCode\gk-job-helper)
+2026-09-10 13:58:16.177  INFO 23548 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-09-10 13:58:20.120  INFO 23548 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2026-09-10 13:58:20.135  INFO 23548 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-10 13:58:20.135  INFO 23548 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-09-10 13:58:20.379  INFO 23548 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-09-10 13:58:20.380  INFO 23548 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4162 ms
+2026-09-10 13:58:22.009  INFO 23548 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2026-09-10 13:58:22.027  INFO 23548 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 6.291 seconds (JVM running for 6.659)
+2026-09-10 13:58:22.042  INFO 23548 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-10 13:58:22.266  INFO 23548 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-09-10 13:58:25.250  INFO 23548 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-10 13:58:25.250  INFO 23548 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-10 13:58:25.252  INFO 23548 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms

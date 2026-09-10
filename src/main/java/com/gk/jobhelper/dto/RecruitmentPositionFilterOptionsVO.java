@@ -1,0 +1,9 @@
+package com.gk.jobhelper.dto;
+import java.util.*;
+/** 招聘岗位库筛选项，全部由当前数据库中的真实数据生成。 */
+public class RecruitmentPositionFilterOptionsVO {
+ private List<Source> sources=new ArrayList<>();private List<Notice> notices=new ArrayList<>();private List<String> locations=new ArrayList<>(),organizations=new ArrayList<>(),educations=new ArrayList<>(),majorTypes=new ArrayList<>();
+ public List<Source> getSources(){return sources;}public void setSources(List<Source> v){sources=v;}public List<Notice> getNotices(){return notices;}public void setNotices(List<Notice> v){notices=v;}public List<String> getLocations(){return locations;}public void setLocations(List<String> v){locations=v;}public List<String> getOrganizations(){return organizations;}public void setOrganizations(List<String> v){organizations=v;}public List<String> getEducations(){return educations;}public void setEducations(List<String> v){educations=v;}public List<String> getMajorTypes(){return majorTypes;}public void setMajorTypes(List<String> v){majorTypes=v;}
+ public static class Source{private String sourceCode,sourceName;public String getSourceCode(){return sourceCode;}public void setSourceCode(String v){sourceCode=v;}public String getSourceName(){return sourceName;}public void setSourceName(String v){sourceName=v;}}
+ public static class Notice{private Long noticeId;private String title,sourceCode;private java.time.LocalDateTime publishDate;public Long getNoticeId(){return noticeId;}public void setNoticeId(Long v){noticeId=v;}public String getTitle(){return title;}public void setTitle(String v){title=v;}public String getSourceCode(){return sourceCode;}public void setSourceCode(String v){sourceCode=v;}public java.time.LocalDateTime getPublishDate(){return publishDate;}public void setPublishDate(java.time.LocalDateTime v){publishDate=v;}}
+}
