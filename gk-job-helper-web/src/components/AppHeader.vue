@@ -4,7 +4,7 @@ import { Collection, HomeFilled, UserFilled, Bell } from '@element-plus/icons-vu
 
 <template>
   <header class="app-header">
-    <router-link class="brand" to="/">公考智能选岗助手</router-link>
+    <router-link class="brand" to="/">智能选岗助手</router-link>
     <nav>
       <el-menu mode="horizontal" :ellipsis="false" router :default-active="$route.path">
         <el-menu-item index="/"><el-icon><HomeFilled /></el-icon>首页</el-menu-item>

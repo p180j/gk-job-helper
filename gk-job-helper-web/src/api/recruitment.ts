@@ -1,7 +1,7 @@
 import { get, post, put } from './http'
 import type { PageVO, RecruitmentDiscoveryResult, RecruitmentNotice, RecruitmentNoticeStatus, RecruitmentPosition, RecruitmentPositionExtractionResponse, RecruitmentPositionLibraryPage, RecruitmentMatchResult, RecruitmentPositionFilterOptions } from '@/types/model'
 export function discoverRecruitment(){return post<RecruitmentDiscoveryResult>('/api/recruitment/discovery')}
-export function fetchRecruitmentNotices(params:{status?:RecruitmentNoticeStatus;keyword?:string;page:number;pageSize:number}){return get<PageVO<RecruitmentNotice>>('/api/recruitment/notices',{params})}
+export function fetchRecruitmentNotices(params:{status?:RecruitmentNoticeStatus|'UNREAD';keyword?:string;page:number;pageSize:number}){return get<PageVO<RecruitmentNotice>>('/api/recruitment/notices',{params})}
 export function fetchRecruitmentNotice(id:number){return get<RecruitmentNotice>(`/api/recruitment/notices/${id}`)}
 export function fetchRecruitmentNoticeDetail(id:number){return post<{noticeId:number;detailStatus:string;attachmentCount:number}>(`/api/recruitment/notices/${id}/fetch-detail`)}
 export function extractRecruitmentPositions(id:number){return post<RecruitmentPositionExtractionResponse>(`/api/recruitment/notices/${id}/extract-positions`)}
@@ -15,3 +15,4 @@ export function fetchRecruitmentPositionMatch(id:number){return get<RecruitmentM
 export function rebuildRecruitmentMatches(){return post<Record<string,number>>('/api/recruitment/matches/rebuild')}
 export function viewRecruitmentNotice(id:number){return post<void>(`/api/recruitment/notices/${id}/view`)}
 export function updateRecruitmentStatus(id:number,status:RecruitmentNoticeStatus){return put<void>(`/api/recruitment/notices/${id}/status`,{status})}
+export function deleteRecruitmentNotices(ids:number[]){return post<void>('/api/recruitment/notices/batch-delete',ids)}

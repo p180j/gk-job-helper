@@ -195,7 +195,7 @@ function openProgressResult() {
 <template>
   <section v-loading="loading">
     <div class="hero">
-      <div><h1>公考智能选岗助手</h1><p>上传官方职位表，自动筛出你能报的岗位。</p></div>
+      <div><h1>智能选岗助手</h1><p>上传官方职位表，自动筛出你能报的岗位。</p></div>
       <el-button type="primary" size="large" :icon="UploadFilled" @click="router.push('/import')">上传职位表</el-button>
     </div>
     <div class="page-card profile-card"><h2 class="page-title">我的报考档案</h2><template v-if="profile"><p class="profile-main">{{ profileSummary }}</p><p class="muted">{{ profile.politicalStatus ?? '政治面貌未填' }} · {{ profile.workYears ?? 0 }}年基层工作经历</p><el-button @click="router.push('/profile')">编辑档案</el-button></template><el-empty v-else description="请先完善报考档案" :image-size="72"><el-button type="primary" @click="router.push('/profile')">立即创建</el-button></el-empty></div>

@@ -14,7 +14,7 @@
     <artifactId>gk-job-helper</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>gk-job-helper</name>
-    <description>公考智能选岗助手 - Iteration 1</description>
+    <description>智能选岗助手 - Iteration 1</description>
 
     <properties>
         <java.version>1.8</java.version>
