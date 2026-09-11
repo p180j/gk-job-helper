@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import BackNavigation from '@/components/BackNavigation.vue'
-import { extractRecruitmentBodyPositions, extractRecruitmentPositions, fetchRecruitmentNotice, fetchRecruitmentNoticeDetail } from '@/api/recruitment'
+import { extractRecruitmentBodyPositions, extractRecruitmentPositions, fetchRecruitmentNotice, fetchRecruitmentNoticeDetail, viewRecruitmentNotice } from '@/api/recruitment'
 import { showError } from '@/api/http'
 import type { RecruitmentNotice } from '@/types/model'
 
@@ -37,7 +37,7 @@ function imageFailed(event: Event) {
   hint.textContent = '图片暂时无法加载，可查看官方原文'
   image.replaceWith(hint)
 }
-async function load(){ loading.value=true;try{notice.value=await fetchRecruitmentNotice(id)}catch(e){showError(e,'读取公告详情失败。')}finally{loading.value=false} }
+async function load(){ loading.value=true;try{notice.value=await fetchRecruitmentNotice(id);if(!notice.value.viewedAt){try{await viewRecruitmentNotice(id);notice.value.viewedAt=new Date().toISOString()}catch(e){console.warn('标记公告已查阅失败',e)}}}catch(e){showError(e,'读取公告详情失败。')}finally{loading.value=false} }
 async function fetchDetail(){fetching.value=true;try{await fetchRecruitmentNoticeDetail(id);ElMessage.success('公告详情已获取');await load()}catch(e){showError(e,'获取公告详情失败。')}finally{fetching.value=false}}
 async function extract(){extracting.value=true;try{const result=await extractRecruitmentPositions(id);ElMessage.success(`解析完成：${result.positionCount} 个岗位`);await load()}catch(e){showError(e,'招聘岗位解析失败。');await load()}finally{extracting.value=false}}
 async function extractBody(){extracting.value=true;try{const result=await extractRecruitmentBodyPositions(id);ElMessage.success(`已从正文识别 ${result.positionCount} 个岗位`);router.push({name:'recruitment-position-list',params:{id}})}catch(e){showError(e,'正文岗位解析失败。')}finally{extracting.value=false}}
@@ -46,7 +46,7 @@ onMounted(load)
 </script>
 <template>
   <section v-loading="loading">
-    <BackNavigation text="返回招聘发现" to="/recruitment" />
+    <BackNavigation floating text="返回招聘发现" to="/recruitment" />
     <div v-if="notice" class="page-card">
       <h1 class="page-title">{{ notice.title }}</h1>
       <p class="meta">{{ notice.sourceName }} · 发布时间：{{ notice.publishDate?.replace('T',' ') || '未知' }}</p>

@@ -30,11 +30,13 @@ public class CareerProfileService {
     private final CareerProfileMapper careerProfileMapper;
     private final UserProfileMapper userProfileMapper;
     private final ObjectMapper objectMapper;
+    private final RecruitmentQualificationMatchService recruitmentMatches;
 
-    public CareerProfileService(CareerProfileMapper careerProfileMapper, UserProfileMapper userProfileMapper, ObjectMapper objectMapper) {
+    public CareerProfileService(CareerProfileMapper careerProfileMapper, UserProfileMapper userProfileMapper, ObjectMapper objectMapper, RecruitmentQualificationMatchService recruitmentMatches) {
         this.careerProfileMapper = careerProfileMapper;
         this.userProfileMapper = userProfileMapper;
         this.objectMapper = objectMapper;
+        this.recruitmentMatches = recruitmentMatches;
     }
 
     public CareerProfileVO getCurrent() {
@@ -68,7 +70,9 @@ public class CareerProfileService {
         entity.setCertificates(write(request.getCertificates()));
         entity.setUpdatedAt(LocalDateTime.now());
         if (creating) careerProfileMapper.insert(entity); else careerProfileMapper.updateByProfileId(entity);
-        return toVO(careerProfileMapper.selectByProfileId(profile.getId()));
+        CareerProfileVO saved = toVO(careerProfileMapper.selectByProfileId(profile.getId()));
+        recruitmentMatches.rebuild();
+        return saved;
     }
 
     private CareerProfileVO toVO(CareerProfile entity) {

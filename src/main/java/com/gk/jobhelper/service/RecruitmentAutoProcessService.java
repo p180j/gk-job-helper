@@ -11,12 +11,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RecruitmentAutoProcessService {
-    private final RecruitmentDetailService details; private final RecruitmentPositionService positions;
+    private final RecruitmentDetailService details; private final RecruitmentPositionService positions; private final RecruitmentQualificationMatchService matches;
     private final RecruitmentNoticeService notices; private final RecruitmentNoticeMapper noticeMapper;
     private final RecruitmentAttachmentMapper attachments;
-    public RecruitmentAutoProcessService(RecruitmentDetailService details, RecruitmentPositionService positions,
+    public RecruitmentAutoProcessService(RecruitmentDetailService details, RecruitmentPositionService positions, RecruitmentQualificationMatchService matches,
             RecruitmentNoticeService notices, RecruitmentNoticeMapper noticeMapper, RecruitmentAttachmentMapper attachments) {
-        this.details = details; this.positions = positions; this.notices = notices; this.noticeMapper = noticeMapper; this.attachments = attachments;
+        this.details = details; this.positions = positions; this.matches = matches; this.notices = notices; this.noticeMapper = noticeMapper; this.attachments = attachments;
     }
     @Async("recruitmentProcessor")
     public void processNoticeAsync(Long noticeId) { processNotice(noticeId); }
@@ -33,7 +33,7 @@ public class RecruitmentAutoProcessService {
             if (!files.isEmpty()) count = positions.extract(noticeId).getPositionCount();
             else if (notice.getBodyPositionHint() != null) count = positions.extractBody(noticeId).getPositionCount();
             else { manual(noticeId, "NO_VALID_POSITION", "未发现可自动结构化的岗位来源"); return; }
-            if (count > 0) noticeMapper.updateProcess(noticeId, "COMPLETED", "DONE", null, null, count, LocalDateTime.now(), LocalDateTime.now());
+            if (count > 0) { matchPositions(noticeId); noticeMapper.updateProcess(noticeId, "COMPLETED", "DONE", null, null, count, LocalDateTime.now(), LocalDateTime.now()); }
             else manual(noticeId, "NO_VALID_POSITION", "未识别到有效岗位");
         } catch (Exception exception) {
             String code = manualCode(noticeId, exception.getMessage());
@@ -55,4 +55,5 @@ public class RecruitmentAutoProcessService {
         return "PARSE_FAILED";
     }
     private String safe(String value) { if (value == null || value.trim().isEmpty()) return "自动处理失败"; return value.length() > 500 ? value.substring(0, 500) : value; }
+    private void matchPositions(Long noticeId) { try { matches.matchNotice(noticeId); } catch (Exception e) { org.slf4j.LoggerFactory.getLogger(getClass()).warn("招聘岗位自动资格匹配失败，noticeId={}", noticeId, e); } }
 }

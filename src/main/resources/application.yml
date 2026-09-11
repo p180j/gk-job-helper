@@ -23,3 +23,13 @@ mybatis:
 # Excel 原始文件保存目录（相对路径基于项目运行目录）
 upload:
   dir: ./uploads
+
+# 招聘 AI 文本补充是可选 fallback；未配置时始终保留规则解析结果，不会阻断公告自动处理。
+# 请通过环境变量提供密钥，切勿提交到版本库。
+recruitment:
+  ai:
+    provider: ${RECRUITMENT_AI_PROVIDER:}
+    model: ${RECRUITMENT_AI_MODEL:}
+    api-key: ${RECRUITMENT_AI_API_KEY:}
+    base-url: ${RECRUITMENT_AI_BASE_URL:}
+    timeout-ms: ${RECRUITMENT_AI_TIMEOUT_MS:15000}

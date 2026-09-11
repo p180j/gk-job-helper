@@ -16,9 +16,11 @@ import java.time.LocalDateTime;
 public class UserProfileService {
 
     private final UserProfileMapper userProfileMapper;
+    private final RecruitmentQualificationMatchService recruitmentMatches;
 
-    public UserProfileService(UserProfileMapper userProfileMapper) {
+    public UserProfileService(UserProfileMapper userProfileMapper, RecruitmentQualificationMatchService recruitmentMatches) {
         this.userProfileMapper = userProfileMapper;
+        this.recruitmentMatches = recruitmentMatches;
     }
 
     /**
@@ -47,7 +49,9 @@ public class UserProfileService {
         profile.setCreatedAt(now);
         profile.setUpdatedAt(now);
         userProfileMapper.insert(profile);
-        return userProfileMapper.selectById(profile.getId());
+        UserProfile saved = userProfileMapper.selectById(profile.getId());
+        recruitmentMatches.rebuild();
+        return saved;
     }
 
     /**
@@ -62,7 +66,9 @@ public class UserProfileService {
         copyFields(request, existing);
         existing.setUpdatedAt(LocalDateTime.now());
         userProfileMapper.updateById(existing);
-        return userProfileMapper.selectById(existing.getId());
+        UserProfile saved = userProfileMapper.selectById(existing.getId());
+        recruitmentMatches.rebuild();
+        return saved;
     }
 
     private void copyFields(ProfileRequest request, UserProfile profile) {

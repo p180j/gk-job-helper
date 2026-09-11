@@ -1,6 +1,6 @@
 import { get, post, put } from './http'
 import type { PageVO, RecruitmentDiscoveryResult, RecruitmentNotice, RecruitmentNoticeStatus, RecruitmentPosition, RecruitmentPositionExtractionResponse, RecruitmentPositionLibraryPage, RecruitmentMatchResult, RecruitmentPositionFilterOptions } from '@/types/model'
-export function discoverRecruitment(){return post<RecruitmentDiscoveryResult>('/api/recruitment/discovery')}
+export function discoverRecruitment(days:number){return post<RecruitmentDiscoveryResult>('/api/recruitment/discovery',undefined,{params:{days}})}
 export function fetchRecruitmentNotices(params:{status?:RecruitmentNoticeStatus|'UNREAD';keyword?:string;page:number;pageSize:number}){return get<PageVO<RecruitmentNotice>>('/api/recruitment/notices',{params})}
 export function fetchRecruitmentNotice(id:number){return get<RecruitmentNotice>(`/api/recruitment/notices/${id}`)}
 export function fetchRecruitmentNoticeDetail(id:number){return post<{noticeId:number;detailStatus:string;attachmentCount:number}>(`/api/recruitment/notices/${id}/fetch-detail`)}

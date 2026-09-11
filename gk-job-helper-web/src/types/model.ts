@@ -19,11 +19,11 @@ export interface AiTestResult {
 export type RecruitmentNoticeStatus='NEW'|'INTERESTED'|'FOLLOWING'|'IGNORED'
 export interface RecruitmentAttachment {id:number;fileName:string;fileUrl:string;fileType:string;attachmentType:string;parseStatus?:'UNPARSED'|'PARSING'|'PARSED'|'PARSE_FAILED'|'UNSUPPORTED_FILE_TYPE'|'OCR_REQUIRED'|'NO_VALID_POSITION';parseError?:string|null;positionCount?:number;sourceText:string|null}
 export interface RecruitmentNotice {id:number;title:string;noticeUrl:string;publishDate:string|null;noticeType:string;userStatus:RecruitmentNoticeStatus;viewedAt:string|null;discoveredAt:string;sourceCode:string;sourceName:string;detailStatus?:'DISCOVERED'|'FETCHING'|'FETCHED'|'FAILED';processStatus?:'DISCOVERED'|'PROCESSING'|'COMPLETED'|'NEED_MANUAL'|'FAILED';processStage?:string|null;processFailureCode?:string|null;processFailureReason?:string|null;processPositionCount?:number;processedAt?:string|null;detailFetchedAt?:string|null;detailError?:string|null;bodyPositionHint?:'BODY_POSITION_CANDIDATE'|null;bodyHtml?:string|null;bodyText?:string|null;attachments?:RecruitmentAttachment[]}
-export interface RecruitmentDiscoveryResult {fetchedCount:number;newCount:number;duplicateCount:number;failedCount:number}
+export interface RecruitmentDiscoveryResult {fetchedCount:number;newCount:number;duplicateCount:number;filteredCount:number;failedCount:number}
 export interface RecruitmentRequirement {id:number;requirementType:string;requirementLevel:string;rawText:string|null;normalizedValue:string|null;sourceText:string|null}
 export interface RecruitmentPosition {id:number;noticeId:number;sourceAttachmentId:number|null;sourceType:string|null;organizationName:string|null;departmentName:string|null;positionName:string;positionCode:string|null;recruitCount:number|null;workLocation:string|null;educationRequirement:string|null;degreeRequirement:string|null;majorRequirement:string|null;ageRequirement:string|null;workYearsRequirement:string|null;responsibility:string|null;otherRequirement:string|null;preferredRequirement:string|null;rawRequirement:string|null;sourceSheet:string;sourceRow:number;noticeTitle:string|null;noticeUrl:string|null;noticePublishDate:string|null;matchResult?:MatchResultValue|null;requirements?:RecruitmentRequirement[]}
 export interface RecruitmentMatchItem {id:number;requirementType:string;requirementLevel:string;result:MatchResultValue;positionRequirement:string|null;userEvidence:string|null;reason:string|null}
-export interface RecruitmentMatchResult {id:number;profileId:number;positionId:number;result:MatchResultValue;matchedCount:number;uncertainCount:number;notMatchedCount:number;summary:string;items:RecruitmentMatchItem[];updatedAt:string|null}
+export interface RecruitmentMatchResult {id:number;profileId:number;positionId:number;result:MatchResultValue;matchedCount:number;uncertainCount:number;notMatchedCount:number;summary:string;uncertainReason?:'MISSING_USER_FACT'|'EXTRACTION_INCOMPLETE'|'UNRESOLVED_REQUIREMENT'|'SEMANTIC_AMBIGUITY'|'MANUAL_REVIEW'|null;items:RecruitmentMatchItem[];updatedAt:string|null}
 export interface RecruitmentPositionLibraryPage {total:number;page:number;size:number;items:RecruitmentPosition[];noticeCount:number;latestUpdatedAt:string|null}
 export interface RecruitmentPositionFilterOptions {sources:Array<{sourceCode:string;sourceName:string}>;notices:Array<{noticeId:number;title:string;sourceCode:string;publishDate:string|null}>;locations:string[];organizations:string[];educations:string[];majorTypes:string[]}
 export interface RecruitmentPositionExtractionResponse {noticeId:number;attachmentCount:number;positionCount:number;failedAttachmentCount:number}
@@ -105,6 +105,8 @@ export interface ResumeFile {
   fileSize: number
   uploadedAt: string | null
 }
+export interface CareerFact {id?:number;factType:'CERTIFICATE'|'PROFESSIONAL_QUALIFICATION'|'PROFESSIONAL_TITLE'|'INDUSTRY_EXPERIENCE'|'SKILL_EXPERIENCE'|'SPECIAL_EXPERIENCE';factKey:string;valueType:'BOOLEAN'|'NUMBER'|'TEXT';booleanValue?:boolean|null;numberValue?:number|null;textValue?:string|null;unit?:string|null;displayName:string;source?:string;confirmedAt?:string|null;updatedAt?:string|null}
+export interface CareerFactQuestion {factType:CareerFact['factType'];factKey:string;displayName:string;valueType:CareerFact['valueType'];unit:string|null;question:string;affectedPositionCount:number}
 
 /** Excel 上传预览 */
 export interface ExcelPreview {

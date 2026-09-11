@@ -18,7 +18,7 @@ onMounted(load)
 </script>
 <template>
   <section v-loading="loading">
-    <BackNavigation :text="backText" :to="backTarget"/>
+    <BackNavigation floating :text="backText" :to="backTarget"/>
     <div v-if="position" class="page-card">
       <div class="title-line"><h1 class="page-title">{{position.positionName}}</h1><el-tag v-if="match" :type="tag(match.result)" effect="dark">{{label(match.result)}}</el-tag><el-tag v-else type="info">未分析</el-tag></div>
       <el-button v-if="!match" type="primary" @click="analyze">分析资格</el-button>
