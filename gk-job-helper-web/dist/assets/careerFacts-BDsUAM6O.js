@@ -1,0 +1,1 @@
+import{g as a,a as r,p as t,d as s}from"./http-CAP0Win1.js";function i(){return a("/api/career-facts")}function n(e){return e.id?r(`/api/career-facts/${e.id}`,e):t("/api/career-facts",e)}function u(e){return s(`/api/career-facts/${e}`)}function f(){return a("/api/career-facts/questions")}export{f as a,u as d,i as f,n as s};

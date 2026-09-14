@@ -1,11 +1,15 @@
 import { get, post, put } from './http'
-import type { PageVO, RecruitmentDiscoveryResult, RecruitmentNotice, RecruitmentNoticeStatus, RecruitmentPosition, RecruitmentPositionExtractionResponse, RecruitmentPositionLibraryPage, RecruitmentMatchResult, RecruitmentPositionFilterOptions } from '@/types/model'
+import type { PageVO, RecruitmentDiscoveryResult, RecruitmentNotice, RecruitmentNoticeStatus, RecruitmentPosition, RecruitmentPositionExtractionResponse, RecruitmentPositionLibraryPage, RecruitmentMatchResult, RecruitmentPositionFilterOptions, RecruitmentSource } from '@/types/model'
 export function discoverRecruitment(days:number){return post<RecruitmentDiscoveryResult>('/api/recruitment/discovery',undefined,{params:{days}})}
+export function fetchRecruitmentSources(){return get<RecruitmentSource[]>('/api/recruitment/sources')}
+export function createRecruitmentSource(source:{sourceName:string;listUrl:string}){return post<RecruitmentSource>('/api/recruitment/sources',source)}
+export function updateRecruitmentSourceEnabled(id:number,enabled:boolean){return put<void>(`/api/recruitment/sources/${id}/enabled`,undefined,{params:{enabled}})}
 export function fetchRecruitmentNotices(params:{status?:RecruitmentNoticeStatus|'UNREAD';keyword?:string;page:number;pageSize:number}){return get<PageVO<RecruitmentNotice>>('/api/recruitment/notices',{params})}
 export function fetchRecruitmentNotice(id:number){return get<RecruitmentNotice>(`/api/recruitment/notices/${id}`)}
 export function fetchRecruitmentNoticeDetail(id:number){return post<{noticeId:number;detailStatus:string;attachmentCount:number}>(`/api/recruitment/notices/${id}/fetch-detail`)}
 export function extractRecruitmentPositions(id:number){return post<RecruitmentPositionExtractionResponse>(`/api/recruitment/notices/${id}/extract-positions`)}
 export function extractRecruitmentBodyPositions(id:number){return post<RecruitmentPositionExtractionResponse>(`/api/recruitment/notices/${id}/extract-body-positions`)}
+export function resolveRecruitmentQrAttachments(id:number){return post<{qrCount:number;decodedCount:number;listPageCount:number;attachmentCount:number;positionDataCount:number;warningCount:number}>(`/api/recruitment/notices/${id}/resolve-qr-attachments`)}
 export function fetchRecruitmentPositions(id:number){return get<RecruitmentPosition[]>(`/api/recruitment/notices/${id}/positions`)}
 export function fetchRecruitmentPosition(id:number){return get<RecruitmentPosition>(`/api/recruitment/positions/${id}`)}
 export function fetchRecruitmentPositionLibrary(params:{keyword?:string;location?:string;organization?:string;education?:string;major?:string;noticeId?:number;matchStatus?:string;page:number;pageSize:number}){return get<RecruitmentPositionLibraryPage>('/api/recruitment/positions',{params})}

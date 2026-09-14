@@ -3,12 +3,12 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import BackNavigation from '@/components/BackNavigation.vue'
-import { extractRecruitmentBodyPositions, extractRecruitmentPositions, fetchRecruitmentNotice, fetchRecruitmentNoticeDetail, viewRecruitmentNotice } from '@/api/recruitment'
+import { extractRecruitmentBodyPositions, extractRecruitmentPositions, fetchRecruitmentNotice, fetchRecruitmentNoticeDetail, resolveRecruitmentQrAttachments, viewRecruitmentNotice } from '@/api/recruitment'
 import { showError } from '@/api/http'
 import type { RecruitmentNotice } from '@/types/model'
 
 const route = useRoute(), router = useRouter(), notice = ref<RecruitmentNotice>()
-const loading = ref(false), fetching = ref(false), extracting = ref(false), id = Number(route.params.id)
+const loading = ref(false), fetching = ref(false), extracting = ref(false), resolvingQr = ref(false), id = Number(route.params.id)
 const typeLabels: Record<string, string> = { POSITION_DATA: '岗位数据', APPLICATION_FORM: '报名材料', COMMITMENT: '承诺材料', GUIDE: '说明材料', QR_ATTACHMENT_HINT: '二维码附件提示', OTHER: '其他附件' }
 const detailReady = computed(() => notice.value?.detailStatus === 'FETCHED')
 const independentAttachments = computed(() => notice.value?.attachments?.filter(file => file.attachmentType !== 'QR_ATTACHMENT_HINT') ?? [])
@@ -41,6 +41,7 @@ async function load(){ loading.value=true;try{notice.value=await fetchRecruitmen
 async function fetchDetail(){fetching.value=true;try{await fetchRecruitmentNoticeDetail(id);ElMessage.success('公告详情已获取');await load()}catch(e){showError(e,'获取公告详情失败。')}finally{fetching.value=false}}
 async function extract(){extracting.value=true;try{const result=await extractRecruitmentPositions(id);ElMessage.success(`解析完成：${result.positionCount} 个岗位`);await load()}catch(e){showError(e,'招聘岗位解析失败。');await load()}finally{extracting.value=false}}
 async function extractBody(){extracting.value=true;try{const result=await extractRecruitmentBodyPositions(id);ElMessage.success(`已从正文识别 ${result.positionCount} 个岗位`);router.push({name:'recruitment-position-list',params:{id}})}catch(e){showError(e,'正文岗位解析失败。')}finally{extracting.value=false}}
+async function resolveQr(){resolvingQr.value=true;try{const result=await resolveRecruitmentQrAttachments(id);await load();if(result.attachmentCount)ElMessage.success(`已从二维码发现 ${result.attachmentCount} 个附件`);else ElMessage.info('已识别二维码，但目标是动态网页，未提供可直接下载的附件，请扫码在手机查看。')}catch(e){showError(e,'二维码附件识别失败。')}finally{resolvingQr.value=false}}
 function open(url:string){window.open(url,'_blank','noopener')}
 onMounted(load)
 </script>
@@ -54,10 +55,10 @@ onMounted(load)
       <div v-if="!detailReady" class="empty"><p>公告详情尚未获取</p><el-button type="primary" :loading="fetching" @click="fetchDetail">获取公告详情</el-button></div>
       <template v-else>
         <el-divider>公告正文</el-divider><div v-if="notice.bodyHtml" class="body" @error.capture="imageFailed" v-html="bodyHtml"/><pre v-else class="body-text">{{ notice.bodyText }}</pre>
-        <div v-if="notice.bodyPositionHint === 'BODY_POSITION_CANDIDATE'" class="body-position-actions"><span class="meta">正文可能包含结构化岗位信息。</span><el-button type="primary" :loading="extracting" @click="extractBody">解析正文岗位</el-button></div>
+        <div v-if="hasQrHint" class="body-position-actions"><span class="meta">该公告包含二维码附件入口，系统会识别二维码后的可下载文件。</span><el-button type="primary" :loading="resolvingQr" @click="resolveQr">识别二维码附件</el-button></div>
+        <div v-else-if="notice.bodyPositionHint === 'BODY_POSITION_CANDIDATE'" class="body-position-actions"><span class="meta">正文可能包含结构化岗位信息。</span><el-button type="primary" :loading="extracting" @click="extractBody">解析正文岗位</el-button></div>
         <el-divider>附件与招聘岗位</el-divider>
         <el-empty v-if="!independentAttachments.length" description="该公告未发现独立附件，岗位信息可能位于公告正文中。"/>
-        <p v-if="hasQrHint" class="meta">该公告包含二维码入口，请扫码查看相关内容。</p>
         <div v-if="independentAttachments.length" class="attachments"><div v-for="file in independentAttachments" :key="file.id" class="attachment"><div><strong>{{ file.fileName }}</strong><p>{{ typeLabels[file.attachmentType] || '其他附件' }}<span v-if="file.attachmentType==='POSITION_DATA'"> · {{ attachmentParseText(file) }}</span></p></div><div class="attachment-actions"><el-button v-if="file.attachmentType==='POSITION_DATA'&&file.parseStatus!=='OCR_REQUIRED'" type="primary" :loading="extracting" @click="extract">解析招聘岗位</el-button><el-button v-if="file.attachmentType==='POSITION_DATA'&&file.positionCount" @click="router.push({name:'recruitment-position-list',params:{id}})">查看岗位</el-button><el-button @click="open(file.fileUrl)">打开附件</el-button></div></div></div>
       </template>
       <el-divider/><div class="bottom-actions"><BackNavigation text="返回招聘发现" to="/recruitment"/><el-button type="primary" plain @click="open(notice.noticeUrl)">查看官方原文</el-button></div>

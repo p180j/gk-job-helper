@@ -28,7 +28,7 @@ class RecruitmentDiscoveryServiceTest {
                     new RecruitmentNoticeCandidate("过期", "https://example.test/old", LocalDateTime.now().minusDays(5)),
                     new RecruitmentNoticeCandidate("日期未知", "https://example.test/unknown", null)); }
         };
-        RecruitmentDiscoveryService service = new RecruitmentDiscoveryService(sources, notices, autoProcess, Arrays.asList(adapter));
+        RecruitmentDiscoveryService service = new RecruitmentDiscoveryService(sources, notices, autoProcess, new GenericRecruitmentSource(), Arrays.asList(adapter));
 
         assertEquals(1, service.discoverAll(3).getNewCount());
         assertEquals(2, service.discoverAll(3).getFilteredCount());
