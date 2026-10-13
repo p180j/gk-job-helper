@@ -274,6 +274,15 @@ class MajorMatcherTest {
     }
 
     @Test
+    void leveledRequirementSeparatedByWhitespaceShouldSelectUserLevelSegment() {
+        MatchItemResult result = match("软件工程", "080902", "本科",
+                "本科：历史学（060101）、政治学与行政学（030201）、中国共产党历史（030502）、法学（030101K） "
+                        + "研究生：中国史（0602）、政治学（0302）、马克思主义理论（0305）、中共党史党建学（0307）、法学（0301）",
+                null);
+        assertResult(result, MatchResult.NOT_MATCH);
+    }
+
+    @Test
     void leveledRequirementWithProfessionalSuffixShouldSelectUserLevelSegment() {
         MatchItemResult result = match("软件工程", "080902", "本科",
                 "研究生专业：计算机类；本科专业：法学类", null);

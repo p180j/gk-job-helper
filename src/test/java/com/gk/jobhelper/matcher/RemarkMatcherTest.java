@@ -167,6 +167,35 @@ class RemarkMatcherTest {
         assertTrue(result.getReason().contains("未填写“服务期满”"));
     }
 
+    @Test
+    void missingServiceProjectShouldRejectServiceProjectOnlyPosition() {
+        UserProfile profile = new UserProfile();
+        profile.setVeteran("否");
+        MatchItemResult result = match(profile,
+                "本岗位定向招录服务期满且考核合格的大学生村官或“三支一扶”人员；"
+                        + "需以最高学历所学主修专业报考；本单位最低服务年限为5年（含试用期）。");
+        assertEquals(MatchResult.NOT_MATCH, result.getResult());
+        assertTrue(result.getReason().contains("未填写基层项目经历"));
+    }
+
+    @Test
+    void listedServiceProjectShouldMatchServiceProjectOnlyPosition() {
+        UserProfile profile = new UserProfile();
+        profile.setServiceProjectType("三支一扶（服务期满且考核合格）");
+        assertEquals(MatchResult.MATCH, match(profile,
+                "本岗位定向招录服务期满且考核合格的大学生村官或“三支一扶”人员").getResult());
+    }
+
+    @Test
+    void unlistedServiceProjectShouldRejectServiceProjectOnlyPosition() {
+        UserProfile profile = new UserProfile();
+        profile.setServiceProjectType("西部计划志愿者（服务期满）");
+        MatchItemResult result = match(profile,
+                "本岗位定向招录服务期满且考核合格的大学生村官或“三支一扶”人员");
+        assertEquals(MatchResult.NOT_MATCH, result.getResult());
+        assertTrue(result.getReason().contains("未包含“西部计划志愿者”"));
+    }
+
     private MatchItemResult match(UserProfile profile, String remark) {
         JobPosition position = new JobPosition();
         position.setRemark(remark);

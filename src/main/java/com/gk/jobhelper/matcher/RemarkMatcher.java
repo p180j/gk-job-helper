@@ -71,9 +71,11 @@ public class RemarkMatcher implements JobConditionMatcher {
             result = worse(result, cetResult);
         }
 
-        if (containsServiceProjectOrVeteranRestriction(remark)) {
+        if (containsServiceProjectRestriction(remark)) {
             recognized = true;
-            MatchResult serviceResult = matchServiceProjectOrVeteran(profile, remark, userValues, reasons);
+            MatchResult serviceResult = containsVeteranRestriction(remark) && remark.contains("或")
+                    ? matchServiceProjectOrVeteran(profile, remark, userValues, reasons)
+                    : matchServiceProject(profile, remark, userValues, reasons);
             result = worse(result, serviceResult);
         }
 
@@ -201,7 +203,7 @@ public class RemarkMatcher implements JobConditionMatcher {
         }
 
         MatchResult veteranResult = matchVeteranAlternative(profile, veteran, notes, remark, reasons);
-        MatchResult serviceResult = matchServiceProjectAlternative(serviceProject, notes, reasons);
+        MatchResult serviceResult = matchServiceProjectAlternative(serviceProject, notes, remark, reasons);
 
         // 备注使用“或”：任一分支满足即可；两个分支均明确不满足才判不符合。
         if (veteranResult == MatchResult.MATCH || serviceResult == MatchResult.MATCH) {
@@ -211,6 +213,17 @@ public class RemarkMatcher implements JobConditionMatcher {
             return MatchResult.UNCERTAIN;
         }
         return MatchResult.NOT_MATCH;
+    }
+
+    private MatchResult matchServiceProject(UserProfile profile, String remark,
+                                             List<String> userValues, List<String> reasons) {
+        String serviceProject = TextNormalizer.normalize(profile.getServiceProjectType());
+        String notes = TextNormalizer.normalize(profile.getNotes());
+        userValues.add("服务基层项目：" + display(profile.getServiceProjectType()));
+        if (!notes.isEmpty()) {
+            userValues.add("档案备注：" + profile.getNotes().trim());
+        }
+        return matchServiceProjectAlternative(serviceProject, notes, remark, reasons);
     }
 
     private MatchResult matchVeteranAlternative(UserProfile profile, String veteran, String notes,
@@ -249,7 +262,7 @@ public class RemarkMatcher implements JobConditionMatcher {
         return MatchResult.MATCH;
     }
 
-    private MatchResult matchServiceProjectAlternative(String serviceProject, String notes,
+    private MatchResult matchServiceProjectAlternative(String serviceProject, String notes, String remark,
                                                         List<String> reasons) {
         if (serviceProject.isEmpty() || isNo(serviceProject)) {
             reasons.add("档案未填写基层项目经历，不满足基层项目服务期满人员分支。");
@@ -259,13 +272,44 @@ public class RemarkMatcher implements JobConditionMatcher {
             reasons.add("档案中的基层项目不属于大学生村官、三支一扶、西部志愿者或农村特岗教师范围。");
             return MatchResult.NOT_MATCH;
         }
+        String projectName = serviceProjectName(serviceProject);
+        if (!isServiceProjectAllowedByRemark(projectName, remark)) {
+            reasons.add("岗位备注列出的基层项目范围未包含“" + projectName + "”。");
+            return MatchResult.NOT_MATCH;
+        }
         String completionText = serviceProject + " " + notes;
         if (!completionText.contains("期满") && !completionText.contains("服务完成")) {
             reasons.add("档案中的基层项目类型符合，但未填写“服务期满”，需人工确认服务状态。");
             return MatchResult.UNCERTAIN;
         }
+        if (remark.contains("考核合格") && !completionText.contains("考核合格")) {
+            reasons.add("档案中的基层项目已注明服务期满，但未填写“考核合格”，需人工确认考核结果。");
+            return MatchResult.UNCERTAIN;
+        }
         reasons.add("档案中的基层项目类型符合，且已注明服务期满。");
         return MatchResult.MATCH;
+    }
+
+    private boolean isServiceProjectAllowedByRemark(String projectName, String remark) {
+        boolean namesSpecificProjects = remark.contains("大学生村官") || remark.contains("三支一扶")
+                || remark.contains("西部志愿") || remark.contains("西部计划")
+                || remark.contains("农村特岗") || remark.contains("特岗教师");
+        if (!namesSpecificProjects) {
+            return remark.contains("基层项目");
+        }
+        if ("大学生村官".equals(projectName)) return remark.contains("大学生村官");
+        if ("三支一扶".equals(projectName)) return remark.contains("三支一扶");
+        if ("西部计划志愿者".equals(projectName)) {
+            return remark.contains("西部志愿") || remark.contains("西部计划");
+        }
+        return remark.contains("农村特岗") || remark.contains("特岗教师");
+    }
+
+    private String serviceProjectName(String value) {
+        if (value.contains("大学生村官")) return "大学生村官";
+        if (value.contains("三支一扶")) return "三支一扶";
+        if (value.contains("西部志愿") || value.contains("西部计划")) return "西部计划志愿者";
+        return "农村特岗教师";
     }
 
     private boolean isAllowedServiceProject(String value) {
@@ -285,9 +329,16 @@ public class RemarkMatcher implements JobConditionMatcher {
         return matcher.find() ? Integer.parseInt(matcher.group(1)) : -1;
     }
 
-    private boolean containsServiceProjectOrVeteranRestriction(String remark) {
-        return (remark.contains("退役士兵") || remark.contains("退役军人"))
-                && (remark.contains("基层项目") || remark.contains("三支一扶") || remark.contains("大学生村官"));
+    private boolean containsServiceProjectRestriction(String remark) {
+        boolean mentionsProject = remark.contains("基层项目") || remark.contains("三支一扶")
+                || remark.contains("大学生村官") || remark.contains("西部志愿")
+                || remark.contains("西部计划") || remark.contains("农村特岗") || remark.contains("特岗教师");
+        return mentionsProject && (remark.contains("限") || remark.contains("定向招录")
+                || remark.contains("服务期满") || remark.contains("考核合格") || remark.contains("报考"));
+    }
+
+    private boolean containsVeteranRestriction(String remark) {
+        return remark.contains("退役士兵") || remark.contains("退役军人");
     }
 
     private boolean looksLikeQualificationRestriction(String remark) {

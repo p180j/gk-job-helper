@@ -4,9 +4,7 @@ import com.gk.jobhelper.common.MajorNameNormalizer;
 import com.gk.jobhelper.common.TextNormalizer;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,13 +38,13 @@ public final class MajorRequirementParser {
             "及其他相关专业", "及相关专业", "其他相关专业", "相关专业", "相近专业", "相似专业", "相关学科"
     };
 
-    /** 分学历层次前缀 */
-    private static final Pattern LEVEL_PREFIX = Pattern.compile("^([^:：]{1,8})[:：](.+)$");
-
-    private static final String[] LEVEL_KEYWORDS = {
-            "硕士研究生", "博士研究生", "研究生", "研究生专业", "本科", "本科专业",
-            "大专", "大专专业", "专科", "专科专业", "硕士", "硕士专业", "博士", "博士专业"
-    };
+    /**
+     * 分学历层次标记。真实职位表常以空格/换行直接衔接“本科：... 研究生：...”，
+     * 不能只依赖分号切分；标记前必须是文本开头、空白或分号，避免误切专业名称。
+     */
+    private static final Pattern LEVEL_MARKER = Pattern.compile(
+            "(?:^|[;\\s])(硕士研究生|博士研究生|研究生专业|本科专业|大专专业|专科专业|硕士专业|博士专业|"
+                    + "研究生|本科|大专|专科|硕士|博士)\\s*[:：]\\s*");
 
     private MajorRequirementParser() {
     }
@@ -107,45 +105,34 @@ public final class MajorRequirementParser {
      * 返回值含义: null=解析失败(格式不稳或无法选择层次); ""=非分段表达(使用原文); 其他=选中的分段内容。
      */
     private static String selectLeveledSegment(String text, String userEducation) {
-        String[] segments = text.split(";", -1);
-        boolean anyLeveled = false;
-        Map<String, String> leveledSegments = new LinkedHashMap<>();
-        for (String segment : segments) {
-            String s = segment.trim();
-            if (s.isEmpty()) {
-                continue;
-            }
-            Matcher matcher = LEVEL_PREFIX.matcher(s);
-            if (matcher.matches() && isLevelKeyword(matcher.group(1).trim())) {
-                anyLeveled = true;
-                leveledSegments.put(matcher.group(1).trim(), matcher.group(2).trim());
-            } else if (anyLeveled) {
-                // 部分分段、部分普通文本 -> 无法稳定解析
-                return null;
-            }
+        Matcher matcher = LEVEL_MARKER.matcher(text);
+        List<String> prefixes = new ArrayList<>();
+        List<Integer> markerStarts = new ArrayList<>();
+        List<Integer> contentStarts = new ArrayList<>();
+        while (matcher.find()) {
+            prefixes.add(matcher.group(1));
+            markerStarts.add(matcher.start());
+            contentStarts.add(matcher.end());
         }
-        if (!anyLeveled) {
+        if (prefixes.isEmpty()) {
             return "";
+        }
+        String leading = text.substring(0, markerStarts.get(0)).replace(";", "").trim();
+        if (!leading.isEmpty()) {
+            return null;
         }
         String userLevel = userLevelKeyword(TextNormalizer.normalize(userEducation));
         if (userLevel == null) {
             return null;
         }
-        for (Map.Entry<String, String> entry : leveledSegments.entrySet()) {
-            if (matchesUserLevel(userLevel, entry.getKey())) {
-                return entry.getValue();
+        for (int i = 0; i < prefixes.size(); i++) {
+            if (matchesUserLevel(userLevel, prefixes.get(i))) {
+                int contentEnd = i + 1 < prefixes.size() ? markerStarts.get(i + 1) : text.length();
+                String content = text.substring(contentStarts.get(i), contentEnd).replaceAll("[;\\s]+$", "").trim();
+                return content.isEmpty() ? null : content;
             }
         }
         return null;
-    }
-
-    private static boolean isLevelKeyword(String keyword) {
-        for (String level : LEVEL_KEYWORDS) {
-            if (level.equals(keyword)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /** 用户学历文本 -> 标准层次关键词（本科/专科/研究生） */

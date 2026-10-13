@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ElMessageBox } from 'element-plus/es/components/message-box/index.mjs'
@@ -26,6 +26,8 @@ const loading = ref(false)
 const pulling = ref(false)
 const deleting = ref(false)
 const labels: Record<RecruitmentNoticeStatus, string> = { NEW: '新发现', INTERESTED: '感兴趣', FOLLOWING: '正在看', IGNORED: '已忽略' }
+const allPageSelected = computed(() => items.value.length > 0 && items.value.every(item => selectedIds.value.includes(item.id)))
+const pageSelectionIndeterminate = computed(() => selectedIds.value.length > 0 && !allPageSelected.value)
 
 onMounted(load)
 
@@ -128,6 +130,7 @@ async function removeNotices(ids: number[]) {
 
 function noticeLabel(notice: RecruitmentNotice) { return notice.userStatus === 'NEW' ? (notice.viewedAt ? '已查阅' : '未查阅') : labels[notice.userStatus] }
 function detail(notice: RecruitmentNotice) { router.push({ name: 'recruitment-notice-detail', params: { id: notice.id } }) }
+function togglePageSelection(value: boolean) { selectedIds.value = value ? items.value.map(item => item.id) : [] }
 function changeStatus(value: string | number) { status.value = (value || '') as NoticeFilterStatus | ''; page.value = 1; load() }
 function search() { page.value = 1; load() }
 function changePage(value: number) { page.value = value; load() }
@@ -165,7 +168,10 @@ function changePage(value: number) { page.value = value; load() }
 
     <div v-loading="loading">
       <div v-if="items.length" class="batch-actions">
-        <span>已选 {{ selectedIds.length }} 篇</span>
+        <div class="selection-summary">
+          <el-checkbox :model-value="allPageSelected" :indeterminate="pageSelectionIndeterminate" @change="togglePageSelection">全选本页</el-checkbox>
+          <span>已选 {{ selectedIds.length }} 篇</span>
+        </div>
         <el-button type="danger" plain :disabled="!selectedIds.length" :loading="deleting" @click="removeNotices(selectedIds)">删除已选</el-button>
       </div>
       <el-empty v-if="!items.length && !loading" description="暂无招聘公告，点击“立即拉取”开始发现。" />
@@ -216,5 +222,5 @@ function changePage(value: number) { page.value = value; load() }
 </template>
 
 <style scoped>
-.head,.pull-actions{display:flex;justify-content:space-between;align-items:center;gap:10px}.head{margin-bottom:16px}.pull-actions .el-select{width:150px}.toolbar{display:flex;align-items:center;gap:24px;margin-bottom:16px}.toolbar .el-tabs{flex:1}.toolbar .el-input{width:300px}.batch-actions{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px;padding:0 4px;color:#606266;font-size:14px}.notice{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.notice-main{min-width:0;flex:1}.notice h2{font-size:17px;margin:0 0 10px}.notice p,.source-row p,.source-row small{margin:0;color:#606266;font-size:13px}.actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.muted{color:#909399}.pager{text-align:right;margin:22px 0}.config-note{color:#606266;font-size:14px;margin-top:0;line-height:1.6}.source-form{padding:4px 0 10px}.source-form-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#909399;font-size:13px}.source-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 0;border-top:1px solid #ebeef5}.source-row strong{display:block;margin-bottom:6px;word-break:break-all}@media(max-width:768px){.head,.toolbar{display:block}.pull-actions{margin-top:10px;flex-wrap:wrap}.toolbar .el-input{width:100%;margin-top:8px}.notice{align-items:flex-start}.actions{max-width:140px}.batch-actions{padding:0}.source-form-actions{align-items:flex-start;flex-direction:column}}
+.head,.pull-actions{display:flex;justify-content:space-between;align-items:center;gap:10px}.head{margin-bottom:16px}.pull-actions .el-select{width:150px}.toolbar{display:flex;align-items:center;gap:24px;margin-bottom:16px}.toolbar .el-tabs{flex:1}.toolbar .el-input{width:300px}.batch-actions,.selection-summary{display:flex;align-items:center;gap:12px}.batch-actions{justify-content:space-between;margin:0 0 10px;padding:0 4px;color:#606266;font-size:14px}.notice{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.notice-main{min-width:0;flex:1}.notice h2{font-size:17px;margin:0 0 10px}.notice p,.source-row p,.source-row small{margin:0;color:#606266;font-size:13px}.actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.muted{color:#909399}.pager{text-align:right;margin:22px 0}.config-note{color:#606266;font-size:14px;margin-top:0;line-height:1.6}.source-form{padding:4px 0 10px}.source-form-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#909399;font-size:13px}.source-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 0;border-top:1px solid #ebeef5}.source-row strong{display:block;margin-bottom:6px;word-break:break-all}@media(max-width:768px){.head,.toolbar{display:block}.pull-actions{margin-top:10px;flex-wrap:wrap}.toolbar .el-input{width:100%;margin-top:8px}.notice{align-items:flex-start}.actions{max-width:140px}.batch-actions{padding:0}.source-form-actions{align-items:flex-start;flex-direction:column}}
 </style>
