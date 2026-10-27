@@ -37,211 +37,33 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-10-13 14:36:40.195  INFO 40364 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 11.0.23 on SJ-DN0520 with PID 40364 (D:\studyCode\gk-job-helper\target\classes started by jiawen.peng in D:\studyCode\gk-job-helper)
-2026-10-13 14:36:40.198  INFO 41500 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
-2026-10-13 14:36:42.672  INFO 41500 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
-2026-10-13 14:36:42.689  INFO 40364 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-10-13 14:36:42.690  INFO 40364 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
-2026-10-13 14:36:42.955  INFO 41500 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-10-13 14:36:42.956  INFO 41500 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2713 ms
-2026-10-13 14:36:44.687  INFO 41500 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
-2026-10-13 14:36:44.705  INFO 41500 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 5.036 seconds (JVM running for 5.476)
-2026-10-13 14:36:44.719  INFO 41500 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-10-13 14:36:44.802  INFO 41500 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-10-13 14:36:44.802  INFO 41500 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-10-13 14:36:44.804  INFO 41500 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
-2026-10-13 14:36:44.951  INFO 41500 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-10-13 14:37:00.841 ERROR 41500 --- [nio-8080-exec-4] c.g.j.common.GlobalExceptionHandler      : 系统内部错误
-
-org.springframework.dao.DeadlockLoserDataAccessException: 
-### Error updating database.  Cause: com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction
-### The error may exist in file [D:\studyCode\gk-job-helper\target\classes\mapper\JobMatchMapper.xml]
-### The error may involve defaultParameterMap
-### The error occurred while setting parameters
-### SQL: DELETE FROM job_match_item         WHERE job_match_id IN (             SELECT id FROM job_match WHERE import_file_id = ?         )
-### Cause: com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction
-; Deadlock found when trying to get lock; try restarting transaction; nested exception is com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction
-	at org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator.doTranslate(SQLErrorCodeSQLExceptionTranslator.java:268) ~[spring-jdbc-5.3.31.jar:5.3.31]
-	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:73) ~[spring-jdbc-5.3.31.jar:5.3.31]
-	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:92) ~[mybatis-spring-2.1.2.jar:2.1.2]
-	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:439) ~[mybatis-spring-2.1.2.jar:2.1.2]
-	at com.sun.proxy.$Proxy71.delete(Unknown Source) ~[na:na]
-	at org.mybatis.spring.SqlSessionTemplate.delete(SqlSessionTemplate.java:304) ~[mybatis-spring-2.1.2.jar:2.1.2]
-	at org.apache.ibatis.binding.MapperMethod.execute(MapperMethod.java:72) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.binding.MapperProxy$PlainMethodInvoker.invoke(MapperProxy.java:141) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.binding.MapperProxy.invoke(MapperProxy.java:86) ~[mybatis-3.5.14.jar:3.5.14]
-	at com.sun.proxy.$Proxy85.deleteItemsByImportFileId(Unknown Source) ~[na:na]
-	at com.gk.jobhelper.service.ExcelImportService.deleteImport(ExcelImportService.java:125) ~[classes/:na]
-	at com.gk.jobhelper.service.ExcelImportService$$FastClassBySpringCGLIB$$42d69b52.invoke(<generated>) ~[classes/:na]
-	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218) ~[spring-core-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.invokeJoinpoint(CglibAopProxy.java:792) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:762) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:123) ~[spring-tx-5.3.31.jar:5.3.31]
-	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:388) ~[spring-tx-5.3.31.jar:5.3.31]
-	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:762) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:707) ~[spring-aop-5.3.31.jar:5.3.31]
-	at com.gk.jobhelper.service.ExcelImportService$$EnhancerBySpringCGLIB$$e8f44375.deleteImport(<generated>) ~[classes/:na]
-	at com.gk.jobhelper.controller.ImportController.delete(ImportController.java:77) ~[classes/:na]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[na:na]
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
-	at java.base/java.lang.reflect.Method.invoke(Method.java:566) ~[na:na]
-	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205) ~[spring-web-5.3.31.jar:5.3.31]
-	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:150) ~[spring-web-5.3.31.jar:5.3.31]
-	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117) ~[spring-webmvc-5.3.31.jar:5.3.31]
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:895) ~[spring-webmvc-5.3.31.jar:5.3.31]
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:808) ~[spring-webmvc-5.3.31.jar:5.3.31]
-	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-5.3.31.jar:5.3.31]
-	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1072) ~[spring-webmvc-5.3.31.jar:5.3.31]
-	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:965) ~[spring-webmvc-5.3.31.jar:5.3.31]
-	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006) ~[spring-webmvc-5.3.31.jar:5.3.31]
-	at org.springframework.web.servlet.FrameworkServlet.doDelete(FrameworkServlet.java:931) ~[spring-webmvc-5.3.31.jar:5.3.31]
-	at javax.servlet.http.HttpServlet.service(HttpServlet.java:561) ~[tomcat-embed-core-9.0.83.jar:4.0.FR]
-	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883) ~[spring-webmvc-5.3.31.jar:5.3.31]
-	at javax.servlet.http.HttpServlet.service(HttpServlet.java:623) ~[tomcat-embed-core-9.0.83.jar:4.0.FR]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:209) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-9.0.83.jar:9.0.83]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-5.3.31.jar:5.3.31]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117) ~[spring-web-5.3.31.jar:5.3.31]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-5.3.31.jar:5.3.31]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117) ~[spring-web-5.3.31.jar:5.3.31]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-5.3.31.jar:5.3.31]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117) ~[spring-web-5.3.31.jar:5.3.31]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:168) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:481) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:130) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:342) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:390) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:928) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1794) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61) ~[tomcat-embed-core-9.0.83.jar:9.0.83]
-	at java.base/java.lang.Thread.run(Thread.java:834) ~[na:na]
-Caused by: com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction
-	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:124) ~[mysql-connector-j-8.0.33.jar:8.0.33]
-	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122) ~[mysql-connector-j-8.0.33.jar:8.0.33]
-	at com.mysql.cj.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:916) ~[mysql-connector-j-8.0.33.jar:8.0.33]
-	at com.mysql.cj.jdbc.ClientPreparedStatement.execute(ClientPreparedStatement.java:354) ~[mysql-connector-j-8.0.33.jar:8.0.33]
-	at com.zaxxer.hikari.pool.ProxyPreparedStatement.execute(ProxyPreparedStatement.java:44) ~[HikariCP-4.0.3.jar:na]
-	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.execute(HikariProxyPreparedStatement.java) ~[HikariCP-4.0.3.jar:na]
-	at org.apache.ibatis.executor.statement.PreparedStatementHandler.update(PreparedStatementHandler.java:48) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.executor.statement.RoutingStatementHandler.update(RoutingStatementHandler.java:75) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.executor.SimpleExecutor.doUpdate(SimpleExecutor.java:50) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.executor.BaseExecutor.update(BaseExecutor.java:117) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.executor.CachingExecutor.update(CachingExecutor.java:76) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.session.defaults.DefaultSqlSession.update(DefaultSqlSession.java:197) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.session.defaults.DefaultSqlSession.delete(DefaultSqlSession.java:212) ~[mybatis-3.5.14.jar:3.5.14]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[na:na]
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
-	at java.base/java.lang.reflect.Method.invoke(Method.java:566) ~[na:na]
-	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:425) ~[mybatis-spring-2.1.2.jar:2.1.2]
-	... 70 common frames omitted
-
-2026-10-13 14:49:59.904  INFO 41500 --- [tment-process-2] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2109847760417652736.html, contentType=text/html, charset=UTF-8, htmlLength=171050, title=【校招】江西铜业加工事业部2027年度校园招聘公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, div#.:80, div#.:80, div#.:73, div#.:33, div#.:39, div#.:0, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80, div#.:0, div#.:0, div#.find-error:0]
-2026-10-13 14:49:59.950  INFO 41500 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2109849389141393408.html, contentType=text/html, charset=UTF-8, htmlLength=157056, title=【校招】江西铜业股份有限公司南昌矿产勘查分公司2027年度第一批次校园招聘公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, div#.:80, div#.:80, div#.:80, div#.:47, div#.:39, div#.:0, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80, div#.:0, div#.:0, div#.find-error:0]
-2026-10-13 14:50:00.191  INFO 41500 --- [tment-process-2] j.s.RecruitmentAttachmentDownloadService : 招聘附件下载完成：attachmentId=105, originalUrl=https://www.jxcc.com/upload/file/2026/09/29/e85a1679-57de-44e5-adad-069bd91bd2d4.xlsx, finalUrl=https://www.jxcc.com/upload/file/2026/09/29/e85a1679-57de-44e5-adad-069bd91bd2d4.xlsx, status=200, contentType=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, contentDisposition=null, bytes=18417, redirects=0, relays=0, fileType=XLSX
-2026-10-13 14:50:00.191  INFO 41500 --- [tment-process-1] j.s.RecruitmentAttachmentDownloadService : 招聘附件下载完成：attachmentId=107, originalUrl=https://www.jxcc.com/upload/file/2026/09/29/e725def7-8740-46c7-abba-1cc4800b437a.xlsx, finalUrl=https://www.jxcc.com/upload/file/2026/09/29/e725def7-8740-46c7-abba-1cc4800b437a.xlsx, status=200, contentType=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, contentDisposition=null, bytes=14576, redirects=0, relays=0, fileType=XLSX
-2026-10-13 14:50:00.748  WARN 41500 --- [tment-process-1] c.g.j.s.RecruitmentAutoProcessService    : 招聘岗位自动资格匹配失败，noticeId=137
-
-org.springframework.dao.DeadlockLoserDataAccessException: 
-### Error updating database.  Cause: com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction
-### The error may exist in file [D:\studyCode\gk-job-helper\target\classes\mapper\RecruitmentMatchMapper.xml]
-### The error may involve defaultParameterMap
-### The error occurred while setting parameters
-### SQL: INSERT INTO recruitment_match_item(match_result_id,requirement_id,requirement_type,requirement_level,result,position_requirement,user_evidence,reason,created_at) VALUES   (?,?,?,?,?,?,?,?,?) , (?,?,?,?,?,?,?,?,?) , (?,?,?,?,?,?,?,?,?) , (?,?,?,?,?,?,?,?,?) , (?,?,?,?,?,?,?,?,?) , (?,?,?,?,?,?,?,?,?) , (?,?,?,?,?,?,?,?,?) , (?,?,?,?,?,?,?,?,?)
-### Cause: com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction
-; Deadlock found when trying to get lock; try restarting transaction; nested exception is com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction
-	at org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator.doTranslate(SQLErrorCodeSQLExceptionTranslator.java:268) ~[spring-jdbc-5.3.31.jar:5.3.31]
-	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:73) ~[spring-jdbc-5.3.31.jar:5.3.31]
-	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:92) ~[mybatis-spring-2.1.2.jar:2.1.2]
-	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:439) ~[mybatis-spring-2.1.2.jar:2.1.2]
-	at com.sun.proxy.$Proxy71.insert(Unknown Source) ~[na:na]
-	at org.mybatis.spring.SqlSessionTemplate.insert(SqlSessionTemplate.java:272) ~[mybatis-spring-2.1.2.jar:2.1.2]
-	at org.apache.ibatis.binding.MapperMethod.execute(MapperMethod.java:62) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.binding.MapperProxy$PlainMethodInvoker.invoke(MapperProxy.java:141) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.binding.MapperProxy.invoke(MapperProxy.java:86) ~[mybatis-3.5.14.jar:3.5.14]
-	at com.sun.proxy.$Proxy77.insertItems(Unknown Source) ~[na:na]
-	at com.gk.jobhelper.service.RecruitmentQualificationMatchService.match(RecruitmentQualificationMatchService.java:26) ~[classes/:na]
-	at com.gk.jobhelper.service.RecruitmentQualificationMatchService.matchNotice(RecruitmentQualificationMatchService.java:27) ~[classes/:na]
-	at com.gk.jobhelper.service.RecruitmentQualificationMatchService$$FastClassBySpringCGLIB$$263723bc.invoke(<generated>) ~[classes/:na]
-	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218) ~[spring-core-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.invokeJoinpoint(CglibAopProxy.java:792) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:762) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:123) ~[spring-tx-5.3.31.jar:5.3.31]
-	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:388) ~[spring-tx-5.3.31.jar:5.3.31]
-	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:762) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:707) ~[spring-aop-5.3.31.jar:5.3.31]
-	at com.gk.jobhelper.service.RecruitmentQualificationMatchService$$EnhancerBySpringCGLIB$$6e116ef3.matchNotice(<generated>) ~[classes/:na]
-	at com.gk.jobhelper.service.RecruitmentAutoProcessService.matchPositions(RecruitmentAutoProcessService.java:102) ~[classes/:na]
-	at com.gk.jobhelper.service.RecruitmentAutoProcessService.processNotice(RecruitmentAutoProcessService.java:73) ~[classes/:na]
-	at com.gk.jobhelper.service.RecruitmentAutoProcessService.processNoticeAsync(RecruitmentAutoProcessService.java:35) ~[classes/:na]
-	at com.gk.jobhelper.service.RecruitmentAutoProcessService$$FastClassBySpringCGLIB$$62748078.invoke(<generated>) ~[classes/:na]
-	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218) ~[spring-core-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.invokeJoinpoint(CglibAopProxy.java:792) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:762) ~[spring-aop-5.3.31.jar:5.3.31]
-	at org.springframework.aop.interceptor.AsyncExecutionInterceptor.lambda$invoke$0(AsyncExecutionInterceptor.java:115) ~[spring-aop-5.3.31.jar:5.3.31]
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[na:na]
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128) ~[na:na]
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628) ~[na:na]
-	at java.base/java.lang.Thread.run(Thread.java:834) ~[na:na]
-Caused by: com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction
-	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:124) ~[mysql-connector-j-8.0.33.jar:8.0.33]
-	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122) ~[mysql-connector-j-8.0.33.jar:8.0.33]
-	at com.mysql.cj.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:916) ~[mysql-connector-j-8.0.33.jar:8.0.33]
-	at com.mysql.cj.jdbc.ClientPreparedStatement.execute(ClientPreparedStatement.java:354) ~[mysql-connector-j-8.0.33.jar:8.0.33]
-	at com.zaxxer.hikari.pool.ProxyPreparedStatement.execute(ProxyPreparedStatement.java:44) ~[HikariCP-4.0.3.jar:na]
-	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.execute(HikariProxyPreparedStatement.java) ~[HikariCP-4.0.3.jar:na]
-	at org.apache.ibatis.executor.statement.PreparedStatementHandler.update(PreparedStatementHandler.java:48) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.executor.statement.RoutingStatementHandler.update(RoutingStatementHandler.java:75) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.executor.SimpleExecutor.doUpdate(SimpleExecutor.java:50) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.executor.BaseExecutor.update(BaseExecutor.java:117) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.executor.CachingExecutor.update(CachingExecutor.java:76) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.session.defaults.DefaultSqlSession.update(DefaultSqlSession.java:197) ~[mybatis-3.5.14.jar:3.5.14]
-	at org.apache.ibatis.session.defaults.DefaultSqlSession.insert(DefaultSqlSession.java:184) ~[mybatis-3.5.14.jar:3.5.14]
-	at jdk.internal.reflect.GeneratedMethodAccessor49.invoke(Unknown Source) ~[na:na]
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
-	at java.base/java.lang.reflect.Method.invoke(Method.java:566) ~[na:na]
-	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:425) ~[mybatis-spring-2.1.2.jar:2.1.2]
-	... 33 common frames omitted
-
-2026-10-13 14:50:01.692  INFO 41500 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/7932?categoryId=18, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=71439, title=江西财经职业学院2026年公开招聘编制外合同聘用制人员公告, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:29, div#.contentmsg:41, div#.content:80]
-2026-10-13 14:50:11.673  INFO 41500 --- [nio-8080-exec-9] j.s.RecruitmentAttachmentDownloadService : 招聘附件下载完成：attachmentId=107, originalUrl=https://www.jxcc.com/upload/file/2026/09/29/e725def7-8740-46c7-abba-1cc4800b437a.xlsx, finalUrl=https://www.jxcc.com/upload/file/2026/09/29/e725def7-8740-46c7-abba-1cc4800b437a.xlsx, status=200, contentType=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, contentDisposition=null, bytes=14576, redirects=0, relays=0, fileType=XLSX
-2026-10-13 15:00:31.014  INFO 41500 --- [nio-8080-exec-1] org.ehcache.core.EhcacheManager          : Cache '97cbc0a5-d410-4101-8153-1de1c0ffe8dc' created in EhcacheManager.
-2026-10-13 15:00:31.032  INFO 41500 --- [nio-8080-exec-1] org.ehcache.core.EhcacheManager          : Cache '97cbc0a5-d410-4101-8153-1de1c0ffe8dc' created in EhcacheManager.
-2026-10-13 15:00:40.089  INFO 41500 --- [nio-8080-exec-1] org.ehcache.core.EhcacheManager          : Cache '97cbc0a5-d410-4101-8153-1de1c0ffe8dc' removed from EhcacheManager.
-2026-10-13 15:00:40.091  INFO 41500 --- [nio-8080-exec-1] org.ehcache.core.EhcacheManager          : Cache '97cbc0a5-d410-4101-8153-1de1c0ffe8dc' removed from EhcacheManager.
-2026-10-13 15:00:40.226  INFO 41500 --- [nio-8080-exec-1] org.ehcache.core.EhcacheManager          : Cache '1d5502f9-073e-436d-8b0e-3c12e2788690' created in EhcacheManager.
-2026-10-13 15:00:40.228  INFO 41500 --- [nio-8080-exec-1] org.ehcache.core.EhcacheManager          : Cache '1d5502f9-073e-436d-8b0e-3c12e2788690' created in EhcacheManager.
-2026-10-13 15:00:49.259  INFO 41500 --- [nio-8080-exec-1] org.ehcache.core.EhcacheManager          : Cache '1d5502f9-073e-436d-8b0e-3c12e2788690' removed from EhcacheManager.
-2026-10-13 15:00:49.260  INFO 41500 --- [nio-8080-exec-1] org.ehcache.core.EhcacheManager          : Cache '1d5502f9-073e-436d-8b0e-3c12e2788690' removed from EhcacheManager.
-2026-10-13 15:00:56.713  INFO 41500 --- [nio-8080-exec-9] org.ehcache.core.EhcacheManager          : Cache 'f325efcd-3afd-4a51-baa1-ea97dd8c704b' created in EhcacheManager.
-2026-10-13 15:00:56.719  INFO 41500 --- [nio-8080-exec-9] org.ehcache.core.EhcacheManager          : Cache 'f325efcd-3afd-4a51-baa1-ea97dd8c704b' created in EhcacheManager.
-2026-10-13 15:01:05.315  INFO 41500 --- [nio-8080-exec-9] org.ehcache.core.EhcacheManager          : Cache 'f325efcd-3afd-4a51-baa1-ea97dd8c704b' removed from EhcacheManager.
-2026-10-13 15:01:05.317  INFO 41500 --- [nio-8080-exec-9] org.ehcache.core.EhcacheManager          : Cache 'f325efcd-3afd-4a51-baa1-ea97dd8c704b' removed from EhcacheManager.
-2026-10-13 15:01:05.453  INFO 41500 --- [nio-8080-exec-9] org.ehcache.core.EhcacheManager          : Cache 'a273c265-1387-4045-94ab-b94ea14b3bf3' created in EhcacheManager.
-2026-10-13 15:01:05.455  INFO 41500 --- [nio-8080-exec-9] org.ehcache.core.EhcacheManager          : Cache 'a273c265-1387-4045-94ab-b94ea14b3bf3' created in EhcacheManager.
-2026-10-13 15:01:14.383  INFO 41500 --- [nio-8080-exec-9] org.ehcache.core.EhcacheManager          : Cache 'a273c265-1387-4045-94ab-b94ea14b3bf3' removed from EhcacheManager.
-2026-10-13 15:01:14.383  INFO 41500 --- [nio-8080-exec-9] org.ehcache.core.EhcacheManager          : Cache 'a273c265-1387-4045-94ab-b94ea14b3bf3' removed from EhcacheManager.
+2026-10-26 16:42:13.371  INFO 38356 --- [           main] com.gk.jobhelper.JobHelperApplication    : Starting JobHelperApplication using Java 11.0.23 on SJ-DN0520 with PID 38356 (D:\studyCode\gk-job-helper\target\classes started by jiawen.peng in D:\studyCode\gk-job-helper)
+2026-10-26 16:42:13.373  INFO 38356 --- [           main] com.gk.jobhelper.JobHelperApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-10-26 16:42:15.838  INFO 38356 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2026-10-26 16:42:15.854  INFO 38356 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-10-26 16:42:15.855  INFO 38356 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-10-26 16:42:16.217  INFO 38356 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-10-26 16:42:16.217  INFO 38356 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2796 ms
+2026-10-26 16:42:18.374  INFO 38356 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2026-10-26 16:42:18.397  INFO 38356 --- [           main] com.gk.jobhelper.JobHelperApplication    : Started JobHelperApplication in 5.5 seconds (JVM running for 5.928)
+2026-10-26 16:42:18.407  INFO 38356 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-10-26 16:42:18.629  INFO 38356 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-10-26 16:42:19.361  INFO 38356 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-26 16:42:19.362  INFO 38356 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-10-26 16:42:19.364  INFO 38356 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-10-26 16:44:50.216  INFO 38356 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2113097930836082688.html, contentType=text/html, charset=UTF-8, htmlLength=165891, title=【社招】江西国际公司2026年社会招聘（第三批）公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, section#.:73, section#.:73, section#.:73, section#.:73, section#.:6, section#.:6, section#.:6, section#.:6, section#.:6, section#.:80, section#.:80, section#.:6, section#.:6]
+2026-10-26 16:44:50.342  INFO 38356 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2112723196092940288.html, contentType=text/html, charset=UTF-8, htmlLength=162245, title=【社招】江西农发集团所属企业2026年度社会招聘公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, section#.:80, section#.:80, section#.:80, section#.:80, section#.:2, section#.:2, section#.:55, section#.:55, section#.:55, section#.:55, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80]
+2026-10-26 16:44:50.407  INFO 38356 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2112722497019904000.html, contentType=text/html, charset=UTF-8, htmlLength=28908, title=【社招】江西投资集团所属企业2026年（第2批次）公开招聘公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:0, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80, div#.:0, div#.:0, div#.find-error:0]
+2026-10-26 16:44:51.373  INFO 38356 --- [tment-process-2] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://gzw.jiangxi.gov.cn/jxsgzw/rczp/content/content_2112744909832781824.html, contentType=text/html, charset=UTF-8, htmlLength=168001, title=【社招】江铜南方公司2027年度社会招聘公告, candidates=[div#content.:80, div#.curmb:7, div#.:7, div#.:0, div#.main center:80, div#.xlcon xl-nr:80, div#zoom.:80, div#.:28, div#.:26, div#.:0, div#prevPage123.:0, div#.mainbottom:0, div#footer.:80, div#.:0, div#.:0, div#.find-error:0]
+2026-10-26 16:44:51.483  INFO 38356 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/8008?categoryId=7, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=32538, title=2027年度中央机关公开遴选和公开选调公务员报考指南, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:26, div#.contentmsg:39, div#.content:80]
+2026-10-26 16:44:51.576  INFO 38356 --- [tment-process-2] j.s.RecruitmentAttachmentDownloadService : 招聘附件下载完成：attachmentId=121, originalUrl=https://www.jxcc.com/upload/file/2026/10/20/a02fdddc-2d6d-46b4-9bcb-16f969b2e4df.xlsx, finalUrl=https://www.jxcc.com/upload/file/2026/10/20/a02fdddc-2d6d-46b4-9bcb-16f969b2e4df.xlsx, status=200, contentType=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, contentDisposition=null, bytes=27329, redirects=0, relays=0, fileType=XLSX
+2026-10-26 16:44:51.631  INFO 38356 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/8006?categoryId=7, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=23937, title=江西财经职业学院2026年公开招聘编制外合同聘用制人员核减岗位招聘计划公告, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:37, div#.contentmsg:41, div#.content:80]
+2026-10-26 16:44:51.790  INFO 38356 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/7995?categoryId=7, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=122052, title=关于2026年江西省高校毕业生“三支一扶”计划招募部分岗位核减的公告, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:34, div#.contentmsg:33, div#.content:80]
+2026-10-26 16:44:51.946  INFO 38356 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/7996?categoryId=7, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=30506, title=遂川县公安局2026年补充招聘警务辅助人员面试公告, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:25, div#.contentmsg:39, div#.content:80]
+2026-10-26 16:44:52.550  INFO 38356 --- [tment-process-2] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/8011?categoryId=18, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=28915, title=龙南市市场监管局招聘公告, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:12, div#.contentmsg:40, div#.content:80]
+2026-10-26 16:44:52.713  INFO 38356 --- [tment-process-2] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/8010?categoryId=18, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=54961, title=玉山县林业局2026年专职护林员招聘公告, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:20, div#.contentmsg:39, div#.content:80]
+2026-10-26 16:44:52.850  INFO 38356 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/8009?categoryId=18, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=88368, title=上犹县公安局2026年公开招聘看护勤务辅警公告, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:23, div#.contentmsg:39, div#.content:80]
+2026-10-26 16:44:52.915  INFO 38356 --- [tment-process-2] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/8007?categoryId=18, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=192457, title=2027年度中央机关公开遴选和公开选调公务员公告, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:24, div#.contentmsg:39, div#.content:80]
+2026-10-26 16:44:53.006  INFO 38356 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/8005?categoryId=18, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=26633, title=上犹县总工会招聘见习生公告, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:13, div#.contentmsg:39, div#.content:80]
+2026-10-26 16:44:53.126  INFO 38356 --- [tment-process-2] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/8004?categoryId=18, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=138915, title=龙南市殡葬服务中心公开招聘葬礼业务人员公告, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:21, div#.contentmsg:40, div#.content:80]
+2026-10-26 16:44:53.213  INFO 38356 --- [tment-process-1] j.s.JiangxiSasacRecruitmentDetailFetcher : 江西国资委详情：status=200, finalUrl=https://www.jxrcrsksta.com/content/8003?categoryId=18, contentType=text/html; charset=utf-8, charset=UTF-8, htmlLength=31142, title=江西农业大学后勤服务集团招聘劳动聘用制人员公告, candidates=[div#__nuxt.:80, div#__layout.:80, section#.container:80, div#.:80, div#.tip:77, div#.header:0, div#.:0, div#.fl logo:0, div#.fl logo2:0, div#.header-imgbg:0, div#.fr:0, div#.search:0, div#.nva:44, section#.:80, div#.contentId_box:80, div#.contentId_node:18, div#.contentId_contentbox:80, div#.title:23, div#.contentmsg:39, div#.content:80]

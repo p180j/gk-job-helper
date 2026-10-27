@@ -5,6 +5,7 @@ import com.gk.jobhelper.constant.ConditionType;
 import com.gk.jobhelper.constant.MatchResult;
 import com.gk.jobhelper.entity.JobPosition;
 import com.gk.jobhelper.entity.UserProfile;
+import com.gk.jobhelper.service.JobRemarkParser;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
  */
 @Component
 public class RemarkMatcher implements JobConditionMatcher {
+    private final JobRemarkParser remarkParser = new JobRemarkParser();
 
     private static final Pattern GRADUATE_YEAR = Pattern.compile("(?:限|仅限)?(\\d{4})届(?:(?:普通)?高校|普通高等学校)?毕业生");
     private static final Pattern LEGAL_A_CERTIFICATE = Pattern.compile("法律职业资格(?:证书)?A证|法律职业资格考试.*成绩合格");
@@ -44,6 +46,28 @@ public class RemarkMatcher implements JobConditionMatcher {
         List<String> reasons = new ArrayList<>();
         MatchResult result = MatchResult.MATCH;
         boolean recognized = false;
+
+        for (JobRemarkParser.Condition condition : remarkParser.parse(remarkRaw)) {
+            if ("MIN_SERVICE_YEARS".equals(condition.getType())) {
+                recognized = true;
+                reasons.add("最低服务" + condition.getYears() + "年，录用后需履行相关服务约束，请确认是否接受。");
+            } else if ("WORK_LOCATION".equals(condition.getType())) {
+                recognized = true;
+                reasons.add("备注说明" + condition.getSourceText() + "，请核对岗位地点。");
+            } else if ("CERTIFICATE".equals(condition.getType())
+                    && !condition.getSourceText().contains("法律职业资格")) {
+                recognized = true;
+                result = worse(result, MatchResult.UNCERTAIN);
+                reasons.add("备注要求" + condition.getSourceText() + "，档案当前无法可靠核验该证书。");
+            } else if ("POLICE_PHYSICAL".equals(condition.getType())
+                    || "WORK_EXPERIENCE".equals(condition.getType())
+                    || "POLITICAL_IDENTITY".equals(condition.getType())
+                    || "UNKNOWN".equals(condition.getType())) {
+                recognized = true;
+                result = worse(result, MatchResult.UNCERTAIN);
+                reasons.add("备注条件“" + condition.getSourceText() + "”尚无法据当前档案可靠核验。");
+            }
+        }
 
         Matcher graduateMatcher = GRADUATE_YEAR.matcher(remark);
         if (graduateMatcher.find()) {
@@ -79,14 +103,28 @@ public class RemarkMatcher implements JobConditionMatcher {
             result = worse(result, serviceResult);
         }
 
-        if (!recognized && looksLikeQualificationRestriction(remark)) {
-            result = MatchResult.UNCERTAIN;
-            reasons.add("备注包含疑似报考限制，当前档案字段无法可靠判断，请人工核验。");
+        if (hasUnresolvedQualificationClause(remark)) {
+            result = worse(result, MatchResult.UNCERTAIN);
+            reasons.add("备注仍包含未识别的疑似报考限制，请人工核验对应原文。");
         } else if (!recognized) {
             reasons.add("备注未识别到需要与个人档案核验的报考限制。请同时阅读岗位说明。");
         }
 
         return build(result, join(userValues), remarkRaw, join(reasons));
+    }
+
+    private boolean hasUnresolvedQualificationClause(String remark) {
+        for (String clause : remark.split("[;；。]+")) {
+            String text = clause.trim();
+            if (!looksLikeQualificationRestriction(text)) continue;
+            String residual = JobRemarkParser.removeRecognizedInformationalText(text);
+            if (!looksLikeQualificationRestriction(residual)) continue;
+            if (GRADUATE_YEAR.matcher(residual).find() || LEGAL_A_CERTIFICATE.matcher(residual).find()
+                    || CET_REQUIREMENT.matcher(residual).find() || containsServiceProjectRestriction(residual)
+                    || residual.matches(".*(?:限|仅限)?(?:男性|女性)(?:[，,；;。.]|$).*")) continue;
+            return true;
+        }
+        return false;
     }
 
     private MatchResult matchCet(UserProfile profile, String remark, List<String> userValues, List<String> reasons) {

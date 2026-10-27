@@ -14,6 +14,7 @@ public class MatchResultQuery {
     /** 级联地区筛选拆出的省份和市/区名称。 */
     private String regionProvince;
     private String regionLocality;
+    private boolean includeUnknownLocation;
     private String organizationKeyword;
     private String positionKeyword;
     private Integer recruitCountMin;
@@ -53,6 +54,8 @@ public class MatchResultQuery {
     public void setRegionProvince(String regionProvince) { this.regionProvince = regionProvince; }
     public String getRegionLocality() { return regionLocality; }
     public void setRegionLocality(String regionLocality) { this.regionLocality = regionLocality; }
+    public boolean isIncludeUnknownLocation() { return includeUnknownLocation; }
+    public void setIncludeUnknownLocation(boolean value) { includeUnknownLocation = value; }
     public String getOrganizationKeyword() { return organizationKeyword; }
     public void setOrganizationKeyword(String organizationKeyword) { this.organizationKeyword = organizationKeyword; }
     public String getPositionKeyword() { return positionKeyword; }

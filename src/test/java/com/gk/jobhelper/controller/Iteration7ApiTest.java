@@ -12,6 +12,7 @@ import com.gk.jobhelper.mapper.JobFavoriteMapper;
 import com.gk.jobhelper.mapper.JobMatchMapper;
 import com.gk.jobhelper.mapper.JobPositionMapper;
 import com.gk.jobhelper.mapper.UserProfileMapper;
+import com.gk.jobhelper.service.JobFeatureService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ class Iteration7ApiTest {
     @Autowired private JobPositionMapper positionMapper;
     @Autowired private JobMatchMapper matchMapper;
     @Autowired private JobFavoriteMapper favoriteMapper;
+    @Autowired private JobFeatureService featureService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private Long profileId;
@@ -65,6 +67,7 @@ class Iteration7ApiTest {
         profileId = insertProfile();
         importId = insertImport();
         jobIds = insertPositions();
+        featureService.rebuild(importId);
         insertMatch(jobIds.get(0), "MATCH", "年龄满足岗位A要求");
         insertMatch(jobIds.get(1), "UNCERTAIN", "岗位B年龄信息需确认");
         insertMatch(jobIds.get(2), "NOT_MATCH", "岗位C年龄不符合");
@@ -82,9 +85,9 @@ class Iteration7ApiTest {
 
     @Test
     void filterByRegion() throws Exception {
-        JsonNode data = result("region", "江西 南昌 东湖区", "page", "1", "size", "20");
+        JsonNode data = result("region", "东湖区", "page", "1", "size", "20");
         assertEquals(3, data.get("total").asInt());
-        assertEquals("江西 南昌 东湖区", data.get("items").get(0).get("region").asText());
+        assertEquals("江西省 南昌市 东湖区", data.get("items").get(0).get("region").asText());
     }
 
     @Test
@@ -97,6 +100,21 @@ class Iteration7ApiTest {
     void filterByCascaderProvinceShouldMatchAllProvincePositions() throws Exception {
         JsonNode data = result("region", "江西省/", "page", "1", "size", "20");
         assertEquals(6, data.get("total").asInt());
+    }
+
+    @Test
+    void regionFilterCanIncludeUnknownWithoutTreatingItAsConfirmed() throws Exception {
+        JobPosition unknown = position("G007", "省直单位岗位", null, null, "江西省某管理中心", null,
+                1, "本科", "不限");
+        unknown.setRawData("{\"联系电话\":\"0791-12345678\"}");
+        positionMapper.insertBatch(Arrays.asList(unknown));
+        insertMatch(unknown.getId(), "MATCH", "测试岗位");
+        featureService.rebuild(importId);
+        assertEquals(3, result("region", "江西省/南昌市", "page", "1", "size", "20").get("total").asInt());
+        JsonNode included = result("region", "江西省/南昌市", "includeUnknownLocation", "true",
+                "page", "1", "size", "20");
+        assertEquals(4, included.get("total").asInt());
+        assertTrue(included.get("items").toString().contains("UNKNOWN"));
     }
 
     @Test
@@ -117,7 +135,7 @@ class Iteration7ApiTest {
 
     @Test
     void filterByCombinedConditions() throws Exception {
-        JsonNode data = result("status", "MATCH", "region", "江西 南昌 东湖区",
+        JsonNode data = result("status", "MATCH", "region", "东湖区",
                 "educationKeyword", "本科", "majorKeyword", "计算机", "recruitCountMin", "1",
                 "recruitCountMax", "1", "page", "1", "size", "20");
         assertEquals(1, data.get("total").asInt());
@@ -165,6 +183,8 @@ class Iteration7ApiTest {
         assertEquals(2, page.get("total").asInt());
         assertEquals(2, page.get("items").size());
         assertTrue(page.get("items").get(0).get("favorite").asBoolean());
+        assertEquals("CONFIRMED", page.get("items").get(0).get("workLocationStatus").asText());
+        assertEquals("江西省 九江市 浔阳区", page.get("items").get(0).get("region").asText());
     }
 
     @Test
@@ -188,6 +208,8 @@ class Iteration7ApiTest {
         JsonNode data = compare(jobIds.subList(0, 2));
         assertEquals(2, data.size());
         assertEquals(jobIds.get(0).longValue(), data.get(0).get("jobId").asLong());
+        assertEquals("CONFIRMED", data.get(0).get("workLocationStatus").asText());
+        assertTrue(data.get(0).get("region").asText().contains("南昌市"));
     }
 
     @Test
@@ -289,6 +311,7 @@ class Iteration7ApiTest {
         p.setProvince("江西"); p.setCity(city); p.setDistrict(district); p.setDepartmentName(department);
         p.setOrganizationName(organization); p.setRecruitCount(recruitCount); p.setEducationRequirement(education);
         p.setMajorRequirement(major); p.setAgeRequirement("35周岁以下"); p.setSourceRow(2);
+        p.setRawData("{\"工作地点\":\"江西省" + city + "市" + district + "\"}");
         p.setCreatedAt(LocalDateTime.now()); p.setUpdatedAt(LocalDateTime.now()); return p;
     }
 

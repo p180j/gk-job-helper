@@ -17,6 +17,8 @@ public class MatchPositionResultVO {
     private String city;
     private String district;
     private String region;
+    private String workLocationStatus;
+    private String workLocationSource;
     private Integer recruitCount;
     private String educationRequirement;
     private String majorRequirement;
@@ -88,6 +90,10 @@ public class MatchPositionResultVO {
     public void setDistrict(String district) { this.district = district; }
     public String getRegion() { return region; }
     public void setRegion(String region) { this.region = region; }
+    public String getWorkLocationStatus() { return workLocationStatus; }
+    public void setWorkLocationStatus(String value) { workLocationStatus = value; }
+    public String getWorkLocationSource() { return workLocationSource; }
+    public void setWorkLocationSource(String value) { workLocationSource = value; }
 
     public Integer getRecruitCount() {
         return recruitCount;

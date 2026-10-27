@@ -35,6 +35,7 @@ const regionCascaderProps = { checkStrictly: true, emitPath: false }
 const filters = reactive({
   status: (['ALL', 'MATCH', 'UNCERTAIN', 'NOT_MATCH'].includes(initialStatus) ? initialStatus : 'MATCH') as StatusFilter,
   region: '',
+  includeUnknownLocation: false,
   organizationKeyword: '',
   positionKeyword: '',
   recruitCount: 'ALL' as RecruitFilter,
@@ -69,6 +70,7 @@ async function load() {
       profileId: profileId.value, importId: importId.value,
       status: filters.status === 'ALL' ? undefined : filters.status,
       region: regionFilterValue(filters.region),
+      includeUnknownLocation: filters.includeUnknownLocation,
       organizationKeyword: filters.organizationKeyword || undefined,
       positionKeyword: filters.positionKeyword || undefined,
       recruitCountMin: recruit.min, recruitCountMax: recruit.max,
@@ -99,7 +101,7 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  Object.assign(filters, { status: 'ALL', region: '', organizationKeyword: '', positionKeyword: '', recruitCount: 'ALL', educationKeyword: '', majorKeyword: '' })
+  Object.assign(filters, { status: 'ALL', region: '', includeUnknownLocation: false, organizationKeyword: '', positionKeyword: '', recruitCount: 'ALL', educationKeyword: '', majorKeyword: '' })
   applyFilters()
 }
 
@@ -163,6 +165,7 @@ function subjects(item: MatchPositionResult) { try { return item.examSubjectsJso
         <div class="filter-grid">
           <el-form-item label="匹配状态"><el-select v-model="filters.status"><el-option label="全部" value="ALL" /><el-option label="可以报" value="MATCH" /><el-option label="待确认" value="UNCERTAIN" /><el-option label="不符合" value="NOT_MATCH" /></el-select></el-form-item>
           <el-form-item label="地区"><el-cascader v-model="filters.region" :options="regionOptions" :props="regionCascaderProps" clearable filterable placeholder="全部地区" /></el-form-item>
+          <el-form-item label="地点待核实"><el-checkbox v-model="filters.includeUnknownLocation">地区筛选时也包含待核实地点</el-checkbox></el-form-item>
           <el-form-item label="招录单位"><el-input v-model="filters.organizationKeyword" clearable placeholder="单位关键字" /></el-form-item>
           <el-form-item label="岗位名称"><el-input v-model="filters.positionKeyword" clearable placeholder="岗位关键字" /></el-form-item>
           <el-form-item label="招录人数"><el-select v-model="filters.recruitCount"><el-option label="全部" value="ALL" /><el-option label="1人" value="1" /><el-option label="2人" value="2" /><el-option label="3人及以上" value="3_PLUS" /></el-select></el-form-item>
@@ -185,7 +188,7 @@ function subjects(item: MatchPositionResult) { try { return item.examSubjectsJso
           <div class="reference-line"><span>考试科目：{{ subjects(item).length ? subjects(item).join(' + ') : '暂未识别' }}</span><el-tag v-if="item.minInterviewScore != null" type="warning" effect="plain">2026最低进面{{ item.minInterviewScore }}</el-tag></div>
         </div>
         <aside class="job-side">
-          <div class="job-location" :title="item.region || '工作地点未填写'"><el-icon><Location /></el-icon><div><small>工作地点</small><strong>{{ item.region || '未填写' }}</strong></div></div>
+          <div class="job-location" :title="item.region || '工作地点未知'"><el-icon><Location /></el-icon><div><small>{{ item.workLocationStatus === 'INFERRED' ? '机关行政辖区' : '工作地点' }}</small><strong>{{ item.workLocationStatus === 'CONFIRMED' ? item.region : item.workLocationStatus === 'INFERRED' ? `${item.region || '-'}（实际地点待核实）` : item.workLocationStatus === 'MULTI_SITE' ? '多个地点，待确定' : '未知' }}</strong></div></div>
           <div class="job-actions"><el-button circle :loading="favoriteLoading.includes(item.jobId)" :type="item.favorite ? 'warning' : 'default'" :title="item.favorite ? '取消收藏' : '收藏岗位'" @click="toggleFavorite(item)"><el-icon><StarFilled v-if="item.favorite" /><Star v-else /></el-icon></el-button><el-button type="primary" plain @click="openDetail(item)">查看详情</el-button></div>
         </aside>
       </article>

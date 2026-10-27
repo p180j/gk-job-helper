@@ -8,15 +8,27 @@
     <result column="major_restriction_type" property="majorRestrictionType"/><result column="major_domains" property="majorDomains"/><result column="major_similarity_keys" property="majorSimilarityKeys"/>
     <result column="major_scope_count" property="majorScopeCount"/><result column="major_analysis_status" property="majorAnalysisStatus"/>
     <result column="organization_level" property="organizationLevel"/><result column="organization_level_status" property="organizationLevelStatus"/>
+    <result column="effective_major_requirement" property="effectiveMajorRequirement"/><result column="remark_conditions" property="remarkConditions"/>
+    <result column="work_location_name" property="workLocationName"/><result column="work_location_code" property="workLocationCode"/>
+    <result column="work_location_status" property="workLocationStatus"/><result column="work_location_source" property="workLocationSource"/>
+    <result column="work_location_evidence" property="workLocationEvidence"/><result column="work_location_type" property="workLocationType"/>
     <result column="created_at" property="createdAt"/><result column="updated_at" property="updatedAt"/>
   </resultMap>
-  <sql id="cols">position_id,exam_subject_count,exam_subjects,exam_subject_group,exam_subject_status,raw_exam_subject_text,major_restriction_type,major_domains,major_similarity_keys,major_scope_count,major_analysis_status,organization_level,organization_level_status,created_at,updated_at</sql>
+  <sql id="cols">position_id,exam_subject_count,exam_subjects,exam_subject_group,exam_subject_status,raw_exam_subject_text,major_restriction_type,major_domains,major_similarity_keys,major_scope_count,major_analysis_status,organization_level,organization_level_status,effective_major_requirement,remark_conditions,work_location_name,work_location_code,work_location_status,work_location_source,work_location_evidence,work_location_type,created_at,updated_at</sql>
   <insert id="upsert">
-    INSERT INTO job_position_feature(<include refid="cols"/>) VALUES(#{positionId},#{examSubjectCount},#{examSubjects},#{examSubjectGroup},#{examSubjectStatus},#{rawExamSubjectText},#{majorRestrictionType},#{majorDomains},#{majorSimilarityKeys},#{majorScopeCount},#{majorAnalysisStatus},#{organizationLevel},#{organizationLevelStatus},#{createdAt},#{updatedAt})
-    ON DUPLICATE KEY UPDATE exam_subject_count=VALUES(exam_subject_count),exam_subjects=VALUES(exam_subjects),exam_subject_group=VALUES(exam_subject_group),exam_subject_status=VALUES(exam_subject_status),raw_exam_subject_text=VALUES(raw_exam_subject_text),major_restriction_type=VALUES(major_restriction_type),major_domains=VALUES(major_domains),major_similarity_keys=VALUES(major_similarity_keys),major_scope_count=VALUES(major_scope_count),major_analysis_status=VALUES(major_analysis_status),organization_level=VALUES(organization_level),organization_level_status=VALUES(organization_level_status),updated_at=VALUES(updated_at)
+    INSERT INTO job_position_feature(<include refid="cols"/>) VALUES(#{positionId},#{examSubjectCount},#{examSubjects},#{examSubjectGroup},#{examSubjectStatus},#{rawExamSubjectText},#{majorRestrictionType},#{majorDomains},#{majorSimilarityKeys},#{majorScopeCount},#{majorAnalysisStatus},#{organizationLevel},#{organizationLevelStatus},#{effectiveMajorRequirement},#{remarkConditions},#{workLocationName},#{workLocationCode},#{workLocationStatus},#{workLocationSource},#{workLocationEvidence},#{workLocationType},#{createdAt},#{updatedAt})
+    ON DUPLICATE KEY UPDATE exam_subject_count=VALUES(exam_subject_count),exam_subjects=VALUES(exam_subjects),exam_subject_group=VALUES(exam_subject_group),exam_subject_status=VALUES(exam_subject_status),raw_exam_subject_text=VALUES(raw_exam_subject_text),major_restriction_type=VALUES(major_restriction_type),major_domains=VALUES(major_domains),major_similarity_keys=VALUES(major_similarity_keys),major_scope_count=VALUES(major_scope_count),major_analysis_status=VALUES(major_analysis_status),organization_level=VALUES(organization_level),organization_level_status=VALUES(organization_level_status),effective_major_requirement=VALUES(effective_major_requirement),remark_conditions=VALUES(remark_conditions),work_location_name=VALUES(work_location_name),work_location_code=VALUES(work_location_code),work_location_status=VALUES(work_location_status),work_location_source=VALUES(work_location_source),work_location_evidence=VALUES(work_location_evidence),work_location_type=VALUES(work_location_type),updated_at=VALUES(updated_at)
   </insert>
   <select id="selectByPositionId" resultMap="map">SELECT <include refid="cols"/> FROM job_position_feature WHERE position_id=#{positionId}</select>
   <select id="selectByPositionIds" resultMap="map">SELECT <include refid="cols"/> FROM job_position_feature WHERE position_id IN <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach></select>
   <select id="selectBySubjectGroup" resultMap="map">SELECT <include refid="cols"/> FROM job_position_feature WHERE exam_subject_group=#{group}</select>
+  <update id="updateParsedFields">
+    UPDATE job_position_feature SET effective_major_requirement=#{effectiveMajorRequirement},
+      remark_conditions=#{remarkConditions},work_location_name=#{workLocationName},
+      work_location_code=#{workLocationCode},work_location_status=#{workLocationStatus},
+      work_location_source=#{workLocationSource},work_location_evidence=#{workLocationEvidence},
+      work_location_type=#{workLocationType},updated_at=#{updatedAt}
+    WHERE position_id=#{positionId}
+  </update>
   <delete id="deleteAll">DELETE FROM job_position_feature</delete>
 </mapper>

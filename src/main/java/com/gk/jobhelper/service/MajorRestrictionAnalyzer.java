@@ -10,7 +10,7 @@ public class MajorRestrictionAnalyzer {
  private final Map<String,List<MajorSearchItemVO>> searchCache=new ConcurrentHashMap<>();
  public MajorRestrictionAnalyzer(MajorCatalogService catalogService){this.catalogService=catalogService;}
  public Result analyze(JobPosition p){
-  MajorRequirementParser.ParsedRequirement parsed=MajorRequirementParser.parse(p.getMajorRequirement(),p.getEducationRequirement());
+  MajorRequirementParser.ParsedRequirement parsed=MajorRequirementParser.parseForHistoricalFeature(p.getMajorRequirement(),p.getEducationRequirement());
   if(parsed.isUnlimited())return new Result("UNRESTRICTED",Collections.<String>emptyList(),Collections.<String>emptyList(),null,"RECOGNIZED");
   if(parsed.isParseFailure())return uncertain();
   int exact=0,categories=0,scope=0; LinkedHashSet<String> domains=new LinkedHashSet<>(),similarityKeys=new LinkedHashSet<>();

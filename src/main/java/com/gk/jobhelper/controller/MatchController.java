@@ -6,6 +6,7 @@ import com.gk.jobhelper.dto.MatchPositionResultVO;
 import com.gk.jobhelper.dto.MatchResultVO;
 import com.gk.jobhelper.dto.MatchSummaryVO;
 import com.gk.jobhelper.dto.MatchProgressVO;
+import com.gk.jobhelper.dto.MatchChangePreviewVO;
 import com.gk.jobhelper.dto.PageVO;
 import com.gk.jobhelper.service.JobMatchService;
 import com.gk.jobhelper.service.JobMatchAsyncService;
@@ -58,6 +59,12 @@ public class MatchController {
         return ApiResponse.ok(matchProgressStore.get(profileId, importId));
     }
 
+    @GetMapping("/change-preview")
+    public ApiResponse<MatchChangePreviewVO> previewChanges(@RequestParam("profileId") Long profileId,
+                                                              @RequestParam("importId") Long importId) {
+        return ApiResponse.ok(jobMatchService.previewChanges(profileId, importId));
+    }
+
     @GetMapping("/result")
     public ApiResponse<PageVO<MatchPositionResultVO>> result(
             @RequestParam("profileId") Long profileId,
@@ -65,6 +72,7 @@ public class MatchController {
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "result", required = false) String legacyResult,
             @RequestParam(value = "region", required = false) String region,
+            @RequestParam(value = "includeUnknownLocation", defaultValue = "false") boolean includeUnknownLocation,
             @RequestParam(value = "organizationKeyword", required = false) String organizationKeyword,
             @RequestParam(value = "positionKeyword", required = false) String positionKeyword,
             @RequestParam(value = "recruitCountMin", required = false) Integer recruitCountMin,
@@ -78,7 +86,7 @@ public class MatchController {
         String effectiveStatus = status == null || status.trim().isEmpty() ? legacyResult : status;
         return ApiResponse.ok(jobMatchService.queryResults(profileId, importId, effectiveStatus,
                 region, organizationKeyword, positionKeyword, recruitCountMin, recruitCountMax,
-                educationKeyword, majorKeyword, safePage, safeSize));
+                educationKeyword, majorKeyword, includeUnknownLocation, safePage, safeSize));
     }
 
     @GetMapping("/regions")

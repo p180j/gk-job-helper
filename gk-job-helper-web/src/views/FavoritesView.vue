@@ -93,7 +93,7 @@ async function changeImport(value: number) { importId.value = value; page.value 
         <div class="favorite-main">
           <div class="title-line"><el-tag v-if="item.matchResult" :type="matchStatus(item.matchResult).type">{{ matchStatus(item.matchResult).label }}</el-tag><el-tag v-else type="info">尚未匹配</el-tag><h2>{{ item.positionName || '未命名岗位' }}</h2></div>
           <p>{{ item.departmentName || '-' }}<span v-if="item.organizationName"> · {{ item.organizationName }}</span></p>
-          <div class="meta"><span>地区：{{ item.region || '-' }}</span><span>代码：{{ item.positionCode || '-' }}</span><span>招录：{{ item.recruitCount ?? '-' }}人</span><span>学历：{{ item.educationRequirement || '无要求' }}</span><span>专业：{{ item.majorRequirement || '无要求' }}</span></div>
+          <div class="meta"><span>工作地点：{{ item.workLocationStatus === 'CONFIRMED' ? item.region : item.workLocationStatus === 'INFERRED' ? `${item.region || '-'}（机关行政辖区，实际地点待核实）` : item.workLocationStatus === 'MULTI_SITE' ? '多个地点，待确定' : '未知' }}</span><span>代码：{{ item.positionCode || '-' }}</span><span>招录：{{ item.recruitCount ?? '-' }}人</span><span>学历：{{ item.educationRequirement || '无要求' }}</span><span>专业：{{ item.majorRequirement || '无要求' }}</span></div>
         </div>
         <div class="actions"><el-button circle type="warning" title="取消收藏" @click="unfavorite(item)"><el-icon><StarFilled /></el-icon></el-button><el-button type="primary" plain @click="router.push({path:`/jobs/${item.jobId}`,query:{from:'favorites'}})">查看详情</el-button></div>
       </article>

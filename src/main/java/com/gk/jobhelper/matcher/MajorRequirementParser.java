@@ -56,6 +56,16 @@ public final class MajorRequirementParser {
      * @param userEducation  用户学历（用于"本科:xx;研究生:xx"分段表达时选择对应部分），可空
      */
     public static ParsedRequirement parse(String requirement, String userEducation) {
+        return parseInternal(requirement, userEducation, true);
+    }
+
+    /** Keeps the pre-existing historical similarity classification stable. */
+    public static ParsedRequirement parseForHistoricalFeature(String requirement, String userEducation) {
+        return parseInternal(requirement, userEducation, false);
+    }
+
+    private static ParsedRequirement parseInternal(String requirement, String userEducation,
+                                                    boolean recognizeLeveledUnlimited) {
         String text = TextNormalizer.normalize(requirement);
         if (text.isEmpty()) {
             return ParsedRequirement.failure("岗位专业要求为空，无法可靠判断。");
@@ -72,6 +82,9 @@ public final class MajorRequirementParser {
         }
         if (!leveled.isEmpty()) {
             effectiveText = leveled;
+        }
+        if (recognizeLeveledUnlimited && isUnlimitedMajor(effectiveText)) {
+            return ParsedRequirement.unlimited();
         }
 
         List<RequirementToken> tokens = new ArrayList<>();
@@ -97,7 +110,8 @@ public final class MajorRequirementParser {
             return true;
         }
         String t = TextNormalizer.normalize(normalizedText);
-        return "专业不限".equals(t) || "不限专业".equals(t) || "无专业限制".equals(t);
+        String compact = t.replace(" ", "");
+        return "专业不限".equals(compact) || "不限专业".equals(compact) || "无专业限制".equals(compact);
     }
 
     /**

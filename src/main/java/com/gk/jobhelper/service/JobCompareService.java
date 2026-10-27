@@ -5,6 +5,8 @@ import com.gk.jobhelper.common.BusinessException;
 import com.gk.jobhelper.dto.JobCompareVO;
 import com.gk.jobhelper.dto.MatchResultVO;
 import com.gk.jobhelper.entity.JobPosition;
+import com.gk.jobhelper.entity.JobPositionFeature;
+import com.gk.jobhelper.mapper.JobPositionFeatureMapper;
 import com.gk.jobhelper.mapper.JobPositionMapper;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +18,12 @@ import java.util.Set;
 @Service
 public class JobCompareService {
     private final JobPositionMapper positionMapper;
+    private final JobPositionFeatureMapper featureMapper;
     private final JobMatchService matchService;
 
-    public JobCompareService(JobPositionMapper positionMapper, JobMatchService matchService) {
+    public JobCompareService(JobPositionMapper positionMapper, JobPositionFeatureMapper featureMapper, JobMatchService matchService) {
         this.positionMapper = positionMapper;
+        this.featureMapper = featureMapper;
         this.matchService = matchService;
     }
 
@@ -44,22 +48,24 @@ public class JobCompareService {
                 throw new BusinessException(ApiResponse.CODE_JOB_NOT_FOUND, "岗位不存在: " + jobId);
             }
             MatchResultVO match = matchService.getMatchDetail(jobId, profileId);
-            result.add(toVO(position, match));
+            result.add(toVO(position, featureMapper.selectByPositionId(jobId), match));
         }
         return result;
     }
 
-    private JobCompareVO toVO(JobPosition p, MatchResultVO match) {
+    private JobCompareVO toVO(JobPosition p, JobPositionFeature feature, MatchResultVO match) {
         JobCompareVO vo = new JobCompareVO();
         vo.setJobId(p.getId());
-        vo.setRegion(join(p.getProvince(), p.getCity(), p.getDistrict()));
+        vo.setRegion(feature == null ? null : feature.getWorkLocationName());
+        vo.setWorkLocationStatus(feature == null ? "UNKNOWN" : feature.getWorkLocationStatus());
         vo.setDepartmentName(p.getDepartmentName());
         vo.setOrganizationName(p.getOrganizationName());
         vo.setPositionName(p.getPositionName());
         vo.setPositionCode(p.getPositionCode());
         vo.setRecruitCount(p.getRecruitCount());
         vo.setEducationRequirement(p.getEducationRequirement());
-        vo.setMajorRequirement(p.getMajorRequirement());
+        vo.setMajorRequirement(feature != null && feature.getEffectiveMajorRequirement() != null
+                ? feature.getEffectiveMajorRequirement() : p.getMajorRequirement());
         vo.setAgeRequirement(p.getAgeRequirement());
         vo.setPoliticalRequirement(p.getPoliticalRequirement());
         vo.setWorkYearRequirement(p.getWorkYearRequirement());

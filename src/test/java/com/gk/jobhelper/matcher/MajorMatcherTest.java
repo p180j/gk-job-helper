@@ -245,15 +245,15 @@ class MajorMatcherTest {
         assertResult(match("软件工程", "080902", "本科", "不限专业", null), MatchResult.MATCH);
         assertResult(match("软件工程", "080902", "本科", "无专业限制", null), MatchResult.MATCH);
         assertResult(match("软件工程", "080902", "本科", "无要求", null), MatchResult.MATCH);
-        assertEquals("岗位不限专业。",
-                match("软件工程", "080902", "本科", "专业不限", null).getReason());
+        assertTrue(match("软件工程", "080902", "本科", "专业不限", null)
+                .getReason().contains("本科"));
     }
 
     @Test
-    void emptyRequirementShouldMeanNoRestriction() {
+    void emptyRequirementShouldRemainUnknown() {
         MatchItemResult result = match("软件工程", "080902", "本科", null, null);
-        assertResult(result, MatchResult.MATCH);
-        assertTrue(result.getReason().contains("不限专业"));
+        assertResult(result, MatchResult.UNCERTAIN);
+        assertTrue(result.getReason().contains("为空"));
     }
 
     @Test
@@ -271,6 +271,35 @@ class MajorMatcherTest {
     void leveledRequirementShouldSelectUserLevelSegment() {
         MatchItemResult result = match("软件工程", "080902", "本科", "本科：计算机类；研究生：法学", null);
         assertResult(result, MatchResult.MATCH);
+    }
+
+    @Test
+    void undergraduateUnlimitedMustIgnoreVocationalRestriction() {
+        MatchItemResult result = match("软件工程", "080902", "本科",
+                "研究生专业：专业不限；本科专业：专业不限；大专专业：护理类", null);
+        assertResult(result, MatchResult.MATCH);
+        assertTrue(result.getReason().contains("本科"));
+    }
+
+    @Test
+    void graduateUnlimitedMustNotOverrideUndergraduateRestriction() {
+        MatchItemResult result = match("软件工程", "080902", "本科",
+                "研究生专业：专业不限；本科专业：法学类；大专专业：护理类", null);
+        assertResult(result, MatchResult.NOT_MATCH);
+    }
+
+    @Test
+    void levelColumnsInOriginalRowOverrideSingleMappedMajorColumn() {
+        UserProfile profile = new UserProfile();
+        profile.setEducation("本科");
+        profile.setMajor("软件工程");
+        profile.setMajorCode("080902");
+        JobPosition position = new JobPosition();
+        position.setMajorRequirement("护理类");
+        position.setRawData("{\"研究生专业\":\"专业不限\",\"本科专业\":\"专业不限\",\"大专专业\":\"护理类\"}");
+        MatchItemResult result = majorMatcher.match(profile, position, MatchContext.of(REFERENCE_DATE));
+        assertResult(result, MatchResult.MATCH);
+        assertTrue(result.getRequirementValue().contains("本科专业：专业不限"));
     }
 
     @Test

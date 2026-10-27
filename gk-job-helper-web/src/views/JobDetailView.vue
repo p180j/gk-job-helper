@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchHistoricalAnalysis, fetchJob, fetchJobFeature } from '@/api/jobs'
+import { fetchImportProgress } from '@/api/import'
 import { fetchJobMatch } from '@/api/match'
 import { fetchProfile, isProfileNotFound } from '@/api/profile'
 import { showError } from '@/api/http'
@@ -23,6 +24,10 @@ const id = Number(route.params.id)
 const job = ref<JobPosition>()
 const match = ref<MatchResult>()
 const feature = ref<JobFeature | null>()
+const remarkConditions = computed(() => {
+  try { return JSON.parse(feature.value?.remarkConditions || '[]') as Array<{ type: string; nature: string; sourceText: string; years: number | null }> }
+  catch { return [] }
+})
 const historical = ref<HistoricalAnalysis>()
 const loading = ref(true)
 const returnSource = computed(() => String(route.query.from || ''))
@@ -45,7 +50,7 @@ const contactPhone = computed(() => {
 const info = computed<DetailItem[]>(() => {
   if (!job.value) return []
   const current = job.value
-  const region = [current.province, current.city, current.district].filter(Boolean).join(' ')
+  const location = feature.value
   return [
     { label: '招录单位', value: current.departmentName, emptyText: '-' },
     ...(hasValue(current.organizationName)
@@ -54,12 +59,16 @@ const info = computed<DetailItem[]>(() => {
     { label: '联系电话', value: contactPhone.value, emptyText: '-' },
     { label: '岗位名称', value: current.positionName, emptyText: '-' },
     { label: '岗位代码', value: current.positionCode, emptyText: '-' },
-    ...(hasValue(region) ? [{ label: '地区', value: region, emptyText: '-' }] : []),
+    { label: location?.workLocationStatus === 'INFERRED' ? '机关行政辖区' : '工作地点',
+      value: location?.workLocationStatus === 'CONFIRMED' ? location.workLocationName
+        : location?.workLocationStatus === 'INFERRED' ? `${location.workLocationName || '-'}（实际岗位地点待核实）`
+          : location?.workLocationStatus === 'MULTI_SITE' ? '多个工作地点（具体地点待确定）' : '未知', emptyText: '未知' },
+    ...(location?.workLocationEvidence ? [{ label: '地点依据', value: location.workLocationEvidence, emptyText: '-', span: 2 }] : []),
     { label: '招录人数', value: current.recruitCount == null ? null : `${current.recruitCount} 人`, emptyText: '-' },
     { label: '考试科目', value: feature.value?.examSubjects?.join(' + '), emptyText: '暂未识别', span: 2 },
     { label: '学历', value: current.educationRequirement, emptyText: '无要求', requirement: true },
     { label: '学位', value: current.degreeRequirement, emptyText: '无要求', requirement: true },
-    { label: '专业', value: current.majorRequirement, emptyText: '无要求', requirement: true, span: 2 },
+    { label: '专业', value: location?.effectiveMajorRequirement || current.majorRequirement, emptyText: '待核实', requirement: true, span: 2 },
     { label: '年龄', value: current.ageRequirement, emptyText: '无要求', requirement: true },
     { label: '政治面貌', value: current.politicalRequirement, emptyText: '无要求', requirement: true },
     { label: '基层工作经历', value: current.workYearRequirement, emptyText: '无要求', requirement: true },
@@ -76,7 +85,9 @@ onMounted(async () => {
   try {
     const profile = await fetchProfile()
     if (!profile) return
-    ;[job.value, match.value, feature.value, historical.value] = await Promise.all([fetchJob(id), fetchJobMatch(id, profile.id), fetchJobFeature(id), fetchHistoricalAnalysis(id, 2026)])
+    ;[job.value, match.value, feature.value] = await Promise.all([fetchJob(id), fetchJobMatch(id, profile.id), fetchJobFeature(id)])
+    const importRecord = job.value?.importFileId ? await fetchImportProgress(job.value.importFileId) : null
+    historical.value = await fetchHistoricalAnalysis(id, importRecord?.examYear || 2026)
   } catch (error) {
     if (isProfileNotFound(error)) router.replace('/profile')
     else showError(error, '读取岗位详情失败。')
@@ -183,6 +194,10 @@ function relativeText(value: string | null | undefined) {
       <div class="remark-block" :class="{ empty: !hasValue(job.remark) }">
         <div class="remark-title">备注</div>
         <div class="remark-content">{{ hasValue(job.remark) ? job.remark : '暂无备注' }}</div>
+        <div v-for="(condition, index) in remarkConditions" :key="index" class="remark-content">
+          {{ condition.type === 'MIN_SERVICE_YEARS' ? `最低服务${condition.years}年，录用后需履行相关服务约束。` : condition.sourceText }}
+          <el-tag size="small" :type="condition.nature === 'QUALIFICATION' ? 'warning' : 'info'">{{ condition.nature === 'QUALIFICATION' ? '报考资格' : condition.nature === 'POST_EMPLOYMENT' ? '录用后约束' : '岗位说明' }}</el-tag>
+        </div>
       </div>
 
       <div class="interview-reference">

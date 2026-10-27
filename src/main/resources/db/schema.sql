@@ -353,6 +353,14 @@ CREATE TABLE IF NOT EXISTS job_position_feature (
     major_analysis_status VARCHAR(16) NOT NULL DEFAULT 'UNKNOWN',
     organization_level VARCHAR(32) DEFAULT NULL,
     organization_level_status VARCHAR(16) NOT NULL DEFAULT 'UNKNOWN',
+    effective_major_requirement TEXT,
+    remark_conditions TEXT,
+    work_location_name VARCHAR(255) DEFAULT NULL,
+    work_location_code VARCHAR(32) DEFAULT NULL,
+    work_location_status VARCHAR(16) NOT NULL DEFAULT 'UNKNOWN',
+    work_location_source VARCHAR(32) DEFAULT NULL,
+    work_location_evidence TEXT,
+    work_location_type VARCHAR(32) DEFAULT NULL,
     created_at DATETIME DEFAULT NULL,
     updated_at DATETIME DEFAULT NULL,
     PRIMARY KEY (position_id),
@@ -360,6 +368,7 @@ CREATE TABLE IF NOT EXISTS job_position_feature (
 );
 CREATE INDEX idx_position_feature_subject_group ON job_position_feature (exam_subject_group);
 CREATE INDEX idx_position_feature_major_type ON job_position_feature (major_restriction_type);
+CREATE INDEX idx_position_feature_work_location ON job_position_feature (work_location_status, work_location_code);
 
 CREATE TABLE IF NOT EXISTS job_preference (
     id BIGINT NOT NULL AUTO_INCREMENT,

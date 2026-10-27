@@ -205,8 +205,8 @@ class MatchApiTest {
         assertTrue(ageItem.get("reason").asText().contains("未设置"));
         JsonNode uncertainMajorItem = uncertain.get("items").get(4);
         assertEquals("MAJOR", uncertainMajorItem.get("conditionType").asText());
-        assertEquals("MATCH", uncertainMajorItem.get("result").asText());
-        assertTrue(uncertainMajorItem.get("reason").asText().contains("未设置"));
+        assertEquals("UNCERTAIN", uncertainMajorItem.get("result").asText());
+        assertTrue(uncertainMajorItem.get("reason").asText().contains("为空"));
         JsonNode remarkItem = uncertain.get("items").get(6);
         assertEquals("REMARK", remarkItem.get("conditionType").asText());
         assertEquals("UNCERTAIN", remarkItem.get("result").asText());
@@ -235,6 +235,16 @@ class MatchApiTest {
         assertEquals(1, stats.get("match").asLong());
         assertEquals(1, stats.get("uncertain").asLong());
         assertEquals(1, stats.get("notMatch").asLong());
+    }
+
+    @Test
+    void changePreviewDoesNotOverwriteStoredMatch() throws Exception {
+        executeBatch();
+        JsonNode preview = getJson("/api/match/change-preview?profileId=" + profileId + "&importId=" + importId);
+        assertEquals(3, preview.get("stored").asInt());
+        assertEquals(0, preview.get("changedResults").asInt());
+        JsonNode after = getJson("/api/match/result?profileId=" + profileId + "&importId=" + importId);
+        assertEquals(3, after.get("total").asInt());
     }
 
     @Test

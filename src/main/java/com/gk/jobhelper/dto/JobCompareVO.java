@@ -8,6 +8,7 @@ import java.util.List;
 public class JobCompareVO {
     private Long jobId;
     private String region;
+    private String workLocationStatus;
     private String departmentName;
     private String organizationName;
     private String positionName;
@@ -27,6 +28,8 @@ public class JobCompareVO {
     public void setJobId(Long jobId) { this.jobId = jobId; }
     public String getRegion() { return region; }
     public void setRegion(String region) { this.region = region; }
+    public String getWorkLocationStatus() { return workLocationStatus; }
+    public void setWorkLocationStatus(String workLocationStatus) { this.workLocationStatus = workLocationStatus; }
     public String getDepartmentName() { return departmentName; }
     public void setDepartmentName(String departmentName) { this.departmentName = departmentName; }
     public String getOrganizationName() { return organizationName; }

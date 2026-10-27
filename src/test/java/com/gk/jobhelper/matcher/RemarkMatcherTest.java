@@ -121,6 +121,22 @@ class RemarkMatcherTest {
     }
 
     @Test
+    void postEmploymentServiceYearsMustNotBecomeQualificationDoubt() {
+        MatchItemResult result = match(new UserProfile(), "须在本机关（单位）最低服务3年。");
+        assertEquals(MatchResult.MATCH, result.getResult());
+        assertTrue(result.getReason().contains("最低服务3年"));
+    }
+
+    @Test
+    void physicalPoliceConditionRemainsUncertainEvenWhenGenderMatches() {
+        UserProfile profile = new UserProfile();
+        profile.setGender("男");
+        MatchItemResult result = match(profile, "限符合人民警察录用条件，裸眼视力达到4.8报考；限男性");
+        assertEquals(MatchResult.UNCERTAIN, result.getResult());
+        assertTrue(result.getReason().contains("裸眼视力"));
+    }
+
+    @Test
     void nonVeteranWithoutServiceProjectShouldNotMatchAlternativeRestriction() {
         UserProfile profile = new UserProfile();
         profile.setVeteran("否");

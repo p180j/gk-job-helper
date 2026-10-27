@@ -7,6 +7,9 @@ public class JobPositionFeature {
     private String examSubjectGroup; private String examSubjectStatus; private String rawExamSubjectText;
     private String majorRestrictionType; private String majorDomains; private String majorSimilarityKeys; private Integer majorScopeCount;
     private String majorAnalysisStatus; private String organizationLevel; private String organizationLevelStatus;
+    private String effectiveMajorRequirement, remarkConditions;
+    private String workLocationName, workLocationCode, workLocationStatus, workLocationSource;
+    private String workLocationEvidence, workLocationType;
     private LocalDateTime createdAt; private LocalDateTime updatedAt;
     public Long getPositionId(){return positionId;} public void setPositionId(Long v){positionId=v;}
     public Integer getExamSubjectCount(){return examSubjectCount;} public void setExamSubjectCount(Integer v){examSubjectCount=v;}
@@ -21,6 +24,14 @@ public class JobPositionFeature {
     public String getMajorAnalysisStatus(){return majorAnalysisStatus;} public void setMajorAnalysisStatus(String v){majorAnalysisStatus=v;}
     public String getOrganizationLevel(){return organizationLevel;} public void setOrganizationLevel(String v){organizationLevel=v;}
     public String getOrganizationLevelStatus(){return organizationLevelStatus;} public void setOrganizationLevelStatus(String v){organizationLevelStatus=v;}
+    public String getEffectiveMajorRequirement(){return effectiveMajorRequirement;} public void setEffectiveMajorRequirement(String v){effectiveMajorRequirement=v;}
+    public String getRemarkConditions(){return remarkConditions;} public void setRemarkConditions(String v){remarkConditions=v;}
+    public String getWorkLocationName(){return workLocationName;} public void setWorkLocationName(String v){workLocationName=v;}
+    public String getWorkLocationCode(){return workLocationCode;} public void setWorkLocationCode(String v){workLocationCode=v;}
+    public String getWorkLocationStatus(){return workLocationStatus;} public void setWorkLocationStatus(String v){workLocationStatus=v;}
+    public String getWorkLocationSource(){return workLocationSource;} public void setWorkLocationSource(String v){workLocationSource=v;}
+    public String getWorkLocationEvidence(){return workLocationEvidence;} public void setWorkLocationEvidence(String v){workLocationEvidence=v;}
+    public String getWorkLocationType(){return workLocationType;} public void setWorkLocationType(String v){workLocationType=v;}
     public LocalDateTime getCreatedAt(){return createdAt;} public void setCreatedAt(LocalDateTime v){createdAt=v;}
     public LocalDateTime getUpdatedAt(){return updatedAt;} public void setUpdatedAt(LocalDateTime v){updatedAt=v;}
 }

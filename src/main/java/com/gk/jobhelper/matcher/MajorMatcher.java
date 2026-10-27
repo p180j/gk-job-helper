@@ -9,6 +9,7 @@ import com.gk.jobhelper.entity.MajorCatalog;
 import com.gk.jobhelper.entity.MajorCatalogItem;
 import com.gk.jobhelper.entity.UserProfile;
 import com.gk.jobhelper.service.MajorCatalogService;
+import com.gk.jobhelper.service.JobMajorRequirementResolver;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -47,9 +48,11 @@ public class MajorMatcher implements JobConditionMatcher {
             recognizedCombinedCategoryMembers();
 
     private final MajorCatalogService majorCatalogService;
+    private final JobMajorRequirementResolver requirementResolver;
 
-    public MajorMatcher(MajorCatalogService majorCatalogService) {
+    public MajorMatcher(MajorCatalogService majorCatalogService, JobMajorRequirementResolver requirementResolver) {
         this.majorCatalogService = majorCatalogService;
+        this.requirementResolver = requirementResolver;
     }
 
     @Override
@@ -59,27 +62,28 @@ public class MajorMatcher implements JobConditionMatcher {
 
     @Override
     public MatchItemResult match(UserProfile profile, JobPosition position, MatchContext context) {
-        String requirementRaw = position.getMajorRequirement();
+        String requirementRaw = requirementResolver.resolve(position);
         String majorRaw = profile.getMajor();
         String majorCodeRaw = profile.getMajorCode();
         String userValue = buildUserValue(majorRaw, majorCodeRaw);
 
-        // 1. 岗位要求为空：业务约定为未设置专业限制
+        // 原始字段缺失不等于官方明确表示不限专业。
         if (TextNormalizer.isBlank(requirementRaw)) {
-            return build(MatchResult.MATCH, userValue, requirementRaw, "岗位未设置专业要求，按不限专业处理。");
+            return build(MatchResult.UNCERTAIN, userValue, requirementRaw, "岗位专业要求为空，无法可靠判断。");
         }
-        if (TextNormalizer.isBlank(majorRaw) && TextNormalizer.isBlank(majorCodeRaw)) {
-            return build(MatchResult.UNCERTAIN, userValue, requirementRaw, "用户档案专业为空，无法判断专业要求。");
-        }
-
-        // 2. 解析岗位专业要求
+        // 先解释岗位约束；明确不限时无需查询专业目录，也无需档案提供专业名称。
         MajorRequirementParser.ParsedRequirement parsed =
                 MajorRequirementParser.parse(requirementRaw, profile.getEducation());
         if (parsed.isParseFailure()) {
             return build(MatchResult.UNCERTAIN, userValue, requirementRaw, parsed.getFailureReason());
         }
         if (parsed.isUnlimited()) {
-            return build(MatchResult.MATCH, userValue, requirementRaw, "岗位不限专业。");
+            String level = MajorRequirementParser.userLevelKeyword(TextNormalizer.normalize(profile.getEducation()));
+            return build(MatchResult.MATCH, userValue, requirementRaw,
+                    level == null ? "岗位不限专业。" : "已匹配：当前报考学历层级（" + level + "）专业不限。");
+        }
+        if (TextNormalizer.isBlank(majorRaw) && TextNormalizer.isBlank(majorCodeRaw)) {
+            return build(MatchResult.UNCERTAIN, userValue, requirementRaw, "用户档案专业为空，无法判断专业要求。");
         }
 
         // 3. 目录优先级链：考试绑定目录优先，其次教育部对应学历层级目录

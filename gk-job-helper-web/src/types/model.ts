@@ -165,6 +165,7 @@ export interface ImportResult {
 
 export interface ImportProgress {
   id: number
+  examYear?: number | null
   totalRows: number
   status: 'PREVIEWED' | 'IMPORTING' | 'IMPORTED' | 'IMPORT_FAILED'
   processedRows: number
@@ -254,6 +255,8 @@ export interface MatchPositionResult {
   city: string | null
   district: string | null
   region: string | null
+  workLocationStatus: 'CONFIRMED' | 'INFERRED' | 'MULTI_SITE' | 'UNKNOWN'
+  workLocationSource: string | null
   recruitCount: number | null
   educationRequirement: string | null
   majorRequirement: string | null
@@ -278,6 +281,14 @@ export interface JobFeature {
   majorScopeCount: number | null
   majorAnalysisStatus: string
   organizationLevel: string | null
+  effectiveMajorRequirement: string | null
+  remarkConditions: string | null
+  workLocationName: string | null
+  workLocationCode: string | null
+  workLocationStatus: 'CONFIRMED' | 'INFERRED' | 'MULTI_SITE' | 'UNKNOWN'
+  workLocationSource: string | null
+  workLocationEvidence: string | null
+  workLocationType: string | null
 }
 
 export interface HistoricalAnalysis {
@@ -313,6 +324,7 @@ export interface RecommendationItem {
   departmentName: string | null
   organizationName: string | null
   region: string | null
+  regionStatus: 'CONFIRMED' | 'INFERRED' | 'MULTI_SITE' | 'UNKNOWN'
   recruitCount: number | null
   educationRequirement: string | null
   majorRequirement: string | null
@@ -345,6 +357,7 @@ export interface MatchResultFilters {
   importId: number
   status?: MatchResultValue
   region?: string
+  includeUnknownLocation?: boolean
   organizationKeyword?: string
   positionKeyword?: string
   recruitCountMin?: number
@@ -358,6 +371,7 @@ export interface MatchResultFilters {
 export interface JobCompareItem {
   jobId: number
   region: string | null
+  workLocationStatus: string | null
   departmentName: string | null
   organizationName: string | null
   positionName: string | null

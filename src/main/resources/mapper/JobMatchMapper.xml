@@ -135,14 +135,14 @@
         <if test="matchResult != null and matchResult != ''">
             AND m.match_result = #{matchResult}
         </if>
-        <if test="region != null and region != ''">
-            AND TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) = #{region}
-        </if>
-        <if test="regionProvince != null and regionProvince != ''">
-            AND TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) LIKE CONCAT('%', #{regionProvince}, '%')
-        </if>
-        <if test="regionLocality != null and regionLocality != ''">
-            AND TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) LIKE CONCAT('%', #{regionLocality}, '%')
+        <if test="(region != null and region != '') or (regionProvince != null and regionProvince != '') or (regionLocality != null and regionLocality != '')">
+            AND ((f.work_location_status = 'CONFIRMED'
+            <if test="region != null and region != ''">AND f.work_location_name LIKE CONCAT('%', #{region}, '%')</if>
+            <if test="regionProvince != null and regionProvince != ''">AND f.work_location_name LIKE CONCAT('%', #{regionProvince}, '%')</if>
+            <if test="regionLocality != null and regionLocality != ''">AND f.work_location_name LIKE CONCAT('%', #{regionLocality}, '%')</if>
+            )
+            <if test="includeUnknownLocation">OR (f.work_location_status IS NULL OR f.work_location_status != 'CONFIRMED')</if>
+            )
         </if>
         <if test="organizationKeyword != null and organizationKeyword != ''">
             AND (p.department_name LIKE #{organizationKeyword} OR p.organization_name LIKE #{organizationKeyword})
@@ -168,6 +168,7 @@
         SELECT COUNT(*)
         FROM job_match m
         JOIN job_position p ON m.job_position_id = p.id
+        LEFT JOIN job_position_feature f ON f.position_id = p.id
         <include refid="Result_Query_Condition"/>
     </select>
 
@@ -180,10 +181,12 @@
                p.province        AS province,
                p.city            AS city,
                p.district        AS district,
-               TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) AS region,
+               f.work_location_name AS region,
+               COALESCE(f.work_location_status, 'UNKNOWN') AS workLocationStatus,
+               f.work_location_source AS workLocationSource,
                p.recruit_count   AS recruitCount,
                p.education_requirement AS educationRequirement,
-               p.major_requirement AS majorRequirement,
+               COALESCE(f.effective_major_requirement, p.major_requirement) AS majorRequirement,
                m.match_result    AS matchResult,
                m.reference_date  AS referenceDate,
                f.exam_subject_count AS examSubjectCount,
@@ -204,12 +207,14 @@
     </select>
 
     <select id="selectResultRegions" resultType="string">
-        SELECT DISTINCT TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) AS region
+        SELECT DISTINCT f.work_location_name AS region
         FROM job_match m
         JOIN job_position p ON m.job_position_id = p.id
+        JOIN job_position_feature f ON f.position_id = p.id
         WHERE m.profile_id = #{profileId}
           AND m.import_file_id = #{importFileId}
-          AND TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) &lt;&gt; ''
+          AND f.work_location_status = 'CONFIRMED'
+          AND f.work_location_name IS NOT NULL
         ORDER BY region
     </select>
 

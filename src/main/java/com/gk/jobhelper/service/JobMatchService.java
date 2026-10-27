@@ -12,6 +12,7 @@ import com.gk.jobhelper.dto.MatchPositionResultVO;
 import com.gk.jobhelper.dto.MatchResultQuery;
 import com.gk.jobhelper.dto.MatchResultVO;
 import com.gk.jobhelper.dto.MatchSummaryVO;
+import com.gk.jobhelper.dto.MatchChangePreviewVO;
 import com.gk.jobhelper.dto.PageVO;
 import com.gk.jobhelper.entity.ImportFile;
 import com.gk.jobhelper.entity.JobMatch;
@@ -158,7 +159,7 @@ public class JobMatchService {
                                                       String region, String organizationKeyword,
                                                       String positionKeyword, Integer recruitCountMin,
                                                       Integer recruitCountMax, String educationKeyword,
-                                                      String majorKeyword, int page, int size) {
+                                                      String majorKeyword, boolean includeUnknownLocation, int page, int size) {
         if (profileId == null) {
             throw new BusinessException(ApiResponse.CODE_BAD_REQUEST, "profileId 不能为空");
         }
@@ -178,6 +179,7 @@ public class JobMatchService {
         query.setImportFileId(importId);
         query.setMatchResult(resultFilter == null ? null : resultFilter.name());
         applyRegionFilter(query, region);
+        query.setIncludeUnknownLocation(includeUnknownLocation);
         query.setOrganizationKeyword(likeValue(organizationKeyword));
         query.setPositionKeyword(likeValue(positionKeyword));
         query.setRecruitCountMin(recruitCountMin);
@@ -249,6 +251,43 @@ public class JobMatchService {
         vo.setReferenceDate(match.getReferenceDate());
         vo.setItems(items);
         return vo;
+    }
+
+    public MatchChangePreviewVO previewChanges(Long profileId, Long importId) {
+        UserProfile profile = requireProfile(profileId);
+        requireImportFile(importId);
+        MatchChangePreviewVO result = new MatchChangePreviewVO();
+        result.setProfileId(profileId);
+        result.setImportId(importId);
+        for (JobPosition position : jobPositionMapper.selectByImportFileId(importId)) {
+            JobMatch stored = jobMatchMapper.selectByProfileAndPosition(profileId, position.getId());
+            if (stored == null) continue;
+            result.setStored(result.getStored() + 1);
+            MatchPersistenceService.PendingMatch current = calculateMatch(profile, position, stored.getReferenceDate());
+            String transition = stored.getMatchResult() + " -> " + current.getOverall().name();
+            result.getTransitions().merge(transition, 1, Integer::sum);
+            if (!stored.getMatchResult().equals(current.getOverall().name())) {
+                result.setChangedResults(result.getChangedResults() + 1);
+            }
+            List<JobMatchItem> oldItems = jobMatchMapper.selectItemsByMatchId(stored.getId());
+            if (conditionChanged(oldItems, current.getItems(), ConditionType.MAJOR)) {
+                result.setChangedMajorItems(result.getChangedMajorItems() + 1);
+            }
+            if (conditionChanged(oldItems, current.getItems(), ConditionType.REMARK)) {
+                result.setChangedRemarkItems(result.getChangedRemarkItems() + 1);
+            }
+        }
+        return result;
+    }
+
+    private boolean conditionChanged(List<JobMatchItem> oldItems, List<MatchItemResult> current, ConditionType type) {
+        JobMatchItem old = null;
+        MatchItemResult next = null;
+        for (JobMatchItem item : oldItems) if (type.name().equals(item.getConditionType())) old = item;
+        for (MatchItemResult item : current) if (type == item.getConditionType()) next = item;
+        if (old == null || next == null) return old != null || next != null;
+        return !old.getMatchResult().equals(next.getResult().name())
+                || !java.util.Objects.equals(old.getReason(), next.getReason());
     }
 
     /**

@@ -38,15 +38,18 @@
                p.province AS province,
                p.city AS city,
                p.district AS district,
-               TRIM(CONCAT(COALESCE(p.province, ''), ' ', COALESCE(p.city, ''), ' ', COALESCE(p.district, ''))) AS region,
+               pf.work_location_name AS region,
+               COALESCE(pf.work_location_status, 'UNKNOWN') AS workLocationStatus,
+               pf.work_location_source AS workLocationSource,
                p.recruit_count AS recruitCount,
                p.education_requirement AS educationRequirement,
-               p.major_requirement AS majorRequirement,
+               COALESCE(pf.effective_major_requirement, p.major_requirement) AS majorRequirement,
                m.match_result AS matchResult,
                m.reference_date AS referenceDate,
                1 AS favorite
         FROM job_favorite f
         JOIN job_position p ON p.id = f.position_id
+        LEFT JOIN job_position_feature pf ON pf.position_id = p.id
         LEFT JOIN job_match m ON m.profile_id = f.profile_id AND m.job_position_id = f.position_id
         WHERE f.profile_id = #{profileId}
         <if test="importId != null">AND p.import_file_id = #{importId}</if>

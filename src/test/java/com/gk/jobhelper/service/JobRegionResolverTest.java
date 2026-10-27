@@ -11,30 +11,30 @@ class JobRegionResolverTest {
     private final JobRegionResolver resolver = new JobRegionResolver();
 
     @Test
-    void resolvesJiangxiCityFromTelephoneWhenRegionColumnsAreEmpty() {
-        RecommendationCandidateRow row = row("宁都县乡镇机关", "{\"联系电话\":\"0797-6938803\"}");
-        assertEquals("江西省 赣州市", resolver.resolve(row));
-        assertTrue(resolver.matches(Collections.singletonList("江西省/赣州市"), row));
-        assertFalse(resolver.matches(Collections.singletonList("江西省/南昌市"), row));
-    }
-
-    @Test
-    void resolvesMunicipalityDistrictFromDepartmentName() {
-        RecommendationCandidateRow row = row("上海市浦东新区某局", null);
-        assertEquals("上海市 浦东新区", resolver.resolve(row));
-        assertTrue(resolver.matches(Collections.singletonList("上海市/浦东新区"), row));
-    }
-
-    @Test
-    void keepsExplicitImportedRegionCompatibleWithCanonicalPreference() {
-        RecommendationCandidateRow row = row("某单位", null);
-        row.setProvince("江西"); row.setCity("南昌");
+    void confirmedWorkSiteCanMeetRegionPreference() {
+        RecommendationCandidateRow row = row("CONFIRMED", "江西省 南昌市 进贤县");
         assertTrue(resolver.matches(Collections.singletonList("江西省/南昌市"), row));
+        assertFalse(resolver.matches(Collections.singletonList("江西省/九江市"), row));
+        assertEquals("江西省 南昌市 进贤县", resolver.resolve(row));
     }
 
-    private RecommendationCandidateRow row(String department, String rawData) {
+    @Test
+    void administrativeJurisdictionDoesNotEarnWorkSitePreference() {
+        RecommendationCandidateRow row = row("INFERRED", "江西省 南昌市 进贤县");
+        assertFalse(resolver.matches(Collections.singletonList("江西省/南昌市"), row));
+        assertTrue(resolver.resolve(row).contains("待核实"));
+    }
+
+    @Test
+    void unknownAndMultiSiteRemainExplicit() {
+        assertEquals("工作地点未知", resolver.resolve(row("UNKNOWN", null)));
+        assertEquals("多个工作地点（具体地点待确定）", resolver.resolve(row("MULTI_SITE", "沿湖基层站")));
+    }
+
+    private RecommendationCandidateRow row(String status, String name) {
         RecommendationCandidateRow row = new RecommendationCandidateRow();
-        row.setDepartmentName(department); row.setRawData(rawData);
+        row.setWorkLocationStatus(status);
+        row.setWorkLocationName(name);
         return row;
     }
 }

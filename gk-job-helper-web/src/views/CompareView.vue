@@ -14,7 +14,7 @@ const jobs = ref<JobCompareItem[]>([])
 const loading = ref(true)
 
 const rows: CompareRow[] = [
-  { key: 'region', label: '地区', value: job => job.region || '-' },
+  { key: 'region', label: '工作地点', value: job => job.workLocationStatus === 'CONFIRMED' ? job.region || '未知' : job.workLocationStatus === 'INFERRED' ? `${job.region || '-'}（机关行政辖区，实际地点待核实）` : job.workLocationStatus === 'MULTI_SITE' ? '多个地点，待确定' : '未知' },
   { key: 'organization', label: '招录单位', value: job => [job.departmentName, job.organizationName].filter(Boolean).join(' · ') || '-' },
   { key: 'position', label: '岗位名称', value: job => job.positionName || '-' },
   { key: 'code', label: '岗位代码', value: job => job.positionCode || '-' },
