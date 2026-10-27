@@ -128,6 +128,8 @@ CREATE TABLE IF NOT EXISTS import_file (
     stored_name      VARCHAR(255)  NOT NULL,                -- 本地保存后的文件名
     stored_path      VARCHAR(512)  NOT NULL,                -- 本地保存完整路径
     file_size        BIGINT        DEFAULT NULL,            -- 文件大小(字节)
+    file_checksum    CHAR(64)      DEFAULT NULL,            -- 上传文件 SHA-256
+    parser_version   VARCHAR(32)  DEFAULT NULL,            -- 导入解析器版本
     file_type        VARCHAR(8)    DEFAULT NULL,            -- 文件类型: .xls / .xlsx
     sheet_name       VARCHAR(128)  DEFAULT NULL,            -- 解析出的 Sheet 名称
     headers          VARCHAR(1000) DEFAULT NULL,            -- 表头字段(逗号分隔)，供字段映射使用
@@ -148,6 +150,7 @@ CREATE TABLE IF NOT EXISTS job_position (
     exam_id                    BIGINT        DEFAULT NULL,       -- 所属考试 -> exam.id
     import_file_id             BIGINT        DEFAULT NULL,       -- 来源文件 -> import_file.id
     department_name            VARCHAR(255)  DEFAULT NULL,       -- 招录机关/部门
+    department_code            VARCHAR(64)   DEFAULT NULL,       -- 招录机关代码（跨机关职位代码可能相同）
     organization_name          VARCHAR(255)  DEFAULT NULL,       -- 用人司局/单位
     position_name              VARCHAR(255)  DEFAULT NULL,       -- 职位名称
     position_code              VARCHAR(64)   DEFAULT NULL,       -- 职位代码
@@ -168,6 +171,9 @@ CREATE TABLE IF NOT EXISTS job_position (
     certificate_requirement    VARCHAR(255)  DEFAULT NULL,       -- 证书要求
     gender_requirement         VARCHAR(32)   DEFAULT NULL,       -- 性别要求
     position_description       VARCHAR(2000) DEFAULT NULL,       -- 职位描述
+    additional_requirements    TEXT          DEFAULT NULL,       -- 其他条件，与备注分别保留
+    work_location              VARCHAR(500)  DEFAULT NULL,       -- 原始明确工作地点
+    settlement_location        VARCHAR(500)  DEFAULT NULL,       -- 落户地点，不作为工作地点
     remark                     VARCHAR(2000) DEFAULT NULL,       -- 备注/其他条件
     source_sheet               VARCHAR(128)  DEFAULT NULL,       -- 来源 Sheet 名称
     source_row                 INT           DEFAULT NULL,       -- 来源 Excel 行号(表头为第 1 行，数据行从 2 起)
@@ -179,6 +185,7 @@ CREATE TABLE IF NOT EXISTS job_position (
 
 -- 岗位表必要索引（控制在最少必要范围）
 CREATE INDEX idx_job_position_import        ON job_position (import_file_id);
+CREATE UNIQUE INDEX uk_job_position_source  ON job_position (import_file_id, source_sheet, source_row);
 CREATE INDEX idx_job_position_code          ON job_position (position_code);
 CREATE INDEX idx_job_position_department    ON job_position (department_name);
 CREATE INDEX idx_job_position_organization  ON job_position (organization_name);

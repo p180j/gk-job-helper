@@ -13,6 +13,7 @@ public class ExcelPreviewResult {
     private String sheetName;
     private List<String> headers = new ArrayList<>();
     private int totalRows;
+    private String parseError;
     private List<Map<Integer, String>> previewRows = new ArrayList<>();
 
     public String getSheetName() {
@@ -38,6 +39,9 @@ public class ExcelPreviewResult {
     public void setTotalRows(int totalRows) {
         this.totalRows = totalRows;
     }
+
+    public String getParseError() { return parseError; }
+    public void setParseError(String parseError) { this.parseError = parseError; }
 
     public List<Map<Integer, String>> getPreviewRows() {
         return previewRows;

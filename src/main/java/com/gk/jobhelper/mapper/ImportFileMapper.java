@@ -29,6 +29,12 @@ public interface ImportFileMapper {
     /** 更新导入状态（PREVIEWED / IMPORTED） */
     int updateStatus(@Param("id") Long id, @Param("status") String status);
 
+    int tryStartImport(@Param("id") Long id);
+
+    int updateImportResult(@Param("id") Long id, @Param("status") String status,
+                           @Param("processed") int processed, @Param("success") int success,
+                           @Param("failed") int failed, @Param("error") String error);
+
     int deleteById(Long id);
 
     /** 清空记录表（测试使用） */

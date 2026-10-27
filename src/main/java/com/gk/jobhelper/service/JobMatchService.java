@@ -1,5 +1,6 @@
 package com.gk.jobhelper.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gk.jobhelper.common.ApiResponse;
 import com.gk.jobhelper.common.BusinessException;
@@ -15,11 +16,13 @@ import com.gk.jobhelper.dto.MatchSummaryVO;
 import com.gk.jobhelper.dto.MatchChangePreviewVO;
 import com.gk.jobhelper.dto.PageVO;
 import com.gk.jobhelper.entity.ImportFile;
+import com.gk.jobhelper.entity.CareerProfile;
 import com.gk.jobhelper.entity.JobMatch;
 import com.gk.jobhelper.entity.JobMatchItem;
 import com.gk.jobhelper.entity.JobPosition;
 import com.gk.jobhelper.entity.UserProfile;
 import com.gk.jobhelper.mapper.ImportFileMapper;
+import com.gk.jobhelper.mapper.CareerProfileMapper;
 import com.gk.jobhelper.mapper.JobMatchMapper;
 import com.gk.jobhelper.mapper.JobPositionMapper;
 import com.gk.jobhelper.mapper.UserProfileMapper;
@@ -27,6 +30,8 @@ import com.gk.jobhelper.matcher.JobConditionMatcher;
 import com.gk.jobhelper.matcher.MatchContext;
 import com.gk.jobhelper.matcher.MatchEvidence;
 import com.gk.jobhelper.matcher.MatchItemResult;
+import com.gk.jobhelper.matcher.RemarkMatcher;
+import com.gk.jobhelper.dto.CareerWorkVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -56,6 +61,7 @@ public class JobMatchService {
     private final MatchProperties matchProperties;
     private final ObjectMapper objectMapper;
     private final QualificationEducationResolver qualificationEducationResolver;
+    private final CareerProfileMapper careerProfileMapper;
     /** 已注册的条件匹配器（按 ConditionType 声明顺序执行） */
     private final List<JobConditionMatcher> matchers;
 
@@ -67,6 +73,7 @@ public class JobMatchService {
                            MatchProperties matchProperties,
                            ObjectMapper objectMapper,
                            QualificationEducationResolver qualificationEducationResolver,
+                           CareerProfileMapper careerProfileMapper,
                            List<JobConditionMatcher> matchers) {
         this.userProfileMapper = userProfileMapper;
         this.jobPositionMapper = jobPositionMapper;
@@ -76,6 +83,7 @@ public class JobMatchService {
         this.matchProperties = matchProperties;
         this.objectMapper = objectMapper;
         this.qualificationEducationResolver = qualificationEducationResolver;
+        this.careerProfileMapper = careerProfileMapper;
         // 固定输出顺序，避免 Spring 注入顺序不稳定导致 items 顺序漂移
         List<JobConditionMatcher> sorted = new ArrayList<>(matchers);
         sorted.sort(Comparator.comparing(matcher -> matcher.support().ordinal()));
@@ -108,6 +116,7 @@ public class JobMatchService {
         MatchSummaryVO summary = new MatchSummaryVO();
         summary.setTotal(total);
         progressReporter.accept(summary);
+        MatchContext context = matchContext(profile, request.getReferenceDate());
 
         int batchSize = Math.max(1, matchProperties.getBatchSize());
         int maxFailedItems = Math.max(0, matchProperties.getMaxFailedItems());
@@ -121,7 +130,7 @@ public class JobMatchService {
             List<MatchPersistenceService.PendingMatch> pendingMatches = new ArrayList<>(positions.size());
             for (JobPosition position : positions) {
                 try {
-                    pendingMatches.add(calculateMatch(profile, position, request.getReferenceDate()));
+                    pendingMatches.add(calculateMatch(profile, position, context));
                 } catch (Exception e) {
                     // 单岗位失败不影响整个批次
                     log.warn("批量匹配单岗位失败, jobId={}, reason={}", position.getId(), e.getMessage());
@@ -259,11 +268,13 @@ public class JobMatchService {
         MatchChangePreviewVO result = new MatchChangePreviewVO();
         result.setProfileId(profileId);
         result.setImportId(importId);
+        List<CareerWorkVO> workExperiences = workExperiences(profile);
         for (JobPosition position : jobPositionMapper.selectByImportFileId(importId)) {
             JobMatch stored = jobMatchMapper.selectByProfileAndPosition(profileId, position.getId());
             if (stored == null) continue;
             result.setStored(result.getStored() + 1);
-            MatchPersistenceService.PendingMatch current = calculateMatch(profile, position, stored.getReferenceDate());
+            MatchPersistenceService.PendingMatch current = calculateMatch(profile, position,
+                    MatchContext.of(stored.getReferenceDate(), workExperiences));
             String transition = stored.getMatchResult() + " -> " + current.getOverall().name();
             result.getTransitions().merge(transition, 1, Integer::sum);
             if (!stored.getMatchResult().equals(current.getOverall().name())) {
@@ -315,7 +326,26 @@ public class JobMatchService {
     }
 
     private MatchPersistenceService.PendingMatch calculateMatch(UserProfile profile, JobPosition position, LocalDate referenceDate) {
-        MatchContext context = MatchContext.of(referenceDate);
+        return calculateMatch(profile, position, matchContext(profile, referenceDate));
+    }
+
+    private MatchContext matchContext(UserProfile profile, LocalDate referenceDate) {
+        return MatchContext.of(referenceDate, workExperiences(profile));
+    }
+
+    private List<CareerWorkVO> workExperiences(UserProfile profile) {
+        CareerProfile career = careerProfileMapper.selectByProfileId(profile.getId());
+        if (career == null || career.getWorkExperiences() == null || career.getWorkExperiences().trim().isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        try {
+            return objectMapper.readValue(career.getWorkExperiences(), new TypeReference<List<CareerWorkVO>>() { });
+        } catch (Exception e) {
+            throw new BusinessException("已确认工作经历无法解析，请检查职业画像：" + e.getMessage());
+        }
+    }
+
+    private MatchPersistenceService.PendingMatch calculateMatch(UserProfile profile, JobPosition position, MatchContext context) {
         List<MatchItemResult> items = new ArrayList<>(matchers.size());
         List<MatchItemResult> qualificationItems = qualificationEducationResolver.resolve(profile, position, context);
         for (JobConditionMatcher matcher : matchers) {
@@ -325,6 +355,12 @@ public class JobMatchService {
                 items.add(qualificationItems.get(1));
             } else {
                 items.add(matcher.match(profile, position, context));
+            }
+        }
+        for (JobConditionMatcher matcher : matchers) {
+            if (matcher instanceof RemarkMatcher) {
+                items.addAll(((RemarkMatcher) matcher).detailMatches(profile, position, context, qualificationItems));
+                break;
             }
         }
         MatchResult overall = aggregate(items);

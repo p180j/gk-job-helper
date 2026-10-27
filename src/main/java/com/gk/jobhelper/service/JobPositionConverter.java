@@ -81,6 +81,7 @@ public class JobPositionConverter {
         position.setSourceRow(row.getRowNumber());
 
         position.setDepartmentName(firstNonBlank(row, targetColumns.get("departmentName")));
+        position.setDepartmentCode(firstNonBlank(row, targetColumns.get("departmentCode")));
         position.setOrganizationName(firstNonBlank(row, targetColumns.get("organizationName")));
         position.setPositionName(firstNonBlank(row, targetColumns.get("positionName")));
         position.setPositionCode(firstNonBlank(row, targetColumns.get("positionCode")));
@@ -101,7 +102,10 @@ public class JobPositionConverter {
         position.setCertificateRequirement(firstNonBlank(row, targetColumns.get("certificateRequirement")));
         position.setGenderRequirement(firstNonBlank(row, targetColumns.get("genderRequirement")));
         position.setPositionDescription(firstNonBlank(row, targetColumns.get("positionDescription")));
-        position.setRemark(firstNonBlank(row, targetColumns.get("remark")));
+        position.setAdditionalRequirements(joinedNonBlank(row, targetColumns.get("additionalRequirements")));
+        position.setWorkLocation(firstNonBlank(row, targetColumns.get("workLocation")));
+        position.setSettlementLocation(firstNonBlank(row, targetColumns.get("settlementLocation")));
+        position.setRemark(joinedNonBlank(row, targetColumns.get("remark")));
 
         // 行级必填校验：映射了关键列但值为空 -> 该行失败
         if (targetColumns.containsKey("positionCode") && isBlank(position.getPositionCode())) {
@@ -192,6 +196,16 @@ public class JobPositionConverter {
             }
         }
         return null;
+    }
+
+    private String joinedNonBlank(ExcelRawRow row, List<Integer> columns) {
+        if (columns == null) return null;
+        Set<String> values = new java.util.LinkedHashSet<>();
+        for (Integer column : columns) {
+            String value = row.getCells().get(column);
+            if (value != null && !value.trim().isEmpty()) values.add(value.trim());
+        }
+        return values.isEmpty() ? null : String.join("；", values);
     }
 
     private boolean isBlank(String value) {

@@ -24,5 +24,8 @@ public enum ConditionType {
     GENDER,
 
     /** 备注中的补充报考条件 */
-    REMARK
+    REMARK,
+
+    /** 其他条件或备注中的一条可追溯子条件 */
+    REMARK_CONDITION
 }

@@ -3,21 +3,23 @@
 <mapper namespace="com.gk.jobhelper.mapper.JobPositionMapper">
 
     <sql id="Base_Column_List">
-        id, exam_id, import_file_id, department_name, organization_name, position_name, position_code,
+        id, exam_id, import_file_id, department_name, department_code, organization_name, position_name, position_code,
         province, city, district, recruit_count, education_requirement, degree_requirement,
         major_requirement, major_codes, age_requirement, political_requirement, work_year_requirement,
         fresh_graduate_requirement, household_requirement, service_project_requirement,
-        certificate_requirement, gender_requirement, position_description, remark,
+        certificate_requirement, gender_requirement, position_description, additional_requirements,
+        work_location, settlement_location, remark,
         source_sheet, source_row, raw_data, created_at, updated_at
     </sql>
 
     <!-- 列表查询列：不含 raw_data 大字段 -->
     <sql id="List_Column_List">
-        id, exam_id, import_file_id, department_name, organization_name, position_name, position_code,
+        id, exam_id, import_file_id, department_name, department_code, organization_name, position_name, position_code,
         province, city, district, recruit_count, education_requirement, degree_requirement,
         major_requirement, major_codes, age_requirement, political_requirement, work_year_requirement,
         fresh_graduate_requirement, household_requirement, service_project_requirement,
-        certificate_requirement, gender_requirement, position_description, remark,
+        certificate_requirement, gender_requirement, position_description, additional_requirements,
+        work_location, settlement_location, remark,
         source_sheet, source_row, created_at, updated_at
     </sql>
 
@@ -26,6 +28,7 @@
         <result property="examId" column="exam_id"/>
         <result property="importFileId" column="import_file_id"/>
         <result property="departmentName" column="department_name"/>
+        <result property="departmentCode" column="department_code"/>
         <result property="organizationName" column="organization_name"/>
         <result property="positionName" column="position_name"/>
         <result property="positionCode" column="position_code"/>
@@ -46,6 +49,9 @@
         <result property="certificateRequirement" column="certificate_requirement"/>
         <result property="genderRequirement" column="gender_requirement"/>
         <result property="positionDescription" column="position_description"/>
+        <result property="additionalRequirements" column="additional_requirements"/>
+        <result property="workLocation" column="work_location"/>
+        <result property="settlementLocation" column="settlement_location"/>
         <result property="remark" column="remark"/>
         <result property="sourceSheet" column="source_sheet"/>
         <result property="sourceRow" column="source_row"/>
@@ -103,22 +109,24 @@
 
     <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO job_position (
-            exam_id, import_file_id, department_name, organization_name, position_name, position_code,
+            exam_id, import_file_id, department_name, department_code, organization_name, position_name, position_code,
             province, city, district, recruit_count, education_requirement, degree_requirement,
             major_requirement, major_codes, age_requirement, political_requirement, work_year_requirement,
             fresh_graduate_requirement, household_requirement, service_project_requirement,
-            certificate_requirement, gender_requirement, position_description, remark,
+            certificate_requirement, gender_requirement, position_description, additional_requirements,
+            work_location, settlement_location, remark,
             source_sheet, source_row, raw_data, created_at, updated_at
         ) VALUES
         <foreach collection="list" item="item" separator=",">
             (
-                #{item.examId}, #{item.importFileId}, #{item.departmentName}, #{item.organizationName},
+                #{item.examId}, #{item.importFileId}, #{item.departmentName}, #{item.departmentCode}, #{item.organizationName},
                 #{item.positionName}, #{item.positionCode}, #{item.province}, #{item.city}, #{item.district},
                 #{item.recruitCount}, #{item.educationRequirement}, #{item.degreeRequirement},
                 #{item.majorRequirement}, #{item.majorCodes}, #{item.ageRequirement},
                 #{item.politicalRequirement}, #{item.workYearRequirement}, #{item.freshGraduateRequirement},
                 #{item.householdRequirement}, #{item.serviceProjectRequirement}, #{item.certificateRequirement},
-                #{item.genderRequirement}, #{item.positionDescription}, #{item.remark},
+                #{item.genderRequirement}, #{item.positionDescription}, #{item.additionalRequirements},
+                #{item.workLocation}, #{item.settlementLocation}, #{item.remark},
                 #{item.sourceSheet}, #{item.sourceRow}, #{item.rawData}, #{item.createdAt}, #{item.updatedAt}
             )
         </foreach>

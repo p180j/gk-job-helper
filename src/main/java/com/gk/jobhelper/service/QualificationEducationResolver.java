@@ -35,18 +35,32 @@ public class QualificationEducationResolver {
     }
 
     public List<MatchItemResult> resolve(UserProfile profile, JobPosition position, MatchContext context) {
+        String scopeText = (position.getAdditionalRequirements() == null ? "" : position.getAdditionalRequirements())
+                + "；" + (position.getRemark() == null ? "" : position.getRemark());
+        boolean highestMajor = scopeText.contains("最高学历对应专业") || scopeText.contains("最高学历所学专业")
+                || scopeText.contains("最高学历所学主修专业");
+        boolean unsupportedScope = scopeText.contains("各阶段均需") || scopeText.contains("仅限主修专业")
+                || scopeText.contains("第二学位") || scopeText.contains("辅修专业");
         if (!educationTableAvailable) {
-            return evaluate(profile, position, context, null);
+            return scopeResult(evaluate(profile, position, context, null), highestMajor || unsupportedScope);
         }
         List<UserEducation> candidates;
         try {
             candidates = userEducationMapper.selectEnabledByProfileId(profile.getId());
         } catch (DataAccessException e) {
             educationTableAvailable = false;
-            return evaluate(profile, position, context, null);
+            return scopeResult(evaluate(profile, position, context, null), highestMajor || unsupportedScope);
         }
         if (candidates == null || candidates.isEmpty()) {
-            return evaluate(profile, position, context, null);
+            return scopeResult(evaluate(profile, position, context, null), highestMajor || unsupportedScope);
+        }
+        if (highestMajor) {
+            List<UserEducation> highest = new ArrayList<>();
+            for (UserEducation education : candidates) if (Boolean.TRUE.equals(education.getHighest())) highest.add(education);
+            if (highest.size() != 1) {
+                return scopeResult(evaluate(profile, position, context, null), true);
+            }
+            candidates = highest;
         }
         Candidate best = null;
         for (UserEducation education : candidates) {
@@ -56,7 +70,17 @@ public class QualificationEducationResolver {
                 best = candidate;
             }
         }
-        return appendCandidateReason(best.items, best.education);
+        return scopeResult(appendCandidateReason(best.items, best.education), unsupportedScope);
+    }
+
+    private List<MatchItemResult> scopeResult(List<MatchItemResult> items, boolean unsupportedScope) {
+        if (!unsupportedScope) return items;
+        List<MatchItemResult> result = new ArrayList<>(items);
+        MatchItemResult major = items.get(1);
+        result.set(1, new MatchItemResult(major.getConditionType(), MatchResult.UNCERTAIN,
+                major.getUserValue(), major.getRequirementValue(),
+                major.getReason() + "；学历阶段或主修、第二学位口径缺少可靠的完整档案证据，需人工核验。", major.getEvidence()));
+        return result;
     }
 
     private List<MatchItemResult> evaluate(UserProfile profile, JobPosition position, MatchContext context,

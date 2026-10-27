@@ -70,6 +70,13 @@ export interface CareerWorkExperience {
   startDate: string | null
   endDate: string | null
   description: string | null
+  region?: string | null
+  organizationNature?: string | null
+  industry?: string | null
+  positionType?: string | null
+  organizationLevel?: string | null
+  employed?: boolean | null
+  evidenceStatus?: string | null
 }
 
 export interface CareerProjectExperience {
@@ -127,6 +134,7 @@ export interface ExcelSheetPreview {
   totalRows: number
   previewRows: Array<Record<string, string>>
   suggestedForImport: boolean
+  parseError?: string
 }
 
 /** 字段映射置信度 */
@@ -184,6 +192,12 @@ export interface MatchEvidence {
   majorName: string | null
   parentCode: string | null
   parentName: string | null
+  ruleId?: string | null
+  sourceField?: string | null
+  parseStatus?: string | null
+  parserVersion?: string | null
+  missingFields?: string | null
+  manualReview?: boolean | null
 }
 
 export interface MatchItem {
@@ -218,6 +232,8 @@ export interface JobPosition {
   examId: number | null
   importFileId: number | null
   departmentName: string | null
+  departmentCode: string | null
+  departmentCode: string | null
   organizationName: string | null
   positionName: string | null
   positionCode: string | null
@@ -238,6 +254,12 @@ export interface JobPosition {
   certificateRequirement: string | null
   genderRequirement: string | null
   positionDescription: string | null
+  additionalRequirements: string | null
+  workLocation: string | null
+  settlementLocation: string | null
+  additionalRequirements: string | null
+  workLocation: string | null
+  settlementLocation: string | null
   remark: string | null
   sourceSheet: string | null
   sourceRow: number | null

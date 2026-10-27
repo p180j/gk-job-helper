@@ -5,6 +5,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 /**
  * 正式导入请求（POST /api/import/{id}/confirm）
@@ -21,6 +23,8 @@ public class ImportConfirmRequest {
     @NotEmpty(message = "字段映射不能为空")
     @Valid
     private List<MappingItem> mappings = new ArrayList<>();
+    /** Optional per-Sheet overrides when selected Sheets use different header names or order. */
+    private Map<String, List<MappingItem>> sheetMappings = new LinkedHashMap<>();
 
     public String getSheetName() {
         return sheetName;
@@ -39,6 +43,10 @@ public class ImportConfirmRequest {
 
     public void setMappings(List<MappingItem> mappings) {
         this.mappings = mappings;
+    }
+    public Map<String, List<MappingItem>> getSheetMappings() { return sheetMappings; }
+    public void setSheetMappings(Map<String, List<MappingItem>> sheetMappings) {
+        this.sheetMappings = sheetMappings == null ? new LinkedHashMap<>() : sheetMappings;
     }
 
     public static class MappingItem {

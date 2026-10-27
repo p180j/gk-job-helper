@@ -20,6 +20,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +44,7 @@ import java.util.UUID;
 public class ExcelImportService {
 
     private static final int MAX_RECENT_IMPORTS = 5;
+    public static final String PARSER_VERSION = "GENERAL_EXAM_V2";
     private static final Set<String> ALLOWED_EXTENSIONS =
             new HashSet<>(Arrays.asList(".xls", ".xlsx"));
 
@@ -88,6 +91,9 @@ public class ExcelImportService {
         List<ExcelPreviewResult> results;
         try {
             results = excelPreviewParser.parseAll(storedFile.toFile());
+            if (results.stream().noneMatch(sheet -> !sheet.getHeaders().isEmpty())) {
+                throw new BusinessException("Excel 中没有可可靠识别表头的 Sheet，请核对职位表内容");
+            }
         } catch (RuntimeException e) {
             deleteQuietly(storedFile);
             throw e;
@@ -103,6 +109,8 @@ public class ExcelImportService {
         record.setStoredName(storedFile.getFileName().toString());
         record.setStoredPath(storedFile.toString());
         record.setFileSize(file.getSize());
+        record.setFileChecksum(checksum(storedFile));
+        record.setParserVersion(PARSER_VERSION);
         record.setFileType(extension);
         record.setSheetName(primary.getSheetName());
         record.setHeaders(String.join(",", primary.getHeaders()));
@@ -164,6 +172,21 @@ public class ExcelImportService {
         }
     }
 
+    private String checksum(Path file) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            try (DigestInputStream input = new DigestInputStream(Files.newInputStream(file), digest)) {
+                byte[] buffer = new byte[8192];
+                while (input.read(buffer) != -1) { }
+            }
+            StringBuilder value = new StringBuilder();
+            for (byte part : digest.digest()) value.append(String.format("%02x", part & 0xff));
+            return value.toString();
+        } catch (Exception e) {
+            throw new BusinessException("计算上传文件校验信息失败: " + e.getMessage());
+        }
+    }
+
     private ExcelPreviewVO toVO(ImportFile record, ExcelPreviewResult result, List<ExcelSheetPreviewVO> sheets) {
         ExcelPreviewVO vo = new ExcelPreviewVO();
         vo.setFileId(record.getId());
@@ -200,7 +223,9 @@ public class ExcelImportService {
             sheet.setSheetName(result.getSheetName());
             sheet.setHeaders(result.getHeaders());
             sheet.setTotalRows(result.getTotalRows());
-            sheet.setSuggestedForImport(aiSuggestedSheets.contains(result.getSheetName()) || isPositionLike(result));
+            sheet.setParseError(result.getParseError());
+            sheet.setSuggestedForImport(result.getParseError() == null
+                    && (aiSuggestedSheets.contains(result.getSheetName()) || isPositionLike(result)));
             List<Map<String, String>> previewRows = new ArrayList<>();
             for (Map<Integer, String> rawRow : result.getPreviewRows()) {
                 previewRows.add(toRowMap(result.getHeaders(), rawRow));

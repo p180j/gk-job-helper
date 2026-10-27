@@ -82,6 +82,19 @@ class RemarkMatcherTest {
     }
 
     @Test
+    void certificateConditionOnlyAppliesToListedMajors() {
+        UserProfile profile = new UserProfile();
+        profile.setMajor("软件工程");
+        String text = "法学、法律专业须取得法律职业资格证书（A证）。";
+        assertEquals(MatchResult.MATCH, match(profile, text).getResult());
+        profile.setMajor("法学");
+        assertEquals(MatchResult.UNCERTAIN, match(profile, text).getResult());
+        profile.setCertificates("法律职业资格A证");
+        assertEquals(MatchResult.MATCH, match(profile, text).getResult());
+        assertEquals(MatchResult.UNCERTAIN, match(profile, "须取得法律职业资格A证，且取得教师资格证").getResult());
+    }
+
+    @Test
     void plainCollegeGraduateAndGenderRestrictionsShouldNotBeTreatedAsInformationalText() {
         MatchItemResult result = match(new UserProfile(), "2026届高校毕业生，男性");
         assertEquals(MatchResult.UNCERTAIN, result.getResult());
@@ -106,6 +119,11 @@ class RemarkMatcherTest {
         UserProfile profile = new UserProfile();
         profile.setEnglishLevel("CET6");
         assertEquals(MatchResult.UNCERTAIN, match(profile, "大学英语六级成绩达到500分及以上").getResult());
+        assertEquals(MatchResult.UNCERTAIN, match(profile, "大学英语六级成绩在500分及以上").getResult());
+        profile.setEnglishLevel("NONE");
+        assertEquals(MatchResult.UNCERTAIN, match(profile, "大学英语四级成绩在425分及以上（雅思成绩在6分及以上亦可）").getResult());
+        profile.setEnglishLevel("CET4");
+        assertEquals(MatchResult.MATCH, match(profile, "大学英语四级成绩在425分及以上（雅思成绩在6分及以上亦可）").getResult());
     }
 
     @Test
@@ -134,6 +152,20 @@ class RemarkMatcherTest {
         MatchItemResult result = match(profile, "限符合人民警察录用条件，裸眼视力达到4.8报考；限男性");
         assertEquals(MatchResult.UNCERTAIN, result.getResult());
         assertTrue(result.getReason().contains("裸眼视力"));
+    }
+
+    @Test
+    void recognizedGenderMustNotHideAnotherUnknownRestriction() {
+        UserProfile profile = new UserProfile();
+        profile.setGender("男");
+        assertEquals(MatchResult.UNCERTAIN,
+                match(profile, "限男性，须通过特别能力测试").getResult());
+    }
+
+    @Test
+    void unsupportedCertificateAlternativeMustRemainUncertain() {
+        assertEquals(MatchResult.UNCERTAIN,
+                match(new UserProfile(), "须取得教师资格证或法律职业资格A证").getResult());
     }
 
     @Test

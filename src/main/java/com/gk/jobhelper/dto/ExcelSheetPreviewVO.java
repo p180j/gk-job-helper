@@ -11,6 +11,7 @@ public class ExcelSheetPreviewVO {
     private Integer totalRows;
     private List<Map<String, String>> previewRows = new ArrayList<>();
     private boolean suggestedForImport;
+    private String parseError;
 
     public String getSheetName() { return sheetName; }
     public void setSheetName(String sheetName) { this.sheetName = sheetName; }
@@ -22,4 +23,6 @@ public class ExcelSheetPreviewVO {
     public void setPreviewRows(List<Map<String, String>> previewRows) { this.previewRows = previewRows; }
     public boolean isSuggestedForImport() { return suggestedForImport; }
     public void setSuggestedForImport(boolean suggestedForImport) { this.suggestedForImport = suggestedForImport; }
+    public String getParseError() { return parseError; }
+    public void setParseError(String parseError) { this.parseError = parseError; }
 }

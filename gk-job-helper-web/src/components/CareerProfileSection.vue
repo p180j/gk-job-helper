@@ -55,7 +55,8 @@ async function createDraft(): Promise<void> {
 
 function currentDraft(): CareerProfileDraft { if (!draft.value) throw new Error('职业画像草稿不存在'); return draft.value }
 function addEducation(): void { currentDraft().educationExperiences.push({ school: null, degree: null, major: null, startDate: null, endDate: null, description: null }) }
-function addWork(): void { currentDraft().workExperiences.push({ company: null, position: null, startDate: null, endDate: null, description: null }) }
+function addWork(): void { currentDraft().workExperiences.push({ company: null, position: null, startDate: null, endDate: null, description: null, region: null, organizationNature: null, industry: null, positionType: null, organizationLevel: null, employed: null, evidenceStatus: null }) }
+function createManualDraft(): void { draft.value = { currentPosition: null, totalWorkYears: null, careerDirections: [], industries: [], educationExperiences: [], workExperiences: [], projectExperiences: [], skills: [], certificates: [] } }
 function addProject(): void { currentDraft().projectExperiences.push({ name: null, role: null, startDate: null, endDate: null, description: null }) }
 
 async function save(): Promise<void> {
@@ -95,8 +96,8 @@ async function removeFact(fact: CareerFact): Promise<void> { if (!fact.id) retur
 <template>
   <section class="page-card career-card">
     <div class="section-head">
-      <div><h2 class="page-title">招聘职业画像</h2><p class="page-subtitle">上传 PDF 或 DOCX 简历，由 AI 提取草稿；仅确认后的内容会保存并用于后续招聘功能。</p></div>
-      <el-button v-if="savedProfile && !draft" @click="editSaved">修改职业画像</el-button>
+      <div><h2 class="page-title">招聘职业画像</h2><p class="page-subtitle">可上传简历由 AI 提取，也可手工填写；仅确认后的内容会保存并用于岗位资格匹配。</p></div>
+      <el-button v-if="savedProfile && !draft" @click="editSaved">修改职业画像</el-button><el-button v-else-if="!draft" @click="createManualDraft">手动填写工作经历</el-button>
     </div>
 
     <div v-if="!draft && currentResume" class="resume-file-card">
@@ -162,7 +163,7 @@ async function removeFact(fact: CareerFact): Promise<void> { if (!fact.id) retur
     </template>
 
     <template v-if="draft">
-      <el-alert title="这是 AI 生成的草稿，请只保留简历中真实存在的信息，确认后才会保存。" type="warning" :closable="false" show-icon />
+      <el-alert title="请只保留能够确认的真实信息；无论 AI 提取还是手工填写，确认后才会保存并参与资格匹配。" type="warning" :closable="false" show-icon />
       <h3>职业概况</h3>
       <div class="overview-card"><el-form label-position="top"><el-row :gutter="16"><el-col :span="12"><el-form-item label="当前/最近岗位"><el-input v-model="draft.currentPosition" placeholder="仅由 AI 从简历提取，可人工修订" /></el-form-item></el-col><el-col :span="12"><el-form-item label="工作年限"><el-input v-model="draft.totalWorkYears" placeholder="仅保留简历明确写出的年限" /></el-form-item></el-col><el-col :span="12"><el-form-item label="职业方向"><el-select v-model="draft.careerDirections" multiple filterable allow-create default-first-option placeholder="AI 未识别时可保持为空"><el-option v-for="item in draft.careerDirections" :key="item" :label="item" :value="item" /></el-select></el-form-item></el-col><el-col :span="12"><el-form-item label="行业经验"><el-select v-model="draft.industries" multiple filterable allow-create default-first-option placeholder="AI 未识别时可保持为空"><el-option v-for="item in draft.industries" :key="item" :label="item" :value="item" /></el-select></el-form-item></el-col></el-row></el-form></div>
 
@@ -170,7 +171,7 @@ async function removeFact(fact: CareerFact): Promise<void> { if (!fact.id) retur
       <div v-for="(item, index) in draft.educationExperiences" :key="`education-${index}`" class="compact-row"><el-input v-model="item.school" placeholder="学校" /><el-input v-model="item.degree" placeholder="学历/学位" /><el-input v-model="item.major" placeholder="专业" /><el-input v-model="item.startDate" placeholder="开始时间：yyyy-MM 或 yyyy" /><el-input v-model="item.endDate" placeholder="结束时间：yyyy-MM 或 yyyy" /><el-input v-model="item.description" placeholder="简历原文描述（选填）" /><el-button type="danger" link @click="draft.educationExperiences.splice(index, 1)">删除</el-button></div>
 
       <h3>工作经历 <el-button link type="primary" @click="addWork">新增</el-button></h3>
-      <article v-for="(item, index) in draft.workExperiences" :key="`work-${index}`" class="experience-card"><div class="card-title"><strong>工作经历 {{ index + 1 }}</strong><el-button type="danger" link @click="draft.workExperiences.splice(index, 1)">删除</el-button></div><div class="work-basic"><el-input v-model="item.company" placeholder="公司/单位" /><el-input v-model="item.position" placeholder="职位" /><el-input v-model="item.startDate" placeholder="开始时间：yyyy-MM 或 yyyy" /><el-input v-model="item.endDate" placeholder="结束时间：yyyy-MM 或 yyyy" /></div><el-input v-model="item.description" type="textarea" :autosize="{ minRows: 3, maxRows: 8 }" placeholder="简历原文中的职责、项目或成果描述" /></article>
+      <article v-for="(item, index) in draft.workExperiences" :key="`work-${index}`" class="experience-card"><div class="card-title"><strong>工作经历 {{ index + 1 }}</strong><el-button type="danger" link @click="draft.workExperiences.splice(index, 1)">删除</el-button></div><div class="work-basic"><el-input v-model="item.company" placeholder="公司/单位" /><el-input v-model="item.position" placeholder="职位" /><el-input v-model="item.startDate" placeholder="开始时间：yyyy-MM 或 yyyy" /><el-input v-model="item.endDate" placeholder="结束时间：yyyy-MM 或 yyyy" /></div><div class="work-basic"><el-input v-model="item.region" placeholder="工作地区：省市县" /><el-input v-model="item.organizationNature" placeholder="单位性质：国企/事业单位等" /><el-input v-model="item.industry" placeholder="所属行业" /><el-input v-model="item.positionType" placeholder="岗位类型" /><el-input v-model="item.organizationLevel" placeholder="单位层级：县/乡镇等" /></div><div class="work-basic"><el-select v-model="item.employed" placeholder="是否在职" clearable><el-option label="在职" :value="true" /><el-option label="离职" :value="false" /></el-select><el-select v-model="item.evidenceStatus" placeholder="信息核验状态" clearable><el-option label="用户确认" value="USER_CONFIRMED" /><el-option label="材料已核验" value="DOCUMENT_VERIFIED" /></el-select></div><el-input v-model="item.description" type="textarea" :autosize="{ minRows: 3, maxRows: 8 }" placeholder="简历原文中的职责、项目或成果描述" /></article>
 
       <h3>项目经历 <el-button link type="primary" @click="addProject">新增</el-button></h3>
       <article v-for="(item, index) in draft.projectExperiences" :key="`project-${index}`" class="experience-card"><div class="card-title"><strong>项目经历 {{ index + 1 }}</strong><el-button type="danger" link @click="draft.projectExperiences.splice(index, 1)">删除</el-button></div><div class="work-basic"><el-input v-model="item.name" placeholder="项目名称" /><el-input v-model="item.role" placeholder="项目角色" /><el-input v-model="item.startDate" placeholder="开始时间：yyyy-MM 或 yyyy" /><el-input v-model="item.endDate" placeholder="结束时间：yyyy-MM 或 yyyy" /></div><el-input v-model="item.description" type="textarea" :autosize="{ minRows: 3, maxRows: 8 }" placeholder="简历原文中的项目描述" /></article>

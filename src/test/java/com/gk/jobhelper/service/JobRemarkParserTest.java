@@ -32,4 +32,21 @@ class JobRemarkParserTest {
     void blankRemarkHasNoConditions() {
         assertTrue(parser.parse("  ").isEmpty());
     }
+
+    @Test
+    void keepsSeparatorsInsideBracketsInOneClause() {
+        List<String> clauses = JobRemarkParser.splitClauses("须取得证书（A；B）；工作地点为南昌市");
+        assertEquals(2, clauses.size());
+        assertTrue(clauses.get(0).contains("A;B"));
+    }
+
+    @Test
+    void exposesSourceOperatorAndParserVersion() {
+        com.gk.jobhelper.entity.JobPosition position = new com.gk.jobhelper.entity.JobPosition();
+        position.setAdditionalRequirements("法学专业须取得法律职业资格A证");
+        JobRemarkParser.Condition condition = parser.parse(position).get(0);
+        assertEquals("additionalRequirements", condition.getSourceField());
+        assertEquals("IF_THEN", condition.getOperator());
+        assertEquals(JobRemarkParser.PARSER_VERSION, condition.getParserVersion());
+    }
 }

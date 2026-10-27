@@ -53,6 +53,7 @@ const info = computed<DetailItem[]>(() => {
   const location = feature.value
   return [
     { label: '招录单位', value: current.departmentName, emptyText: '-' },
+    ...(hasValue(current.departmentCode) ? [{ label: '部门代码', value: current.departmentCode, emptyText: '-' }] : []),
     ...(hasValue(current.organizationName)
       ? [{ label: '用人单位', value: current.organizationName, emptyText: '-' }]
       : []),
@@ -64,6 +65,7 @@ const info = computed<DetailItem[]>(() => {
         : location?.workLocationStatus === 'INFERRED' ? `${location.workLocationName || '-'}（实际岗位地点待核实）`
           : location?.workLocationStatus === 'MULTI_SITE' ? '多个工作地点（具体地点待确定）' : '未知', emptyText: '未知' },
     ...(location?.workLocationEvidence ? [{ label: '地点依据', value: location.workLocationEvidence, emptyText: '-', span: 2 }] : []),
+    ...(hasValue(current.settlementLocation) ? [{ label: '落户地点', value: current.settlementLocation, emptyText: '-' }] : []),
     { label: '招录人数', value: current.recruitCount == null ? null : `${current.recruitCount} 人`, emptyText: '-' },
     { label: '考试科目', value: feature.value?.examSubjects?.join(' + '), emptyText: '暂未识别', span: 2 },
     { label: '学历', value: current.educationRequirement, emptyText: '无要求', requirement: true },
@@ -191,6 +193,10 @@ function relativeText(value: string | null | undefined) {
         </el-descriptions-item>
       </el-descriptions>
 
+      <div v-if="hasValue(job.additionalRequirements)" class="remark-block">
+        <div class="remark-title">其他条件</div>
+        <div class="remark-content">{{ job.additionalRequirements }}</div>
+      </div>
       <div class="remark-block" :class="{ empty: !hasValue(job.remark) }">
         <div class="remark-title">备注</div>
         <div class="remark-content">{{ hasValue(job.remark) ? job.remark : '暂无备注' }}</div>
@@ -219,15 +225,16 @@ function relativeText(value: string | null | undefined) {
         综合判断：<el-tag :type="matchStatus(match.result).type">{{ matchStatus(match.result).detailLabel }}</el-tag>
       </p>
 
-      <div v-for="item in match.items" :key="item.conditionType" class="match-item">
+      <div v-for="(item, index) in match.items" :key="`${item.conditionType}-${index}`" class="match-item">
         <div class="item-title">
-          <strong>{{ CONDITION_LABELS[item.conditionType] || item.conditionType }}</strong>
+          <strong>{{ item.conditionType === 'REMARK_CONDITION' ? `${CONDITION_LABELS[item.conditionType]} · ${item.evidence?.sourceField === 'additionalRequirements' ? '其他条件' : '备注'}` : CONDITION_LABELS[item.conditionType] || item.conditionType }}</strong>
           <el-tag :type="itemStatusType(item)">{{ itemStatusLabel(item) }}</el-tag>
         </div>
         <div class="match-copy">
           <p><span>你的条件</span>{{ userValueText(item) }}</p>
           <p><span>岗位要求</span>{{ requirementText(item) }}</p>
           <p><span>判断说明</span>{{ item.reason || '暂无说明' }}</p>
+          <p v-if="item.evidence?.missingFields"><span>待补资料</span>{{ item.evidence.missingFields }}</p>
         </div>
         <p v-if="evidenceText(item)" class="evidence">{{ evidenceText(item) }}</p>
       </div>

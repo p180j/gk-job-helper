@@ -24,8 +24,8 @@ export function fetchMapping(importId: number, sheetNames?: string[]): Promise<F
 }
 
 /** 按确认的映射正式导入岗位 */
-export function confirmImport(importId: number, mappings: MappingItem[], sheetNames: string[]): Promise<ImportResult> {
-  return post<ImportResult>(`/api/import/${importId}/confirm`, { mappings, sheetNames })
+export function confirmImport(importId: number, mappings: MappingItem[], sheetNames: string[], sheetMappings?: Record<string, MappingItem[]>): Promise<ImportResult> {
+  return post<ImportResult>(`/api/import/${importId}/confirm`, { mappings, sheetNames, sheetMappings })
 }
 
 export function fetchImportProgress(importId: number): Promise<ImportProgress> {

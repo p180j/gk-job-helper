@@ -5,6 +5,7 @@ import java.util.List;
 @Mapper public interface JobPositionFeatureMapper {
     int upsert(JobPositionFeature feature);
     int updateParsedFields(JobPositionFeature feature);
+    int deleteByPositionId(Long positionId);
     JobPositionFeature selectByPositionId(Long positionId);
     List<JobPositionFeature> selectByPositionIds(@Param("ids") List<Long> ids);
     List<JobPositionFeature> selectBySubjectGroup(@Param("group") String group);

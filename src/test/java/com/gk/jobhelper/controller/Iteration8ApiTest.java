@@ -16,6 +16,13 @@ class Iteration8ApiTest {
   assertEquals(1,applied.get("changed").asInt());
   JsonNode repeated=call(get("/api/job-features/parsed-preview").param("importId",importId.toString())).get("data");
   assertEquals(0,repeated.get("changed").asInt());
+  String backupId=applied.get("backupId").asText();
+  assertFalse(backupId.isEmpty());
+  JsonNode restored=call(post("/api/job-features/parsed-restore").param("importId",importId.toString()).param("backupId",backupId)).get("data");
+  assertEquals(1,restored.get("changed").asInt());
+  assertNull(features.selectByPositionId(positionId));
+  JsonNode restoredAgain=call(post("/api/job-features/parsed-restore").param("importId",importId.toString()).param("backupId",backupId)).get("data");
+  assertEquals(0,restoredAgain.get("changed").asInt());
   assertEquals(0,new BigDecimal("132.6").compareTo(scores.selectByYearAndCode(2026,"A001").getMinInterviewScore()));
  }
  @Test void preferenceCanBeSavedAndApplied()throws Exception{call(post("/api/job-features/rebuild").param("importId",importId.toString()));String body="{\"preferredRegions\":[\"南昌\"],\"acceptedOrgLevels\":[],\"excludedOrgLevels\":[],\"preferredSubjectGroups\":[],\"acceptExtraSubjects\":true,\"preferMoreRecruits\":true}";JsonNode saved=call(put("/api/preferences/"+profileId).contentType(MediaType.APPLICATION_JSON).content(body)).get("data");assertEquals("南昌",saved.get("preferredRegions").get(0).asText());JsonNode item=call(get("/api/recommendations").param("profileId",profileId.toString()).param("importId",importId.toString())).get("data").get("items").get(0);assertEquals("PRIORITY",item.get("priorityLevel").asText());assertEquals("地区符合偏好",item.get("recommendReasons").get(0).asText());}

@@ -49,7 +49,7 @@ class FieldMappingServiceTest {
         assertSuggest("部门名称", "departmentName", FieldConfidence.ALIAS);
         assertSuggest("人数", "recruitCount", FieldConfidence.ALIAS);
         assertSuggest("学历要求", "educationRequirement", FieldConfidence.ALIAS);
-        assertSuggest("工作地点", "city", FieldConfidence.ALIAS);
+        assertSuggest("工作地点", "workLocation", FieldConfidence.EXACT);
         assertSuggest("设区市", "city", FieldConfidence.ALIAS);
         assertSuggest("招录地区", "district", FieldConfidence.ALIAS);
         assertSuggest("岗位所在地", "district", FieldConfidence.ALIAS);

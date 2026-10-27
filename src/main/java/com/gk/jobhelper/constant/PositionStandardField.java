@@ -15,6 +15,8 @@ public enum PositionStandardField {
             new String[]{"招录机关"},
             new String[]{"招聘单位", "主管部门", "单位名称", "部门名称", "招录单位", "招考单位"}),
 
+    DEPARTMENT_CODE("departmentCode", new String[]{"部门代码"}, new String[]{"招录机关代码", "单位代码"}),
+
     ORGANIZATION_NAME("organizationName",
             new String[]{"用人司局"},
             new String[]{"用人单位", "内设机构"}),
@@ -33,12 +35,18 @@ public enum PositionStandardField {
 
     CITY("city",
             new String[]{"城市"},
-            new String[]{"市", "设区市", "地市", "工作地点", "工作城市", "所在城市"}),
+            new String[]{"市", "设区市", "地市", "工作城市", "所在城市"}),
 
     DISTRICT("district",
             new String[]{"区县"},
             new String[]{"县区", "县市区", "地区", "招录地区", "招考地区", "岗位地区",
-                    "工作地区", "所在地区", "岗位所在地", "单位所在地", "行政区划"}),
+                    "所在地区", "岗位所在地", "单位所在地", "行政区划"}),
+
+    WORK_LOCATION("workLocation", new String[]{"工作地点"},
+            new String[]{"实际工作地点", "岗位地点", "工作地区", "工作地"}),
+
+    SETTLEMENT_LOCATION("settlementLocation", new String[]{"落户地点"},
+            new String[]{"落户地", "户口落户地点"}),
 
     RECRUIT_COUNT("recruitCount",
             new String[]{"招考人数"},
@@ -96,9 +104,12 @@ public enum PositionStandardField {
             new String[]{"职位描述"},
             new String[]{"职位简介", "岗位职责", "职位介绍", "工作职责"}),
 
+    ADDITIONAL_REQUIREMENTS("additionalRequirements", new String[]{"其他条件"},
+            new String[]{"其他要求", "附加条件", "报考条件", "资格条件", "任职要求"}),
+
     REMARK("remark",
             new String[]{"备注"},
-            new String[]{"其他条件", "其他要求", "备注信息"});
+            new String[]{"备注信息"});
 
     private final String fieldName;
     private final String[] exactNames;

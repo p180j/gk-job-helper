@@ -3,8 +3,8 @@
 <mapper namespace="com.gk.jobhelper.mapper.ImportFileMapper">
 
     <sql id="Base_Column_List">
-        id, original_name, stored_name, stored_path, file_size, file_type, sheet_name,
-        headers, total_rows, exam_year, status, created_at
+        id, original_name, stored_name, stored_path, file_size, file_checksum, parser_version, file_type, sheet_name,
+        headers, total_rows, exam_year, status, processed_rows, success_rows, failed_rows, error_message, created_at
     </sql>
 
     <resultMap id="BaseResultMap" type="com.gk.jobhelper.entity.ImportFile">
@@ -13,12 +13,18 @@
         <result property="storedName" column="stored_name"/>
         <result property="storedPath" column="stored_path"/>
         <result property="fileSize" column="file_size"/>
+        <result property="fileChecksum" column="file_checksum"/>
+        <result property="parserVersion" column="parser_version"/>
         <result property="fileType" column="file_type"/>
         <result property="sheetName" column="sheet_name"/>
         <result property="headers" column="headers"/>
         <result property="totalRows" column="total_rows"/>
         <result property="examYear" column="exam_year"/>
         <result property="status" column="status"/>
+        <result property="processedRows" column="processed_rows"/>
+        <result property="successRows" column="success_rows"/>
+        <result property="failedRows" column="failed_rows"/>
+        <result property="errorMessage" column="error_message"/>
         <result property="createdAt" column="created_at"/>
     </resultMap>
 
@@ -47,15 +53,28 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO import_file (original_name, stored_name, stored_path, file_size, file_type,
+        INSERT INTO import_file (original_name, stored_name, stored_path, file_size, file_checksum, parser_version, file_type,
                                  sheet_name, headers, total_rows, exam_year, status, created_at)
-        VALUES (#{originalName}, #{storedName}, #{storedPath}, #{fileSize}, #{fileType},
+        VALUES (#{originalName}, #{storedName}, #{storedPath}, #{fileSize}, #{fileChecksum}, #{parserVersion}, #{fileType},
                 #{sheetName}, #{headers}, #{totalRows}, #{examYear}, #{status}, #{createdAt})
     </insert>
 
     <update id="updateStatus">
         UPDATE import_file
         SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <update id="tryStartImport">
+        UPDATE import_file SET status = 'IMPORTING', processed_rows = 0, success_rows = 0,
+               failed_rows = 0, error_message = NULL
+        WHERE id = #{id} AND status IN ('PREVIEWED', 'IMPORT_FAILED')
+    </update>
+
+    <update id="updateImportResult">
+        UPDATE import_file SET status = #{status}, processed_rows = #{processed},
+               total_rows = CASE WHEN #{status} = 'IMPORTED' THEN #{success} + #{failed} ELSE total_rows END,
+               success_rows = #{success}, failed_rows = #{failed}, error_message = #{error}
         WHERE id = #{id}
     </update>
 

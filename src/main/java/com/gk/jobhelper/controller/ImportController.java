@@ -68,7 +68,16 @@ public class ImportController {
     @GetMapping("/{id}/progress")
     public ApiResponse<com.gk.jobhelper.entity.ImportFile> progress(@PathVariable("id") Long id) {
         com.gk.jobhelper.entity.ImportFile progress = importProgressStore.get(id);
-        return ApiResponse.ok(progress == null ? excelImportService.getImportFile(id) : progress);
+        com.gk.jobhelper.entity.ImportFile record = excelImportService.getImportFile(id);
+        if (progress != null) {
+            record.setStatus(progress.getStatus());
+            record.setTotalRows(progress.getTotalRows());
+            record.setProcessedRows(progress.getProcessedRows());
+            record.setSuccessRows(progress.getSuccessRows());
+            record.setFailedRows(progress.getFailedRows());
+            record.setErrorMessage(progress.getErrorMessage());
+        }
+        return ApiResponse.ok(record);
     }
 
     /** 删除指定职位表及其导入岗位、匹配结果 */

@@ -31,4 +31,5 @@
     WHERE position_id=#{positionId}
   </update>
   <delete id="deleteAll">DELETE FROM job_position_feature</delete>
+  <delete id="deleteByPositionId">DELETE FROM job_position_feature WHERE position_id=#{positionId}</delete>
 </mapper>

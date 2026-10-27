@@ -199,7 +199,7 @@ class MatchApiTest {
         postJson("/api/jobs/" + uncertainJobId + "/match", matchBody(REFERENCE_DATE));
         JsonNode uncertain = getJson("/api/jobs/" + uncertainJobId + "/match?profileId=" + profileId);
         assertEquals("UNCERTAIN", uncertain.get("result").asText());
-        assertEquals(7, uncertain.get("items").size());
+        assertEquals(8, uncertain.get("items").size());
         JsonNode ageItem = uncertain.get("items").get(1);
         assertEquals("MATCH", ageItem.get("result").asText());
         assertTrue(ageItem.get("reason").asText().contains("未设置"));
@@ -210,6 +210,7 @@ class MatchApiTest {
         JsonNode remarkItem = uncertain.get("items").get(6);
         assertEquals("REMARK", remarkItem.get("conditionType").asText());
         assertEquals("UNCERTAIN", remarkItem.get("result").asText());
+        assertEquals("REMARK_CONDITION", uncertain.get("items").get(7).get("conditionType").asText());
         assertTrue(remarkItem.get("reason").asText().contains("人工核验"));
     }
 
@@ -459,6 +460,7 @@ class MatchApiTest {
                 "2年以上", null, null, importId);
         uncertainPosition.setRemark("限本县事业单位工作5年以上人员报考");
         positions.add(uncertainPosition);
+        for (int index = 0; index < positions.size(); index++) positions.get(index).setSourceRow(index + 2);
         jobPositionMapper.insertBatch(positions);
         List<Long> ids = new ArrayList<>();
         for (JobPosition position : positions) {

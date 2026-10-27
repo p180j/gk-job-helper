@@ -3,10 +3,14 @@ package com.gk.jobhelper.service;
 import com.gk.jobhelper.constant.FieldConfidence;
 import com.gk.jobhelper.constant.PositionStandardField;
 import com.gk.jobhelper.dto.HeaderSuggestion;
+import com.gk.jobhelper.dto.ImportConfirmRequest;
+import com.gk.jobhelper.dto.ExcelRawSheet;
+import com.gk.jobhelper.common.BusinessException;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Excel 表头与标准字段映射建议服务（纯字典匹配，不做 AI 猜测）
@@ -74,5 +78,41 @@ public class FieldMappingService {
             }
         }
         return -1;
+    }
+
+    /** Resolve user-confirmed semantics independently for each Sheet without assuming identical headers. */
+    public List<ImportConfirmRequest.MappingItem> mappingsForSheet(ExcelRawSheet sheet, ImportConfirmRequest request) {
+        Map<String, List<ImportConfirmRequest.MappingItem>> overrides = request.getSheetMappings();
+        if (overrides != null && overrides.containsKey(sheet.getSheetName())) {
+            return overrides.get(sheet.getSheetName());
+        }
+        List<ImportConfirmRequest.MappingItem> resolved = new ArrayList<>();
+        for (ImportConfirmRequest.MappingItem mapping : request.getMappings()) {
+            String target = mapping.getTargetField();
+            int direct = findColumnIndex(sheet.getHeaders(), mapping.getSourceField());
+            if (direct >= 0) {
+                resolved.add(mapping);
+                continue;
+            }
+            if (request.getSheetNames() == null || request.getSheetNames().isEmpty()
+                    || sheet.getSheetName().equals(request.getSheetNames().get(0))) {
+                resolved.add(mapping);
+                continue;
+            }
+            if (target == null || target.trim().isEmpty()) continue;
+            String alternative = null;
+            for (String header : sheet.getHeaders()) {
+                if (!target.equals(suggest(header).getSuggestedField())) continue;
+                if (alternative != null) throw new BusinessException("Sheet “" + sheet.getSheetName() + "”的字段“" + target + "”有多个候选列，请分别确认映射");
+                alternative = header;
+            }
+            if (alternative != null) {
+                ImportConfirmRequest.MappingItem item = new ImportConfirmRequest.MappingItem();
+                item.setSourceField(alternative);
+                item.setTargetField(target);
+                resolved.add(item);
+            }
+        }
+        return resolved;
     }
 }

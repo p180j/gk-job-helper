@@ -25,7 +25,16 @@ public class JobWorkLocationResolver {
     }
 
     public Result resolve(JobPosition position) {
+        String conditions = text(position.getAdditionalRequirements()) + " " + text(position.getRemark());
+        if (conditions.contains("二次分配") || conditions.contains("服从分配") || conditions.contains("录用后选岗")) {
+            return new Result(null, null, "MULTI_SITE", "ASSIGNMENT_RULE", conditions.trim(), "WORK_SITE");
+        }
+        if (position.getWorkLocation() != null && !position.getWorkLocation().trim().isEmpty()) {
+            return stated(position.getWorkLocation().trim(), "SOURCE_COLUMN", "工作地点：" + position.getWorkLocation().trim());
+        }
         Result explicit = fromRaw(position.getRawData());
+        if (explicit != null) return explicit;
+        explicit = fromText(position.getAdditionalRequirements(), "ADDITIONAL_REQUIREMENTS");
         if (explicit != null) return explicit;
         explicit = fromText(position.getRemark(), "REMARK");
         if (explicit != null) return explicit;

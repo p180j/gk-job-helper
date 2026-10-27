@@ -20,6 +20,12 @@ public class MatchEvidence {
     private String parentCode;
     /** 命中的要求节点(专业类/学科)名称，如 计算机类 */
     private String parentName;
+    private String ruleId;
+    private String sourceField;
+    private String parseStatus;
+    private String parserVersion;
+    private String missingFields;
+    private Boolean manualReview;
 
     public MatchEvidence() {
     }
@@ -82,4 +88,16 @@ public class MatchEvidence {
     public void setParentName(String parentName) {
         this.parentName = parentName;
     }
+    public String getRuleId() { return ruleId; }
+    public void setRuleId(String ruleId) { this.ruleId = ruleId; }
+    public String getSourceField() { return sourceField; }
+    public void setSourceField(String sourceField) { this.sourceField = sourceField; }
+    public String getParseStatus() { return parseStatus; }
+    public void setParseStatus(String parseStatus) { this.parseStatus = parseStatus; }
+    public String getParserVersion() { return parserVersion; }
+    public void setParserVersion(String parserVersion) { this.parserVersion = parserVersion; }
+    public String getMissingFields() { return missingFields; }
+    public void setMissingFields(String missingFields) { this.missingFields = missingFields; }
+    public Boolean getManualReview() { return manualReview; }
+    public void setManualReview(Boolean manualReview) { this.manualReview = manualReview; }
 }

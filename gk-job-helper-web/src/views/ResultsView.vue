@@ -15,7 +15,6 @@ import { regionOptions } from '@/constants/regions'
 import PositionLibraryBar from '@/components/PositionLibraryBar.vue'
 
 type StatusFilter = 'ALL' | MatchResultValue
-type RecruitFilter = 'ALL' | '1' | '2' | '3_PLUS'
 
 const route = useRoute()
 const router = useRouter()
@@ -36,9 +35,6 @@ const filters = reactive({
   status: (['ALL', 'MATCH', 'UNCERTAIN', 'NOT_MATCH'].includes(initialStatus) ? initialStatus : 'MATCH') as StatusFilter,
   region: '',
   includeUnknownLocation: false,
-  organizationKeyword: '',
-  positionKeyword: '',
-  recruitCount: 'ALL' as RecruitFilter,
   educationKeyword: '',
   majorKeyword: '',
 })
@@ -65,15 +61,11 @@ async function load() {
   if (!profileId.value) return
   loading.value = true
   try {
-    const recruit = recruitRange(filters.recruitCount)
     const data = await fetchMatchResults({
       profileId: profileId.value, importId: importId.value,
       status: filters.status === 'ALL' ? undefined : filters.status,
       region: regionFilterValue(filters.region),
       includeUnknownLocation: filters.includeUnknownLocation,
-      organizationKeyword: filters.organizationKeyword || undefined,
-      positionKeyword: filters.positionKeyword || undefined,
-      recruitCountMin: recruit.min, recruitCountMax: recruit.max,
       educationKeyword: filters.educationKeyword || undefined,
       majorKeyword: filters.majorKeyword || undefined,
       page: page.value, size,
@@ -87,13 +79,6 @@ async function load() {
   }
 }
 
-function recruitRange(value: RecruitFilter) {
-  if (value === '1') return { min: 1, max: 1 }
-  if (value === '2') return { min: 2, max: 2 }
-  if (value === '3_PLUS') return { min: 3, max: undefined }
-  return { min: undefined, max: undefined }
-}
-
 function applyFilters() {
   page.value = 1
   router.replace({ query: filters.status === 'ALL' ? {} : { result: filters.status } })
@@ -101,7 +86,7 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  Object.assign(filters, { status: 'ALL', region: '', includeUnknownLocation: false, organizationKeyword: '', positionKeyword: '', recruitCount: 'ALL', educationKeyword: '', majorKeyword: '' })
+  Object.assign(filters, { status: 'ALL', region: '', includeUnknownLocation: false, educationKeyword: '', majorKeyword: '' })
   applyFilters()
 }
 
@@ -164,11 +149,10 @@ function subjects(item: MatchPositionResult) { try { return item.examSubjectsJso
       <el-form class="filter-form" label-position="top" @submit.prevent="applyFilters">
         <div class="filter-grid">
           <el-form-item label="匹配状态"><el-select v-model="filters.status"><el-option label="全部" value="ALL" /><el-option label="可以报" value="MATCH" /><el-option label="待确认" value="UNCERTAIN" /><el-option label="不符合" value="NOT_MATCH" /></el-select></el-form-item>
-          <el-form-item label="地区"><el-cascader v-model="filters.region" :options="regionOptions" :props="regionCascaderProps" clearable filterable placeholder="全部地区" /></el-form-item>
-          <el-form-item label="地点待核实"><el-checkbox v-model="filters.includeUnknownLocation">地区筛选时也包含待核实地点</el-checkbox></el-form-item>
-          <el-form-item label="招录单位"><el-input v-model="filters.organizationKeyword" clearable placeholder="单位关键字" /></el-form-item>
-          <el-form-item label="岗位名称"><el-input v-model="filters.positionKeyword" clearable placeholder="岗位关键字" /></el-form-item>
-          <el-form-item label="招录人数"><el-select v-model="filters.recruitCount"><el-option label="全部" value="ALL" /><el-option label="1人" value="1" /><el-option label="2人" value="2" /><el-option label="3人及以上" value="3_PLUS" /></el-select></el-form-item>
+          <el-form-item>
+            <template #label><span class="region-filter-label">地区 <el-checkbox v-model="filters.includeUnknownLocation" size="small">含待核实</el-checkbox></span></template>
+            <el-cascader v-model="filters.region" :options="regionOptions" :props="regionCascaderProps" clearable filterable placeholder="全部地区" />
+          </el-form-item>
           <el-form-item label="最低学历要求"><el-select v-model="filters.educationKeyword" clearable placeholder="全部"><el-option label="全部" value="" /><el-option label="不限" value="不限" /><el-option label="专科（含专科及以上）" value="专科" /><el-option label="本科（含本科及以上）" value="本科" /><el-option label="硕士（含硕士及以上）" value="硕士" /><el-option label="博士（含博士及以上）" value="博士" /></el-select></el-form-item>
           <el-form-item label="专业要求"><el-input v-model="filters.majorKeyword" clearable placeholder="如：计算机类" /></el-form-item>
         </div>
@@ -200,5 +184,6 @@ function subjects(item: MatchPositionResult) { try { return item.examSubjectsJso
 </template>
 
 <style scoped>
+.region-filter-label{display:inline-flex;align-items:center;gap:12px}
 .result-head{margin-bottom:18px}.filter-form{margin-top:20px;padding-top:18px;border-top:1px solid #ebeef5}.filter-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 18px}.filter-grid :deep(.el-select),.filter-grid :deep(.el-cascader),.filter-grid :deep(.el-input){width:100%}.filter-actions{text-align:right}.jobs{min-height:260px;padding-bottom:64px}.job-card{position:relative;background:#fff;border-radius:10px;padding:20px 22px;margin-bottom:14px;display:flex;align-items:stretch;gap:16px;border:1px solid #ebeef5;transition:.2s}.job-card:hover{border-color:#a0cfff;box-shadow:0 5px 16px rgba(64,158,255,.08)}.compare-check{align-self:flex-start;margin-top:3px}.job-main{min-width:0;flex:1}.job-title-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.job-main h2{font-size:17px;margin:0}.job-organization{margin:9px 0 14px;color:#606266}.job-facts{display:flex;gap:10px 26px;flex-wrap:wrap;color:#303133;font-size:13px}.job-facts span{display:inline-flex;align-items:baseline;gap:7px}.job-facts small,.job-major small{color:#909399;font-size:12px}.job-major{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;margin-top:10px;color:#606266;font-size:13px;line-height:1.65}.job-major small{padding-top:1px;white-space:nowrap}.job-side{flex:0 0 196px;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:22px}.job-location{box-sizing:border-box;width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--el-color-primary-light-7);border-radius:8px;background:var(--el-color-primary-light-9);color:var(--el-color-primary)}.job-location .el-icon{flex:0 0 auto;font-size:18px}.job-location div{min-width:0;display:flex;flex-direction:column;gap:2px}.job-location small{color:#909399;font-size:12px;font-weight:400}.job-location strong{overflow:hidden;color:#303133;font-size:14px;text-overflow:ellipsis;white-space:nowrap}.job-actions{display:flex;align-items:center;white-space:nowrap}.pager{text-align:right;margin:24px 0}.compare-bar{position:fixed;z-index:20;left:50%;bottom:24px;transform:translateX(-50%);min-width:380px;padding:13px 18px;background:#303133;color:#fff;border-radius:10px;box-shadow:0 8px 26px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:space-between;gap:24px}.compare-bar strong{color:#79bbff}.el-form-item{margin-bottom:14px}.reference-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;color:#606266;font-size:13px}@media(max-width:900px){.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.job-card{align-items:flex-start;flex-wrap:wrap}.job-main{width:calc(100% - 36px)}.job-side{flex:1 1 100%;margin-left:34px;flex-direction:row;align-items:center}.job-location{width:auto;max-width:60%}.compare-bar{min-width:calc(100vw - 32px)}}
 </style>

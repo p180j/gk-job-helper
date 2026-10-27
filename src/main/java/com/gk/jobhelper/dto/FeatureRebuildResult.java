@@ -3,6 +3,8 @@ public class FeatureRebuildResult {
  private Long importId; private int total; private int success; private int unknownSubjects; private int uncertainMajors;
  private int changed,confirmedLocations,inferredLocations,multiSiteLocations,unknownLocations;
  private boolean preview;
+ private String backupId;
+ public String getBackupId(){return backupId;} public void setBackupId(String v){backupId=v;}
  public Long getImportId(){return importId;} public void setImportId(Long v){importId=v;}
  public int getTotal(){return total;} public void setTotal(int v){total=v;}
  public int getSuccess(){return success;} public void setSuccess(int v){success=v;}

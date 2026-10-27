@@ -12,6 +12,8 @@ public class ImportFile {
     private String storedName;
     private String storedPath;
     private Long fileSize;
+    private String fileChecksum;
+    private String parserVersion;
     private String fileType;
     private String sheetName;
     private String headers;
@@ -63,6 +65,10 @@ public class ImportFile {
     public void setFileSize(Long fileSize) {
         this.fileSize = fileSize;
     }
+    public String getFileChecksum() { return fileChecksum; }
+    public void setFileChecksum(String fileChecksum) { this.fileChecksum = fileChecksum; }
+    public String getParserVersion() { return parserVersion; }
+    public void setParserVersion(String parserVersion) { this.parserVersion = parserVersion; }
 
     public String getFileType() {
         return fileType;

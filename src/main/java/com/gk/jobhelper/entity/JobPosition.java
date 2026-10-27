@@ -11,6 +11,7 @@ public class JobPosition {
     private Long examId;
     private Long importFileId;
     private String departmentName;
+    private String departmentCode;
     private String organizationName;
     private String positionName;
     private String positionCode;
@@ -31,6 +32,9 @@ public class JobPosition {
     private String certificateRequirement;
     private String genderRequirement;
     private String positionDescription;
+    private String additionalRequirements;
+    private String workLocation;
+    private String settlementLocation;
     private String remark;
     private String sourceSheet;
     private Integer sourceRow;
@@ -69,6 +73,8 @@ public class JobPosition {
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
     }
+    public String getDepartmentCode() { return departmentCode; }
+    public void setDepartmentCode(String departmentCode) { this.departmentCode = departmentCode; }
 
     public String getOrganizationName() {
         return organizationName;
@@ -229,6 +235,12 @@ public class JobPosition {
     public void setPositionDescription(String positionDescription) {
         this.positionDescription = positionDescription;
     }
+    public String getAdditionalRequirements() { return additionalRequirements; }
+    public void setAdditionalRequirements(String additionalRequirements) { this.additionalRequirements = additionalRequirements; }
+    public String getWorkLocation() { return workLocation; }
+    public void setWorkLocation(String workLocation) { this.workLocation = workLocation; }
+    public String getSettlementLocation() { return settlementLocation; }
+    public void setSettlementLocation(String settlementLocation) { this.settlementLocation = settlementLocation; }
 
     public String getRemark() {
         return remark;
