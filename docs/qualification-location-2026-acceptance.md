@@ -20,13 +20,13 @@
 - 专业：`MajorRequirementParser`、`MajorMatcher`、`JobMajorRequirementResolver`、`MajorRestrictionAnalyzer`。
 - 备注：`JobRemarkParser`、`RemarkMatcher`。
 - 地点：`AdministrativeDivisionCatalog`、`JobWorkLocationResolver`、`JobRegionResolver`、`administrative-divisions-2025.json` 及许可文本。
-- 派生数据与接口：`JobFeatureService`、`JobMatchService`、`JobCompareService`、相关 Controller、DTO、实体、Mapper 及 `schema.sql`、`hf_migration_position_qualification_location.sql`。
+- 派生数据与接口：`JobFeatureService`、`JobMatchService`、`JobCompareService`、相关 Controller、DTO、实体、Mapper 及 `schema.sql`、`hf_incremental.sql`。
 - 页面：`ResultsView.vue`、`JobDetailView.vue`、`FavoritesView.vue`、`CompareView.vue`、`model.ts`；推荐读取逻辑及其 Mapper。
 - 测试：`MajorMatcherTest`、`RemarkMatcherTest`、`JobRemarkParserTest`、`JobWorkLocationResolverTest`、`JobRegionResolverTest`、`Iteration7ApiTest`、`Iteration8ApiTest`、`MatchApiTest`。
 
 ## 4. 数据库迁移
 
-增量脚本 `src/main/resources/db/hf_migration_position_qualification_location.sql` 仅给 `job_position_feature` 新增 8 个派生字段及地点索引；不改原始职位、面试分、考试科目、专业目录或既有匹配表结构。此 DDL **只执行一次**，不是可重复执行脚本。新建数据库用同步更新后的 `schema.sql`。部署顺序：备份数据库 → 执行增量脚本 → 部署后端与前端 → 按批次预览并重建派生字段 → 预览并重算相应档案的匹配结果。
+统一增量脚本 `src/main/resources/db/hf_incremental.sql` 会幂等补齐 `job_position_feature` 的派生字段及地点索引，并合并其他历史结构升级；不改原始职位、面试分、考试科目、专业目录或既有匹配结果。新建数据库用同步更新后的 `schema.sql`。部署顺序：备份数据库 → 执行增量脚本 → 部署后端与前端 → 按批次预览并重建派生字段 → 预览并重算相应档案的匹配结果。
 
 ## 5. 专业验证
 
@@ -64,4 +64,4 @@
 
 ## 12. 其他开发环境与部署操作
 
-共享代码没有写入本机绝对路径，也没有新增生产依赖。其他电脑或部署环境拉取代码后需：先备份各自数据库；若为旧库，执行一次 `hf_migration_position_qualification_location.sql`；启动新后端并发布前端；按各自实际 `importId` 调用解析预览及重建；按各自 `profileId` 预览并重算匹配。已有旧版本后端不能直接读取新页面需要的派生字段，部署时应同步更新。新库直接使用更新后的 `schema.sql`，不用再执行增量脚本。未同步的电脑仍运行旧逻辑及旧数据；同步前留意各自未提交代码和本地数据库备份。
+共享代码没有写入本机绝对路径，也没有新增生产依赖。其他电脑或部署环境拉取代码后需：先备份各自数据库；若为旧库，执行统一的 `hf_incremental.sql`；启动新后端并发布前端；按各自实际 `importId` 调用解析预览及重建；按各自 `profileId` 预览并重算匹配。已有旧版本后端不能直接读取新页面需要的派生字段，部署时应同步更新。新库直接使用更新后的 `schema.sql`，不用再执行增量脚本。未同步的电脑仍运行旧逻辑及旧数据；同步前留意各自未提交代码和本地数据库备份。

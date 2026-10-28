@@ -1,10 +1,11 @@
 -- =============================================================
--- 公考智能选岗助手建表脚本（Iteration 4）
+-- DEPLOYMENT ENTRYPOINT: FULL
+-- 公考智能选岗助手全量建表脚本（仅用于全新数据库）
 -- 适用: MySQL 5.7+ / 8.0 （同样兼容单元测试使用的 H2 MySQL 模式）
 -- 全新部署执行前请先创建数据库:
 --   CREATE DATABASE gk_job_helper DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 --   USE gk_job_helper;
--- 存量库升级(Iteration 3 -> 4)请执行 db/migration_iteration4.sql
+-- 已有数据库不要执行本文件，请执行 db/hf_incremental.sql
 -- 专业目录由应用启动时从仓库内官方 CSV 导入（数据来源说明见 docs/major-catalog.md）
 -- =============================================================
 
@@ -394,6 +395,7 @@ CREATE TABLE IF NOT EXISTS job_preference (
 CREATE UNIQUE INDEX uk_job_preference_profile ON job_preference (profile_id);
 
 CREATE TABLE IF NOT EXISTS recruitment_source (id BIGINT NOT NULL AUTO_INCREMENT,source_code VARCHAR(64) NOT NULL,source_name VARCHAR(255) NOT NULL,source_type VARCHAR(32) NOT NULL,list_url VARCHAR(1000) NOT NULL,enabled TINYINT NOT NULL DEFAULT 1,last_fetch_time DATETIME DEFAULT NULL,last_fetch_status VARCHAR(255) DEFAULT NULL,created_at DATETIME DEFAULT NULL,updated_at DATETIME DEFAULT NULL,PRIMARY KEY(id),UNIQUE KEY uk_recruitment_source_code(source_code));
+INSERT IGNORE INTO recruitment_source(source_code,source_name,source_type,list_url,enabled,created_at,updated_at) VALUES ('JIANGXI_SASAC','江西省国有资产监督管理委员会','WEB','https://gzw.jiangxi.gov.cn/jxsgzw/rczp/index.html',1,NOW(),NOW());
 INSERT IGNORE INTO recruitment_source(source_code,source_name,source_type,list_url,enabled,created_at,updated_at) VALUES ('JIANGXI_TALENT_EVALUATION','江西省人才测评中心','WEB','https://www.jxrcrsksta.com/list/7',1,NOW(),NOW());
 CREATE TABLE IF NOT EXISTS recruitment_notice (id BIGINT NOT NULL AUTO_INCREMENT,source_id BIGINT NOT NULL,title VARCHAR(1000) NOT NULL,notice_url VARCHAR(512) NOT NULL,publish_date DATETIME DEFAULT NULL,notice_type VARCHAR(32) NOT NULL,parent_notice_id BIGINT DEFAULT NULL,user_status VARCHAR(32) NOT NULL,detail_status VARCHAR(16) NOT NULL DEFAULT 'DISCOVERED',process_status VARCHAR(16) NOT NULL DEFAULT 'DISCOVERED',process_stage VARCHAR(32) DEFAULT NULL,process_failure_code VARCHAR(64) DEFAULT NULL,process_failure_reason VARCHAR(500) DEFAULT NULL,process_position_count INT NOT NULL DEFAULT 0,processed_at DATETIME DEFAULT NULL,body_html LONGTEXT DEFAULT NULL,body_text LONGTEXT DEFAULT NULL,detail_fetched_at DATETIME DEFAULT NULL,detail_error VARCHAR(500) DEFAULT NULL,viewed_at DATETIME DEFAULT NULL,discovered_at DATETIME NOT NULL,created_at DATETIME DEFAULT NULL,updated_at DATETIME DEFAULT NULL,PRIMARY KEY(id),UNIQUE KEY uk_recruitment_notice_source_url(source_id,notice_url),KEY idx_recruitment_notice_status(user_status),KEY idx_recruitment_notice_process(process_status),CONSTRAINT fk_recruitment_notice_source FOREIGN KEY(source_id) REFERENCES recruitment_source(id));
 CREATE TABLE IF NOT EXISTS recruitment_attachment (id BIGINT NOT NULL AUTO_INCREMENT,notice_id BIGINT NOT NULL,file_name VARCHAR(1000) NOT NULL,file_url VARCHAR(700) NOT NULL,dedupe_key CHAR(64) NOT NULL,file_type VARCHAR(16) NOT NULL,attachment_type VARCHAR(32) NOT NULL,parse_status VARCHAR(16) NOT NULL DEFAULT 'UNPARSED',parse_error VARCHAR(500) DEFAULT NULL,parsed_at DATETIME DEFAULT NULL,position_count INT NOT NULL DEFAULT 0,source_text VARCHAR(1000) DEFAULT NULL,created_at DATETIME DEFAULT NULL,updated_at DATETIME DEFAULT NULL,PRIMARY KEY(id),UNIQUE KEY uk_recruitment_attachment_notice_dedupe(notice_id,dedupe_key),CONSTRAINT fk_recruitment_attachment_notice FOREIGN KEY(notice_id) REFERENCES recruitment_notice(id));

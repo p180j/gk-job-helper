@@ -233,7 +233,6 @@ export interface JobPosition {
   importFileId: number | null
   departmentName: string | null
   departmentCode: string | null
-  departmentCode: string | null
   organizationName: string | null
   positionName: string | null
   positionCode: string | null
@@ -254,9 +253,6 @@ export interface JobPosition {
   certificateRequirement: string | null
   genderRequirement: string | null
   positionDescription: string | null
-  additionalRequirements: string | null
-  workLocation: string | null
-  settlementLocation: string | null
   additionalRequirements: string | null
   workLocation: string | null
   settlementLocation: string | null

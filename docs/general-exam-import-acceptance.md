@@ -166,7 +166,7 @@
 ### 部署前操作
 
 1. 备份 MySQL 和 `${upload.dir}`。
-2. 检查 `import_file`/`job_position` 待新增列是否已存在，并检查 `(import_file_id, source_sheet, source_row)` 是否有重复；确认无冲突后执行 `src/main/resources/db/hf_migration_general_exam_import.sql` 一次。
+2. 新库只执行 `src/main/resources/db/schema.sql`；旧库执行可重复运行的 `src/main/resources/db/hf_incremental.sql`。增量脚本会检查列和索引，并在来源行重复时明确中止。
 3. 部署并重启前后端。
 4. 对目标批次先调用 `parsed-preview`，人工抽查差异；确认后再调用 `parsed-rebuild`，保存返回的 `backupId`。
 5. 另一台电脑拉取共享代码后同样执行数据库预检和迁移；不需要复制本机绝对路径或真实测试文件。若需要跨电脑恢复快照，应同时安全复制对应 `feature-backups` 目录。
